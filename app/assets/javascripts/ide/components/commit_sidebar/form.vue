@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlButton } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
 import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import CommitMessageField from './message_field.vue';
@@ -16,6 +16,7 @@ export default {
     CommitMessageField,
     SuccessMessage,
     GlModal,
+    GlButton,
   },
   data() {
     return {
@@ -119,15 +120,17 @@ export default {
       @after-enter="afterEndTransition"
     >
       <div v-if="isCompact" ref="compactEl" class="commit-form-compact">
-        <button
+        <gl-button
           :disabled="!someUncommittedChanges"
-          type="button"
-          class="btn btn-primary btn-sm btn-block qa-begin-commit-button"
+          category="primary"
+          variant="info"
+          block="block"
+          class="qa-begin-commit-button"
           data-testid="begin-commit-button"
           @click="beginCommit"
         >
           {{ __('Commit…') }}
-        </button>
+        </gl-button>
         <p class="text-center bold">{{ overviewText }}</p>
       </div>
       <form v-else ref="formEl" @submit.prevent.stop="commit">
@@ -146,14 +149,13 @@ export default {
             container-class="btn btn-success btn-sm float-left qa-commit-button"
             @click="commit"
           />
-          <button
+          <gl-button
             v-if="!discardDraftButtonDisabled"
-            type="button"
-            class="btn btn-default btn-sm float-right"
+            class="float-right"
             @click="discardDraft"
           >
             {{ __('Discard draft') }}
-          </button>
+          </gl-button>
           <button
             v-else
             type="button"
