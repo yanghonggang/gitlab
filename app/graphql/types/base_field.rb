@@ -2,7 +2,6 @@
 
 module Types
   class BaseField < GraphQL::Schema::Field
-    prepend Gitlab::Graphql::Authorize
     include GitlabStyleDeprecations
 
     argument_class ::Types::BaseArgument
@@ -12,12 +11,14 @@ module Types
     def initialize(*args, **kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
       @constant_complexity = !!kwargs[:complexity]
+      @authorize = kwargs.delete(:authorize)
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], kwargs[:complexity])
       @feature_flag = kwargs[:feature_flag]
       kwargs = check_feature_flag(kwargs)
       kwargs = gitlab_deprecation(kwargs)
 
       super(*args, **kwargs, &block)
+      extension ::Gitlab::Graphql::AuthFilterExtension
     end
 
     # Based on https://github.com/rmosolgo/graphql-ruby/blob/v1.11.4/lib/graphql/schema/field.rb#L538-L563

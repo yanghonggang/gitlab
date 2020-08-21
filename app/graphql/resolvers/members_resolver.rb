@@ -12,7 +12,7 @@ module Resolvers
               description: 'Search query'
 
     def resolve_with_lookahead(**args)
-      authorize!(object)
+      authorize!(object, context)
 
       apply_lookahead(finder_class.new(object, current_user, params: args).execute)
     end

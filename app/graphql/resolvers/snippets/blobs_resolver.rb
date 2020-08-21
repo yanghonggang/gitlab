@@ -9,12 +9,14 @@ module Resolvers
 
       alias_method :snippet, :object
 
+      authorize :read_snippet
+
       argument :paths, [GraphQL::STRING_TYPE],
                required: false,
                description: 'Paths of the blobs'
 
       def resolve(**args)
-        authorize!(snippet)
+        authorize!(snippet, context)
 
         return [snippet.blob] if snippet.empty_repo?
 
@@ -25,10 +27,6 @@ module Resolvers
         else
           snippet.repository.blobs_at(transformed_blob_paths(paths))
         end
-      end
-
-      def authorized_resource?(snippet)
-        Ability.allowed?(context[:current_user], :read_snippet, snippet)
       end
 
       private

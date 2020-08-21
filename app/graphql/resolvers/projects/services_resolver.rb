@@ -6,6 +6,7 @@ module Resolvers
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
       type Types::Projects::ServiceType.connection_type, null: true
+      authorize :admin_project
 
       argument :active,
                GraphQL::BOOLEAN_TYPE,
@@ -19,13 +20,9 @@ module Resolvers
       alias_method :project, :object
 
       def resolve(**args)
-        authorize!(project)
+        authorize!(project, context)
 
         services(args[:active], args[:type])
-      end
-
-      def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
       end
 
       private

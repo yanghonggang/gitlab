@@ -14,10 +14,6 @@ RSpec.describe GitlabSchema do
     expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::GenericTracing))
   end
 
-  it 'enables the authorization instrumenter' do
-    expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::Authorize::Instrumentation))
-  end
-
   it 'enables using presenters' do
     expect(field_instrumenters).to include(instance_of(::Gitlab::Graphql::Present::Instrumentation))
   end

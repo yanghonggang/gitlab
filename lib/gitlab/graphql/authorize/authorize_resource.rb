@@ -12,7 +12,7 @@ module Gitlab
           def required_permissions
             # If the `#authorize` call is used on multiple classes, we add the
             # permissions specified on a subclass, to the ones that were specified
-            # on it's superclass.
+            # on its superclass.
             @required_permissions ||= if self.respond_to?(:superclass) && superclass.respond_to?(:required_permissions)
                                         superclass.required_permissions.dup
                                       else
@@ -37,28 +37,9 @@ module Gitlab
           object
         end
 
-        def authorize!(object)
-          unless authorized_resource?(object)
+        def authorize!(object, context = { current_user: current_user })
+          unless self.class.authorized?(object, context)
             raise_resource_not_available_error!
-          end
-        end
-
-        # this was named `#authorized?`, however it conflicts with the native
-        # graphql gem version
-        # TODO consider adopting the gem's built in authorization system
-        # https://gitlab.com/gitlab-org/gitlab/issues/13984
-        def authorized_resource?(object)
-          # Sanity check. We don't want to accidentally allow a developer to authorize
-          # without first adding permissions to authorize against
-          if self.class.required_permissions.empty?
-            raise Gitlab::Graphql::Errors::ArgumentError, "#{self.class.name} has no authorizations"
-          end
-
-          self.class.required_permissions.all? do |ability|
-            # The actions could be performed across multiple objects. In which
-            # case the current user is common, and we could benefit from the
-            # caching in `DeclarativePolicy`.
-            Ability.allowed?(current_user, ability, object, scope: :user)
           end
         end
 

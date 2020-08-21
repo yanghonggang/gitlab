@@ -34,5 +34,9 @@ module Mutations
         true
       end
     end
+
+    def self.authorized?(object, context)
+      Array.wrap(authorize).all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
+    end
   end
 end

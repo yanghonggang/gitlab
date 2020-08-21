@@ -18,7 +18,7 @@ module Mutations
             description: 'Updated todos'
 
       def resolve
-        authorize!(current_user)
+        authorize!(current_user, context)
 
         updated_ids = mark_all_todos_done
 

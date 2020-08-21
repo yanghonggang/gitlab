@@ -5,6 +5,8 @@ module Resolvers
     include BoardIssueFilterable
     include Gitlab::Graphql::Authorize::AuthorizeResource
 
+    authorize :read_list
+
     type Types::BoardListType, null: true
 
     argument :id, Types::GlobalIDType[List],
@@ -18,7 +20,7 @@ module Resolvers
     alias_method :board, :object
 
     def resolve(lookahead: nil, id: nil, issue_filters: {})
-      authorize!(board)
+      authorize!(board, context)
 
       lists = board_lists(id)
       context.scoped_set!(:issue_filters, issue_filters(issue_filters))
@@ -40,10 +42,6 @@ module Resolvers
       )
 
       service.execute(board, create_default_lists: false)
-    end
-
-    def authorized_resource?(board)
-      Ability.allowed?(context[:current_user], :read_list, board)
     end
 
     def load_preferences?(lookahead)

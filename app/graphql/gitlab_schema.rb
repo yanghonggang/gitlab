@@ -12,7 +12,6 @@ class GitlabSchema < GraphQL::Schema
 
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
-  use Gitlab::Graphql::Authorize
   use Gitlab::Graphql::Present
   use Gitlab::Graphql::CallsGitaly
   use Gitlab::Graphql::Pagination::Connections
@@ -136,6 +135,14 @@ class GitlabSchema < GraphQL::Schema
       gid
     end
 
+    def unauthorized_object(unauthorized_error)
+      Placeholder
+    end
+
+    # def unauthorized_field(unauthorized_error)
+    #   nil
+    # end
+
     private
 
     def max_query_complexity(ctx)
@@ -168,6 +175,8 @@ class GitlabSchema < GraphQL::Schema
     super(type_name)
   end
 end
+
+class Placeholder; end
 
 GitlabSchema.prepend_if_ee('EE::GitlabSchema') # rubocop: disable Cop/InjectEnterpriseEditionModule
 

@@ -139,5 +139,16 @@ module Resolvers
     def select_result(results)
       results
     end
+
+    def self.authorized?(object, context)
+      return true unless object
+
+      # in resolvers, we don't always define a permission
+      # So let's skip if there aren't any
+      required_permissions = try(:required_permissions)
+      return true unless required_permissions
+
+      Ability.allowed?(context[:current_user], required_permissions.first, object)
+    end
   end
 end
