@@ -1,4 +1,4 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import createStore from '~/notes/stores';
 import NoteForm from '~/notes/components/note_form.vue';
 import batchComments from '~/batch_comments/stores/modules/batch_comments';
@@ -17,9 +17,11 @@ describe('issue_note_form component', () => {
   let wrapper;
   let props;
 
-  const createComponentWrapper = () => {
+  const createComponentWrapper = ({ shallow = false }) => {
+    // Temporarily defaults to mount
+    const func = shallow ? shallowMount : mount;
     const localVue = createLocalVue();
-    return shallowMount(localVue.extend(NoteForm), {
+    return func(localVue.extend(NoteForm), {
       store,
       propsData: props,
       // see https://gitlab.com/gitlab-org/gitlab-foss/issues/56317 for the following
