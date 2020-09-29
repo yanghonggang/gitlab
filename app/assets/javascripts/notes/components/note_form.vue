@@ -381,7 +381,7 @@ export default {
               :disabled="isDisabled"
               category="primary"
               variant="success"
-              class="qa-start-review"
+              data-qa-selector="start_review_button"
               @click="handleAddToReview"
             >
               <template v-if="hasDrafts">{{ __('Add to review') }}</template>
@@ -391,7 +391,8 @@ export default {
               :disabled="isDisabled"
               category="secondary"
               variant="default"
-              class="qa-comment-now js-comment-button"
+              data-qa-selector="comment_now_button"
+              class="js-comment-button"
               @click="handleUpdate()"
             >
               {{ __('Add comment now') }}
@@ -412,7 +413,8 @@ export default {
             :disabled="isDisabled"
             category="primary"
             variant="success"
-            class="js-vue-issue-save js-comment-button qa-reply-comment-button"
+            data-qa-selector="reply_comment_button"
+            class="js-vue-issue-save js-comment-button"
             @click="handleUpdate()"
           >
             {{ saveButtonTitle }}
