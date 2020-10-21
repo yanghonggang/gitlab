@@ -138,12 +138,8 @@ class GitlabSchema < GraphQL::Schema
     end
 
     def unauthorized_object(unauthorized_error)
-      unauthorized_error.context.skip
+      nil
     end
-
-    # def unauthorized_field(unauthorized_error)
-    #   nil
-    # end
 
     private
 
