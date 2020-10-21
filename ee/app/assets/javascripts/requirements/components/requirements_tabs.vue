@@ -44,38 +44,33 @@ export default {
 </script>
 
 <template>
-  <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
-    <gl-tabs>
-      <gl-tab @click="$emit('clickTab', { filterBy: $options.FilterState.opened })">
-        <template slot="title">
-          <span>{{ __('Open') }}</span>
-          <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.OPENED }}</gl-badge>
-        </template>
-      </gl-tab>
-      <gl-tab @click="$emit('clickTab', { filterBy: $options.FilterState.archived })">
-        <template slot="title">
-          <span>{{ __('Archived') }}</span>
-          <gl-badge size="sm" class="gl-tab-counter-badge">{{
-            requirementsCount.ARCHIVED
-          }}</gl-badge>
-        </template>
-      </gl-tab>
-      <gl-tab @click="$emit('clickTab', { filterBy: $options.FilterState.all })">
-        <template slot="title">
-          <span>{{ __('All') }}</span>
-          <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.ALL }}</gl-badge>
-        </template>
-      </gl-tab>
-    </gl-tabs>
-    <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
-      <gl-button
-        category="primary"
-        variant="success"
-        class="js-new-requirement qa-new-requirement-button"
-        :disabled="showCreateForm"
-        @click="$emit('clickNewRequirement')"
-        >{{ __('New requirement') }}</gl-button
-      >
-    </div>
-  </div>
+  <gl-tabs class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+    <gl-tab @click="$emit('click-tab', { filterBy: $options.FilterState.opened })">
+      <template slot="title">
+        <span>{{ __('Open') }}</span>
+        <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.OPENED }}</gl-badge>
+      </template>
+    </gl-tab>
+    <gl-tab @click="$emit('click-tab', { filterBy: $options.FilterState.archived })">
+      <template slot="title">
+        <span>{{ __('Archived') }}</span>
+        <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.ARCHIVED }}</gl-badge>
+      </template>
+    </gl-tab>
+    <gl-tab @click="$emit('click-tab', { filterBy: $options.FilterState.all })">
+      <template slot="title">
+        <span>{{ __('All') }}</span>
+        <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.ALL }}</gl-badge>
+      </template>
+    </gl-tab>
+    <gl-button
+      v-if="isOpenTab && canCreateRequirement"
+      category="primary"
+      variant="success"
+      class="js-new-requirement qa-new-requirement-button"
+      :disabled="showCreateForm"
+      @click="$emit('click-new-requirement')"
+      >{{ __('New requirement') }}</gl-button
+    >
+  </gl-tabs>
 </template>
