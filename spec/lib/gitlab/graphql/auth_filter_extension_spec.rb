@@ -4,16 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Graphql::AuthFilterExtension do
   let_it_be(:test_schema) do
-    base_field = Class.new(::GraphQL::Schema::Field) do
-      def initialize(*args, **kwargs, &block)
-        super
-        extension ::Gitlab::Graphql::AuthFilterExtension
-      end
-    end
-
-    base_object = Class.new(::GraphQL::Schema::Object) do
-      field_class base_field
-
+    base_object = Class.new(::Types::BaseObject) do
       def self.authorized?(object, context)
         return false if object.is_a?(Hash) && object[:id] == 100
 

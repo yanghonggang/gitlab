@@ -23,6 +23,13 @@ module Types
       Array.wrap(authorize).all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
     end
 
+    def self.scope_items(items, context)
+      items.select do |item|
+        forced = ::Gitlab::Graphql::Lazy.force(item)
+        authorized?(forced, context)
+      end
+    end
+
     def current_user
       context[:current_user]
     end

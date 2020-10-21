@@ -9,14 +9,7 @@ module Gitlab
       end
 
       def after_resolve(object:, arguments:, context:, value:, memo:)
-        if @field.connection?
-          value.edge_nodes.to_a.reject { |node| node == unauthorized }
-        elsif @field.type.list? && type = unwrap(@field.type)
-          value.map { |item| ::Gitlab::Graphql::Lazy.force(item) }
-               .select { |item| type.authorized?(item, context) }
-        else
-          value
-        end
+        value
       end
 
       # Find the first type that can do auth checks
