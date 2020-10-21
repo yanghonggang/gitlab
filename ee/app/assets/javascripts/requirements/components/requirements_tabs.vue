@@ -45,7 +45,7 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
-    <gl-tabs content-class="gl-p-0!">
+    <gl-tabs content-class="gl-p-0">
       <gl-tab @click="$emit('click-tab', { filterBy: $options.FilterState.opened })">
         <template slot="title">
           <span>{{ __('Open') }}</span>
