@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLink, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
+import { GlTab, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';
 
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 import { FilterState } from 'ee/requirements/constants';
@@ -35,7 +35,7 @@ describe('RequirementsTabs', () => {
 
   describe('template', () => {
     it('renders "Open" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(0);
+      const tabEl = wrapper.findAll(GlTab).at(0);
 
       expect(tabEl.attributes('id')).toBe('state-opened');
       expect(tabEl.attributes('data-state')).toBe('opened');
@@ -45,7 +45,7 @@ describe('RequirementsTabs', () => {
     });
 
     it('renders "Archived" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(1);
+      const tabEl = wrapper.findAll(GlTab).at(1);
 
       expect(tabEl.attributes('id')).toBe('state-archived');
       expect(tabEl.attributes('data-state')).toBe('archived');
@@ -55,7 +55,7 @@ describe('RequirementsTabs', () => {
     });
 
     it('renders "All" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(2);
+      const tabEl = wrapper.findAll(GlTab).at(2);
 
       expect(tabEl.attributes('id')).toBe('state-all');
       expect(tabEl.attributes('data-state')).toBe('all');
