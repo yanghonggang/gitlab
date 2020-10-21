@@ -20,7 +20,7 @@ module Gitlab
       # Force evaluation of a (possibly) lazy value
       def self.force(value)
         case value
-        when ::Gitlab::Graphql::Lazy
+        when ::Gitlab::Graphql::Lazy # self
           value.force
         when ::BatchLoader::GraphQL
           value.sync

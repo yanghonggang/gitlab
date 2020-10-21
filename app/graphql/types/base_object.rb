@@ -20,10 +20,6 @@ module Types
     end
 
     def self.authorized?(object, context)
-      # return true if object.nil? #sometimes we get nil objects??
-      # return true if object.object.nil? #sometimes we get nil objects??
-      return false if object == Placeholder || object.try(:object) == Placeholder
-
       Array.wrap(authorize).all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
     end
 

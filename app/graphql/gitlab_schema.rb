@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+class Placeholder; end
+
 class GitlabSchema < GraphQL::Schema
   # Currently an IntrospectionQuery has a complexity of 179.
   # These values will evolve over time.
@@ -136,7 +138,7 @@ class GitlabSchema < GraphQL::Schema
     end
 
     def unauthorized_object(unauthorized_error)
-      Placeholder
+      unauthorized_error.context.skip
     end
 
     # def unauthorized_field(unauthorized_error)
@@ -175,8 +177,6 @@ class GitlabSchema < GraphQL::Schema
     super(type_name)
   end
 end
-
-class Placeholder; end
 
 GitlabSchema.prepend_if_ee('EE::GitlabSchema') # rubocop: disable Cop/InjectEnterpriseEditionModule
 

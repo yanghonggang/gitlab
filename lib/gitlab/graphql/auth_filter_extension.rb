@@ -5,33 +5,25 @@ module Gitlab
     class AuthFilterExtension < GraphQL::Schema::FieldExtension
       def resolve(object:, arguments:, context:)
         # skip resolution if object is a Placeholder
-        ap "FILTER resolving"
-        ap object
-        ap "resolve: PLACEHOLDER" if object.object == Placeholder
-        return Placeholder if object.object == Placeholder
-
-        ap "resolving as normal"
-        yield(object, arguments, context)
+        yield(object, arguments)
       end
 
       def after_resolve(object:, arguments:, context:, value:, memo:)
-        ap "Filter: after_resolve object"
-        ap object
-        ap "Filter: after_resolve value"
-        ap value
-        # if field is a connection or an array, filter out Placeholders
-        ap @field
         if @field.connection?
-          ap "FIELD CONNECTION"
-          value.edge_nodes.to_a.keep_if { |node| !node.is_a?(Placeholder) }
-        elsif @field.type.list? || value.is_a?(Array)
-          ap "FIELD IS ARRAY"
-          value.select { |item| !item.is_a?(Placeholder) }
-        elsif value == Placeholder
-          nil
+          value.edge_nodes.to_a.reject { |node| node == unauthorized }
+        elsif @field.type.list? && type = unwrap(@field.type)
+          value.map { |item| ::Gitlab::Graphql::Lazy.force(item) }
+               .select { |item| type.authorized?(item, context) }
         else
           value
         end
+      end
+
+      # Find the first type that can do auth checks
+      def unwrap(type)
+        type = type.of_type while !type.respond_to?(:authorized?) && type.respond_to?(:of_type)
+
+        type if type.respond_to?(:authorized?)
       end
     end
   end
