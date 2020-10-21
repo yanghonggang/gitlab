@@ -18,7 +18,6 @@ module Types
       kwargs = gitlab_deprecation(kwargs)
 
       super(*args, **kwargs, &block)
-      extension ::Gitlab::Graphql::AuthFilterExtension
     end
 
     # Based on https://github.com/rmosolgo/graphql-ruby/blob/v1.11.4/lib/graphql/schema/field.rb#L538-L563
