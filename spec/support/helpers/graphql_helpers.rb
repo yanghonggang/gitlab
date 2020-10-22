@@ -164,9 +164,14 @@ module GraphqlHelpers
     "#{namerized}#{field_params}"
   end
 
-  def query_graphql_field(name, attributes = {}, fields = nil)
+  def query_graphql_field(name, arguments = {}, fields = nil)
+    if fields.nil? && !arguments.is_a?(Hash)
+      fields = arguments
+      arguments = nil
+    end
+
     <<~QUERY
-      #{field_with_params(name, attributes)}
+      #{field_with_params(name, arguments)}
       #{wrap_fields(fields || all_graphql_fields_for(name.to_s.classify))}
     QUERY
   end
