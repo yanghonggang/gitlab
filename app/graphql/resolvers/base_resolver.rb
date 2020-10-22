@@ -141,8 +141,6 @@ module Resolvers
     end
 
     def self.authorized?(object, context)
-      return true unless object
-
       # in resolvers, we don't always define a permission
       # So let's skip if there aren't any
       required_permissions = try(:required_permissions)
