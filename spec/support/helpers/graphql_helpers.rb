@@ -79,9 +79,10 @@ module GraphqlHelpers
   end
 
   def graphql_query_for(name, attributes = {}, fields = nil)
+    type = GitlabSchema.types['Query'].fields[GraphqlHelpers.fieldnamerize(name)]&.type
     <<~QUERY
     {
-      #{query_graphql_field(name, attributes, fields)}
+      #{query_graphql_field(name, attributes, fields, type)}
     }
     QUERY
   end
@@ -164,7 +165,8 @@ module GraphqlHelpers
     "#{namerized}#{field_params}"
   end
 
-  def query_graphql_field(name, arguments = {}, fields = nil)
+  def query_graphql_field(name, arguments = {}, fields = nil, type = nil)
+    type ||= name.to_s.classify
     if fields.nil? && !arguments.is_a?(Hash)
       fields = arguments
       arguments = nil
@@ -172,7 +174,7 @@ module GraphqlHelpers
 
     <<~QUERY
       #{field_with_params(name, arguments)}
-      #{wrap_fields(fields || all_graphql_fields_for(name.to_s.classify))}
+      #{wrap_fields(fields || all_graphql_fields_for(type))}
     QUERY
   end
 
@@ -224,8 +226,10 @@ module GraphqlHelpers
     allow_high_graphql_recursion
     allow_high_graphql_transaction_threshold
 
-    type = GitlabSchema.types[class_name.to_s]
+    type = class_name.respond_to?(:kind) ? class_name : GitlabSchema.types[class_name.to_s]
     raise "#{class_name} is not a known type in the GitlabSchema" unless type
+
+    return '' unless type.kind.fields?
 
     type.fields.map do |name, field|
       # We can't guess arguments, so skip fields that require them
