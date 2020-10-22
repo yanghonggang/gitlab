@@ -146,9 +146,13 @@ module Resolvers
       # in resolvers, we don't always define a permission
       # So let's skip if there aren't any
       required_permissions = try(:required_permissions)
-      return true unless required_permissions
+      return true unless required_permissions.present?
 
-      Ability.allowed?(context[:current_user], required_permissions.first, object)
+      user = context[:current_user]
+
+      required_permissions.all? do |ability|
+        Ability.allowed?(user, ability, object)
+      end
     end
   end
 end
