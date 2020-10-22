@@ -36,7 +36,15 @@ module Mutations
     end
 
     def self.authorized?(object, context)
-      Array.wrap(authorize).all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
+      # we never provide an object to mutations, but we do need to have a user.
+      context[:current_user].present? && !context[:current_user].blocked?
+    end
+
+    def authorize!(object, context = nil)
+      abilities = Array.wrap(self.class.authorize)
+      return if abilities.all? { |ability| Ability.allowed?(current_user, ability, object) }
+
+      raise_resource_not_available_error!
     end
   end
 end
