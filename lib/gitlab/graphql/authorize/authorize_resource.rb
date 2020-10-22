@@ -23,6 +23,12 @@ module Gitlab
           def authorize(*permissions)
             required_permissions.concat(permissions)
           end
+
+          def authorizes_object(new_setting = nil)
+            @authorizes_object = new_setting unless new_setting.nil?
+
+            defined?(@authorizes_object) ? false : @authorizes_object
+          end
         end
 
         def find_object(*args)

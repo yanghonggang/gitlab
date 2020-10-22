@@ -48,6 +48,18 @@ module Types
       end
     end
 
+    # By default fields authorize against the current object, but that is not how our
+    # resolvers work - they use declarative permissions to authorize fields
+    # manually (so we make them opt in).
+    # TODO: separate out authorize into permissions on the object, and on the
+    #       resolved values
+    def authorized?(object, args, ctx)
+      rc = @resolver_class
+      return true if rc&.respond_to?(:authorizes_object) && !rc.authorizes_object
+
+      super
+    end
+
     def base_complexity
       complexity = DEFAULT_COMPLEXITY
       complexity += 1 if calls_gitaly?
