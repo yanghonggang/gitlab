@@ -171,6 +171,25 @@ module GraphqlHelpers
     QUERY
   end
 
+  def query_graphql_path(segments, fields = nil)
+    return fields if segments.empty?
+
+    head = segments.shift
+    name, args = case head
+                 when Array
+                   head
+                 else
+                   [head, nil]
+                 end
+
+    query_graphql_field(name, args, query_graphql_path(segments, fields))
+  end
+
+  def query_nodes(name, args = nil, fields = nil)
+    fields ||= all_graphql_fields_for(name.to_s.classify, max_depth: 1)
+    query_graphql_path([[name, args], :nodes], fields)
+  end
+
   def wrap_fields(fields)
     fields = Array.wrap(fields).map do |field|
       case field
@@ -201,7 +220,7 @@ module GraphqlHelpers
     allow_high_graphql_transaction_threshold
 
     type = GitlabSchema.types[class_name.to_s]
-    return "" unless type
+    raise "#{class_name} is not a known type in the GitlabSchema" unless type
 
     type.fields.map do |name, field|
       # We can't guess arguments, so skip fields that require them
