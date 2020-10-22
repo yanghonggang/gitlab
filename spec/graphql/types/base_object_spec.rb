@@ -9,6 +9,7 @@ RSpec.describe Types::BaseObject do
         # Override authorization so we don't need to mock Ability
         def self.authorized?(object, context)
           return false if object == { id: 100 }
+          return false if object.try(:deactivated?)
 
           true
         end
@@ -16,6 +17,7 @@ RSpec.describe Types::BaseObject do
 
       y_type = Class.new(base_object) do
         graphql_name 'Y'
+        authorize :read_y
         field :id, Integer, null: false
 
         def id
@@ -38,20 +40,32 @@ RSpec.describe Types::BaseObject do
         end
       end
 
+      user_type = Class.new(base_object) do
+        graphql_name 'User'
+        authorize :read_user
+        field 'name', String, null: true
+      end
+
       Class.new(GraphQL::Schema) do
         lazy_resolve ::Gitlab::Graphql::Lazy, :force
+        use GraphQL::Pagination::Connections
 
         query(Class.new(::Types::BaseObject) do
           graphql_name 'Query'
           field :x, x_type, null: true
+          field :users, user_type.connection_type, null: true
 
           def x
             ::Gitlab::Graphql::Lazy.new { context[:x] }
           end
+
+          def users
+            ::Gitlab::Graphql::Lazy.new { User.id_in(context[:user_ids]) }
+          end
         end)
 
         def unauthorized_object(err)
-          err.context.skip
+          nil
         end
       end
     end
@@ -97,6 +111,52 @@ RSpec.describe Types::BaseObject do
     # For example using a batchloader to map over a set of IDs
     context 'a list of lazy items' do
       it_behaves_like 'array member redaction', 'listOfLazyYs'
+    end
+
+    it 'filters connections correctly' do
+      active_users = create_list(:user, 3, state: :active)
+      inactive = create(:user, state: :deactivated)
+
+      data = { user_ids: [inactive, *active_users].map(&:id) }
+
+      doc = GraphQL.parse(<<~GQL)
+      query {
+        users { nodes { name } }
+      }
+      GQL
+
+      query = GraphQL::Query.new(test_schema, document: doc, context: data)
+      result = query.result.to_h
+
+      expect(result.dig('data', 'users', 'nodes')).to match_array(active_users.map do |u|
+        eq({ 'name' => u.name })
+      end)
+    end
+
+    it 'paginates before scoping' do
+      # Inactive first so they sort first
+      n = 3
+      inactive = create_list(:user, n - 1, state: :deactivated)
+      active_users = create_list(:user, 2, state: :active)
+
+      data = { user_ids: [*inactive, *active_users].map(&:id) }
+
+      doc = GraphQL.parse(<<~GQL)
+      query {
+        users(first: #{n}) {
+          pageInfo { hasNextPage }
+          nodes { name } }
+      }
+      GQL
+
+      query = GraphQL::Query.new(test_schema, document: doc, context: data)
+      result = query.result.to_h
+
+      # We expect the page to be loaded and then filtered - i.e. to have all
+      # deactivated users removed.
+      expect(result.dig('data', 'users', 'pageInfo', 'hasNextPage')).to be_truthy
+      expect(result.dig('data', 'users', 'nodes'))
+        .to contain_exactly({ 'name' => active_users.first.name })
     end
   end
 end
