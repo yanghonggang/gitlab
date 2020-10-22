@@ -21,7 +21,9 @@ module Types
 
     def self.authorized?(object, context)
       abilities = Array.wrap(authorize)
-      abilities.all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
+      return true if abilities.empty?
+
+      Ability.policy_for(context[:current_user], object).allowed?(*abilities)
     end
 
     def self.scope_items(items, context)
