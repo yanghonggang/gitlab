@@ -62,7 +62,7 @@ module Types
       end
 
       rc = @resolver_class
-      return true if rc&.respond_to?(:authorizes_object) && !rc.authorizes_object
+      return true if rc&.respond_to?(:authorizes_object?) && !rc.authorizes_object?
 
       super
     end

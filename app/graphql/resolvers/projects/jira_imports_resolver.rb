@@ -8,13 +8,11 @@ module Resolvers
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
       authorize :read_project
+      authorizes_object!
 
       alias_method :project, :object
 
       def resolve(**args)
-        raise_resource_not_available_error! unless current_user
-        authorize!(project, context)
-
         project.jira_imports
       end
     end

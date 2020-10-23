@@ -20,7 +20,7 @@ module Resolvers
     alias_method :board, :object
 
     def resolve(lookahead: nil, id: nil, issue_filters: {})
-      authorize!(board, context)
+      authorize!(board)
 
       lists = board_lists(id)
       context.scoped_set!(:issue_filters, issue_filters(issue_filters))

@@ -7,9 +7,7 @@ RSpec.shared_examples 'no Jira import data present' do
 end
 
 RSpec.shared_examples 'no Jira import access' do
-  it 'raises error' do
-    expect do
-      resolve_imports
-    end.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+  it 'returns nil' do
+    expect(resolve_imports).to be_nil
   end
 end

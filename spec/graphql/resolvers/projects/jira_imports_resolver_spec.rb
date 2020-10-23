@@ -11,7 +11,7 @@ RSpec.describe Resolvers::Projects::JiraImportsResolver do
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:project, reload: true) { create(:project, :public) }
+    let_it_be(:project, reload: true) { create(:project) }
 
     context 'when project does not have Jira imports' do
       let(:current_user) { user }

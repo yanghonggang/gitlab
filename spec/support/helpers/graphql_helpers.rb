@@ -17,8 +17,11 @@ module GraphqlHelpers
   # ready, then the early return is returned instead.
   #
   # Then the resolve method is called.
-  def resolve(resolver_class, args: {}, **resolver_args)
-    resolver = resolver_instance(resolver_class, **resolver_args)
+  def resolve(resolver_class, obj: nil, args: {}, ctx: {}, field: nil)
+    field ||= ::Types::BaseField.new(name: 'value', type: Object, null: true, resolver_class: resolver_class)
+    return unless field.authorized?(obj, args, ctx)
+
+    resolver = resolver_instance(resolver_class, obj: obj, ctx: ctx, field: field)
     ready, early_return = sync_all { resolver.ready?(**args) }
 
     return early_return unless ready

@@ -40,9 +40,11 @@ module Mutations
       context[:current_user].present? && !context[:current_user].blocked?
     end
 
-    def authorize!(object, context = nil)
+    def authorize!(object, ctx = context)
       abilities = Array.wrap(self.class.authorize)
-      return if abilities.all? { |ability| Ability.allowed?(current_user, ability, object) }
+      user = ctx[:current_user]
+
+      return if abilities.all? { |ability| Ability.allowed?(user, ability, object) }
 
       raise_resource_not_available_error!
     end

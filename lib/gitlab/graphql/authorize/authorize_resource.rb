@@ -24,10 +24,12 @@ module Gitlab
             required_permissions.concat(permissions)
           end
 
-          def authorizes_object(new_setting = nil)
-            @authorizes_object = new_setting unless new_setting.nil?
+          def authorizes_object?
+            defined?(@authorizes_object) ? @authorizes_object : false
+          end
 
-            defined?(@authorizes_object) ? false : @authorizes_object
+          def authorizes_object!
+            @authorizes_object = true
           end
         end
 
