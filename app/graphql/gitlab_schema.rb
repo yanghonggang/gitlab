@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-class Placeholder; end
-
 class GitlabSchema < GraphQL::Schema
   # Currently an IntrospectionQuery has a complexity of 179.
   # These values will evolve over time.
