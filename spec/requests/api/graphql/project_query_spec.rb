@@ -109,7 +109,7 @@ RSpec.describe 'getting project information' do
   end
 
   describe 'performance' do
-    before do
+    before_all do
       project.add_developer(current_user)
       mrs = create_list(:merge_request, 10, :closed, :with_head_pipeline,
                         source_project: project,
@@ -152,7 +152,7 @@ RSpec.describe 'getting project information' do
     end
 
     it 'can lookahead to eliminate N+1 queries', :use_clean_rails_memory_store_caching, :request_store do
-      pending 'currently 19 vs 22 in EE' if Gitlab.ee?
+      pending 'currently 21 vs 22 in EE' if Gitlab.ee?
 
       expect { run_query(10) }.to issue_same_number_of_queries_as { run_query(1) }.or_fewer.ignoring_cached_queries
     end

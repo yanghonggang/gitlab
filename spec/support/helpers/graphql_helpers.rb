@@ -181,18 +181,15 @@ module GraphqlHelpers
     QUERY
   end
 
+  # e.g:
+  #   query_graphql_path(%i[foo bar baz], all_graphql_fields_for('Baz'))
+  #   => foo { bar { baz { x y z } } }
   def query_graphql_path(segments, fields = nil)
-    return fields if segments.empty?
-
-    head = segments.shift
-    name, args = case head
-                 when Array
-                   head
-                 else
-                   [head, nil]
-                 end
-
-    query_graphql_field(name, args, query_graphql_path(segments, fields))
+    # we really want foldr here...
+    segments.reverse.reduce(fields) do |tail, segment|
+      name, args = Array.wrap(segment)
+      query_graphql_field(name, args, tail)
+    end
   end
 
   def query_nodes(name, args = nil, fields = nil)
