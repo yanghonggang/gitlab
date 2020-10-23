@@ -45,10 +45,12 @@ module Gitlab
           object
         end
 
-        def authorize!(object, context = { current_user: current_user })
-          unless self.class.authorized?(object, context)
-            raise_resource_not_available_error!
-          end
+        def authorize!(object)
+          raise_resource_not_available_error! unless authorized_resource?(object)
+        end
+
+        def authorized_resource?(object)
+          self.class.authorized?(object, context)
         end
 
         def raise_resource_not_available_error!
