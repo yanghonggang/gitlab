@@ -11,7 +11,7 @@ module Types
     def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
       @constant_complexity = !!kwargs[:complexity]
-      @authorize = kwargs.delete(:authorize)
+      @authorize = Array.wrap(kwargs.delete(:authorize))
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], kwargs[:complexity])
       @feature_flag = kwargs[:feature_flag]
       kwargs = check_feature_flag(kwargs)
@@ -56,6 +56,11 @@ module Types
     # TODO: separate out authorize into permissions on the object, and on the
     #       resolved values
     def authorized?(object, args, ctx)
+      if @authorize.present?
+        user = ctx[:current_user]
+        return @authorize.all? { |p| Ability.allowed?(user, p, object) }
+      end
+
       rc = @resolver_class
       return true if rc&.respond_to?(:authorizes_object) && !rc.authorizes_object
 
