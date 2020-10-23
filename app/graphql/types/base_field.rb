@@ -8,7 +8,7 @@ module Types
 
     DEFAULT_COMPLEXITY = 1
 
-    def initialize(type:, extensions: [], **kwargs, &block)
+    def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
       @constant_complexity = !!kwargs[:complexity]
       @authorize = kwargs.delete(:authorize)
@@ -16,9 +16,10 @@ module Types
       @feature_flag = kwargs[:feature_flag]
       kwargs = check_feature_flag(kwargs)
       kwargs = gitlab_deprecation(kwargs)
-      extensions << Gitlab::Graphql::ConnectionFilterExtension
 
-      super(type: type, extensions: extensions, **kwargs, &block)
+      super(**kwargs, &block)
+
+      extension Gitlab::Graphql::ConnectionFilterExtension # if connection?
     end
 
     # Based on https://github.com/rmosolgo/graphql-ruby/blob/v1.11.4/lib/graphql/schema/field.rb#L538-L563

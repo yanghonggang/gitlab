@@ -5,7 +5,7 @@ module Gitlab
     class ConnectionFilterExtension < GraphQL::Schema::FieldExtension
       class Redactor
         def initialize(field, context)
-          @type = field.type.node_type
+          @type = field.type.unwrap.node_type
           @context = context
         end
 
@@ -19,7 +19,8 @@ module Gitlab
       end
 
       def after_resolve(value:, context:, **rest)
-        return value unless @field.connection? && value.respond_to?(:redactor)
+        return value unless @field.connection?
+        return value unless value.respond_to?(:redactor=)
 
         redactor = Redactor.new(@field, context)
         value.redactor = redactor if redactor.active?

@@ -23,7 +23,9 @@ module Types
       abilities = Array.wrap(authorize)
       return true if abilities.empty?
 
-      Ability.policy_for(context[:current_user], object).allowed?(*abilities)
+      abilities.all? do |ability|
+        Ability.allowed?(context[:current_user], ability, object)
+      end
     end
 
     def self.scope_items(items, context)
@@ -37,10 +39,9 @@ module Types
       return unless array.is_a?(Array)
       return unless authorize.present?
 
-      array.select! do |lazy|
-        forced = ::Gitlab::Graphql::Lazy.force(lazy)
-        authorized?(forced, context)
-      end
+      array
+        .map! { |lazy| ::Gitlab::Graphql::Lazy.force(lazy) }
+        .keep_if { |forced| authorized?(forced, context) }
     end
 
     def current_user
