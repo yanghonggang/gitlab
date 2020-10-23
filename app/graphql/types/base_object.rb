@@ -27,20 +27,16 @@ module Types
     end
 
     def self.scope_items(items, context)
-      return items unless authorize.present?
-
-      if items.is_a?(Array)
-        remove_unauthorized(items, context)
-      elsif items.respond_to?(:nodes) # A connection?
-        items.context ||= context
-        remove_unauthorized(items.nodes, context)
-      end
+      remove_unauthorized(items, context)
 
       items
     end
 
     # Mutates the input array
     def self.remove_unauthorized(array, context)
+      return unless array.is_a?(Array)
+      return unless authorize.present?
+
       array.select! do |lazy|
         forced = ::Gitlab::Graphql::Lazy.force(lazy)
         authorized?(forced, context)
