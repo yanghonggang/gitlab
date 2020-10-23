@@ -6,6 +6,7 @@ class GitlabSchema < GraphQL::Schema
   DEFAULT_MAX_COMPLEXITY   = 200
   AUTHENTICATED_COMPLEXITY = 250
   ADMIN_COMPLEXITY         = 300
+  RESOURCE_ACCESS_ERROR = "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
 
   DEFAULT_MAX_DEPTH = 15
   AUTHENTICATED_MAX_DEPTH = 20
@@ -136,7 +137,11 @@ class GitlabSchema < GraphQL::Schema
     end
 
     def unauthorized_object(unauthorized_error)
-      nil
+      if unauthorized_error.context.query.mutation?
+        raise Gitlab::Graphql::Errors::ResourceNotAvailable, RESOURCE_ACCESS_ERROR
+      else
+        nil
+      end
     end
 
     private

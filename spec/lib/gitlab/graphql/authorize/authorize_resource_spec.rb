@@ -23,17 +23,19 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeResource do
         user
       end
 
+      def context
+        { current_user: user }
+      end
+
       def self.authorized?(object, context)
-        Array.wrap(authorize).all? { |ability| Ability.allowed?(context[:current_user], ability, object) }
+        user = context[:current_user]
+        Array.wrap(authorize).all? { |ability| Ability.allowed?(user, ability, object) }
       end
     end
   end
 
   let(:user) { build(:user) }
   let(:project) { build(:project) }
-  let(:context) do
-    { current_user: user }
-  end
 
   subject(:loading_resource) { fake_class.new(user, project) }
 
@@ -59,7 +61,7 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeResource do
 
     describe '#authorize!' do
       it 'does not raise an error' do
-        expect { loading_resource.authorize!(project, context) }.not_to raise_error
+        expect { loading_resource.authorize!(project) }.not_to raise_error
       end
     end
   end
@@ -67,13 +69,13 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeResource do
   context 'when the user is not allowed to perform the action' do
     describe '#authorized_find!' do
       it 'raises an error' do
-        expect { loading_resource.authorize!(project, context) }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect { loading_resource.authorized_find! }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
     end
 
     describe '#authorize!' do
       it 'raises an error' do
-        expect { loading_resource.authorize!(project, context) }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect { loading_resource.authorize!(project) }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
     end
   end

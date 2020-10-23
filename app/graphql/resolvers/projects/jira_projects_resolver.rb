@@ -14,7 +14,7 @@ module Resolvers
                description: 'Project name or key'
 
       def resolve(name: nil, **args)
-        authorize!(project, context)
+        authorize!(project)
 
         response = jira_projects(name: name)
 

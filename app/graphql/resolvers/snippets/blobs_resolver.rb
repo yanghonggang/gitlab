@@ -16,7 +16,7 @@ module Resolvers
                description: 'Paths of the blobs'
 
       def resolve(**args)
-        authorize!(snippet, context)
+        authorize!(snippet)
 
         return [snippet.blob] if snippet.empty_repo?
 

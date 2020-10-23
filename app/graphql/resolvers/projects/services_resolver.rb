@@ -19,10 +19,10 @@ module Resolvers
 
       alias_method :project, :object
 
-      def resolve(**args)
-        authorize!(project, context)
+      def resolve(active: nil, type: nil)
+        authorize!(project)
 
-        services(args[:active], args[:type])
+        services(active, type)
       end
 
       private
