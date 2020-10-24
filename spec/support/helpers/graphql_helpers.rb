@@ -19,6 +19,8 @@ module GraphqlHelpers
   # Then the resolve method is called.
   def resolve(resolver_class, obj: nil, args: {}, ctx: {}, field: nil)
     field ||= ::Types::BaseField.new(name: 'value', type: Object, null: true, resolver_class: resolver_class)
+    ctx = GraphQL::Query::Context.new(query: nil, schema: GitlabSchema, values: ctx, object: obj) if ctx.is_a?(Hash)
+
     return unless field.authorized?(obj, args, ctx)
 
     resolver = resolver_instance(resolver_class, obj: obj, ctx: ctx, field: field)
