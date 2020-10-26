@@ -9,18 +9,17 @@ module Resolvers
 
       alias_method :snippet, :object
 
+      type Types::Snippets::BlobType.connection_type, null: true
+
       authorize :read_snippet
+      authorizes_object!
 
       argument :paths, [GraphQL::STRING_TYPE],
                required: false,
                description: 'Paths of the blobs'
 
-      def resolve(**args)
-        authorize!(snippet)
-
+      def resolve(paths: [])
         return [snippet.blob] if snippet.empty_repo?
-
-        paths = Array(args.fetch(:paths, []))
 
         if paths.empty?
           snippet.blobs

@@ -5,6 +5,8 @@ module Gitlab
   module Graphql
     module Pagination
       class ExternallyPaginatedArrayConnection < GraphQL::Pagination::ArrayConnection
+        include ::Gitlab::Graphql::ConnectionCollectionMethods
+
         def start_cursor
           items.previous_cursor
         end

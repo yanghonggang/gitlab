@@ -3,8 +3,8 @@
 module Resolvers
   module ErrorTracking
     class SentryErrorsResolver < BaseResolver
-      type Types::ErrorTracking::SentryErrorType.connection_type, null: true
       extension Gitlab::Graphql::Extensions::ExternallyPaginatedArrayExtension
+      type Types::ErrorTracking::SentryErrorType.connection_type, null: true
 
       argument :search_term, ::GraphQL::STRING_TYPE,
               description: 'Search query for the Sentry error details',

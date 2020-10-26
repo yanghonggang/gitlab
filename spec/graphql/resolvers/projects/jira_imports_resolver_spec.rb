@@ -60,8 +60,7 @@ RSpec.describe Resolvers::Projects::JiraImportsResolver do
         it 'returns Jira imports sorted ascending by created_at time' do
           imports = resolve_imports
 
-          expect(imports.size).to eq 2
-          expect(imports.map(&:jira_project_key)).to eq %w(BB AA)
+          expect(imports.to_a.map(&:jira_project_key)).to eq(%w[BB AA])
         end
       end
     end

@@ -8,6 +8,7 @@ module Resolvers
       alias_method :design_or_collection, :object
 
       VersionID = ::Types::GlobalIDType[::DesignManagement::Version]
+      extras [:parent]
 
       argument :earlier_or_equal_to_sha, GraphQL::STRING_TYPE,
                as: :sha,

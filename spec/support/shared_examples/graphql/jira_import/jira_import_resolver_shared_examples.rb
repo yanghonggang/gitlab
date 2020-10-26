@@ -2,7 +2,7 @@
 
 RSpec.shared_examples 'no Jira import data present' do
   it 'returns none' do
-    expect(resolve_imports).to eq JiraImportState.none
+    expect(resolve_imports).to be_empty
   end
 end
 

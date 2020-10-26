@@ -6,6 +6,8 @@ module Resolvers
 
     alias_method :project, :object
 
+    type ::Types::Ci::PipelineType, null: true
+
     argument :iid, GraphQL::ID_TYPE,
              required: true,
              description: 'IID of the Pipeline, e.g., "1"'

@@ -15,19 +15,12 @@ module EE
         field :dast_scanner_profiles,
             ::Types::DastScannerProfileType.connection_type,
             null: true,
-            description: 'The DAST scanner profiles associated with the project',
-            resolve: -> (project, _args, _ctx) do
-              DastScannerProfilesFinder.new(project_ids: [project.id]).execute
-            end
+            description: 'The DAST scanner profiles associated with the project'
 
-        field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
-          calls_gitaly: true,
-          description: 'SAST CI configuration for the project',
-          resolve: -> (project, args, ctx) do
-            return unless Ability.allowed?(ctx[:current_user], :download_code, project)
-
-            sast_ci_configuration(project)
-          end
+        field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type,
+            null: true,
+            calls_gitaly: true,
+            description: 'SAST CI configuration for the project'
 
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
@@ -61,12 +54,7 @@ module EE
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver
 
         field :requirement_states_count, ::Types::RequirementsManagement::RequirementStatesCountType, null: true,
-              description: 'Number of requirements for the project by their state',
-              resolve: -> (project, args, ctx) do
-                return unless Ability.allowed?(ctx[:current_user], :read_requirement, project)
-
-                Hash.new(0).merge(project.requirements.counts_by_state)
-              end
+              description: 'Number of requirements for the project by their state'
 
         field :compliance_frameworks, ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               description: 'Compliance frameworks associated with the project',
@@ -87,12 +75,6 @@ module EE
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
               null: true,
-              resolve: -> (obj, args, _ctx) do
-                # TODO: remove this coercion when the compatibility layer is removed
-                # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
-                gid = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(args[:id])
-                DastSiteProfilesFinder.new(project_id: obj.id, id: gid.model_id).execute.first
-              end,
               description: 'DAST Site Profile associated with the project' do
                 argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true, description: 'ID of the site profile'
               end
@@ -100,20 +82,11 @@ module EE
         field :dast_site_profiles,
               ::Types::DastSiteProfileType.connection_type,
               null: true,
-              description: 'DAST Site Profiles associated with the project',
-              resolve: -> (obj, _args, _ctx) { DastSiteProfilesFinder.new(project_id: obj.id).execute }
+              description: 'DAST Site Profiles associated with the project'
 
         field :dast_site_validation,
               ::Types::DastSiteValidationType,
               null: true,
-              resolve: -> (project, args, _ctx) do
-                unless ::Feature.enabled?(:security_on_demand_scans_site_validation, project)
-                  raise ::Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled'
-                end
-
-                url_base = DastSiteValidation.get_normalized_url_base(args.target_url)
-                DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base).execute.first
-              end,
               description: 'DAST Site Validation associated with the project' do
                 argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
               end
@@ -139,18 +112,51 @@ module EE
         field :actual_repository_size_limit,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Size limit for the repository in bytes',
-              resolve: -> (obj, _args, _ctx) { obj.actual_size_limit }
+              method: :actual_size_limit,
+              description: 'Size limit for the repository in bytes'
 
         field :code_coverage_summary,
               ::Types::Ci::CodeCoverageSummaryType,
               null: true,
-              description: 'Code coverage summary associated with the project',
+              description: 'Code coverage summary associated with the project.',
               resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
+      end
 
-        def self.sast_ci_configuration(project)
-          ::Security::CiConfiguration::SastParserService.new(project).configuration
-        end
+      def dast_site_validation(target_url:)
+        project = object
+        return unless ::Feature.enabled?(:security_on_demand_scans_site_validation, project)
+
+        url_base = DastSiteValidation.get_normalized_url_base(target_url)
+        DastSiteValidationsFinder.new(project_id: project.id, url_base: url_base).execute.first
+      end
+
+      def sast_ci_configuration
+        return unless can?(:download_code)
+
+        ::Security::CiConfiguration::SastParserService.new(object).configuration
+      end
+
+      def dast_site_profiles
+        DastSiteProfilesFinder.new(project_id: object.id).execute
+      end
+
+      def dast_site_profile(id:)
+        # TODO: remove this coercion when the compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        gid = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(args[:id])
+        DastSiteProfilesFinder.new(project_id: object.id, id: gid.model_id).execute.first
+      end
+
+      def dast_scanner_profiles
+        project = object
+
+        DastScannerProfilesFinder.new(project_ids: [project.id]).execute
+      end
+
+      def requirement_states_count
+        return unless can?(:read_requirement)
+
+        Hash.new(0).merge(object.requirements.counts_by_state)
       end
     end
   end

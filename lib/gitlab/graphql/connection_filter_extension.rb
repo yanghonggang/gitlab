@@ -4,28 +4,42 @@ module Gitlab
   module Graphql
     class ConnectionFilterExtension < GraphQL::Schema::FieldExtension
       class Redactor
-        def initialize(field, context)
-          @type = field.type.unwrap.node_type
+        def initialize(type, context)
+          @type = type
           @context = context
         end
 
         def redact(nodes)
-          @type.scope_items(nodes, @context)
+          @type.remove_unauthorized(nodes, @context)
+
+          nodes
         end
 
         def active?
-          @type && @type.respond_to?(:scope_items)
+          @type && @type.respond_to?(:remove_unauthorized)
         end
       end
 
       def after_resolve(value:, context:, **rest)
-        return value unless @field.connection?
-        return value unless value.respond_to?(:redactor=)
-
-        redactor = Redactor.new(@field, context)
-        value.redactor = redactor if redactor.active?
+        if @field.connection?
+          redact_connection(value, context)
+        elsif @field.type.list?
+          redact_list(value, context)
+        end
 
         value
+      end
+
+      def redact_connection(conn, context)
+        redactor = Redactor.new(@field.type.unwrap.node_type, context)
+        return unless redactor.active?
+
+        conn.redactor = redactor if conn.respond_to?(:redactor=)
+      end
+
+      def redact_list(list, context)
+        redactor = Redactor.new(@field.type.unwrap, context)
+        redactor.redact(list) if redactor.active?
       end
     end
   end

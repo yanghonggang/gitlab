@@ -11,24 +11,46 @@ module GraphqlHelpers
     underscored_field_name.to_s.camelize(:lower)
   end
 
-  # Run a loader's named resolver in a way that closely mimics the framework.
-  #
-  # First the `ready?` method is called. If it turns out that the resolver is not
-  # ready, then the early return is returned instead.
-  #
-  # Then the resolve method is called.
-  def resolve(resolver_class, obj: nil, args: {}, ctx: {}, field: nil)
-    field ||= ::Types::BaseField.new(name: 'value', type: Object, null: true, resolver_class: resolver_class)
-    ctx = GraphQL::Query::Context.new(query: nil, schema: GitlabSchema, values: ctx, object: obj) if ctx.is_a?(Hash)
+  def self.deep_fieldnamerize(map)
+    map.to_h do |k, v|
+      [fieldnamerize(k), v.is_a?(Hash) ? deep_fieldnamerize(v) : v]
+    end
+  end
 
-    return unless field.authorized?(obj, args, ctx)
+  # Run this resolver exactly as it would be called in the framework. This
+  # includes all authorization hooks, all argument processing and all result
+  # wrapping.
+  def resolve(
+    resolver_class,
+    obj: nil, args: {}, ctx: {},
+    parent: :not_given,
+    lookahead: :not_given)
+    field_options = resolver_class.field_options.merge(name: 'value')
+    field = ::Types::BaseField.new(**field_options)
+    query = GraphQL::Query.new(GitlabSchema, document: nil, context: ctx)
+    lookahead = negative_lookahead if lookahead == :not_given && field_options[:extras].include?(:lookahead)
 
-    resolver = resolver_instance(resolver_class, obj: obj, ctx: ctx, field: field)
-    ready, early_return = sync_all { resolver.ready?(**args) }
+    query_ctx = query.context
 
-    return early_return unless ready
+    mock_extras(query_ctx, parent: parent, lookahead: lookahead)
 
-    resolver.resolve(**args)
+    parent = resolver_parent.authorized_new(obj, query_ctx)
+    arguments = field.to_graphql.arguments_class.new(
+      GraphqlHelpers.deep_fieldnamerize(args),
+      context: query_ctx,
+      defaults_used: []
+    )
+
+    field.resolve_field(parent, arguments, query_ctx)
+  end
+
+  def mock_extras(context, parent:, lookahead:)
+    allow(context).to receive(:parent).and_return(parent) unless parent == :not_given
+    allow(context).to receive(:lookahead).and_return(lookahead) unless lookahead == :not_given
+  end
+
+  def resolver_parent
+    @resolver_parent ||= Class.new(::Types::BaseObject) { graphql_name 'ResolverParent' }
   end
 
   def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema)
@@ -526,6 +548,20 @@ module GraphqlHelpers
       context: { current_user: user },
       variables: {}
     )
+  end
+
+  # A lookahead that selects everything
+  def positive_lookahead
+    double(selects?: true).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
+  end
+
+  # A lookahead that selects nothing
+  def negative_lookahead
+    double(selects?: false).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
   end
 end
 

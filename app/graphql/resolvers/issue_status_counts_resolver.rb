@@ -4,6 +4,8 @@ module Resolvers
   class IssueStatusCountsResolver < BaseResolver
     prepend IssueResolverArguments
 
+    extras [:lookahead]
+
     type Types::IssueStatusCountsType, null: true
 
     def continue_issue_resolve(parent, finder, **args)

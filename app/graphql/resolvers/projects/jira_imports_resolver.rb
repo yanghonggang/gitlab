@@ -7,6 +7,7 @@ module Resolvers
 
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
+      type Types::JiraImportType.connection_type, null: true
       authorize :read_project
       authorizes_object!
 

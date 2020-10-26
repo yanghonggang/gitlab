@@ -5,6 +5,7 @@ module Types
     prepend Gitlab::Graphql::Present
     prepend Gitlab::Graphql::ExposePermissions
     prepend Gitlab::Graphql::MarkdownField
+    extend Gitlab::Graphql::Laziness
 
     field_class Types::BaseField
 
@@ -29,7 +30,7 @@ module Types
     end
 
     def self.scope_items(items, context)
-      remove_unauthorized(items, context)
+      # remove_unauthorized(items, context) unless @field.connection?
 
       items
     end
@@ -40,7 +41,7 @@ module Types
       return unless authorize.present?
 
       array
-        .map! { |lazy| ::Gitlab::Graphql::Lazy.force(lazy) }
+        .map! { |lazy| force(lazy) }
         .keep_if { |forced| authorized?(forced, context) }
     end
 
@@ -54,6 +55,10 @@ module Types
       return true if assignable.blank?
 
       assignable.any? { |cls| object.is_a?(cls) }
+    end
+
+    def can?(ability, subject = object)
+      Ability.allowed?(current_user, ability, subject)
     end
   end
 end
