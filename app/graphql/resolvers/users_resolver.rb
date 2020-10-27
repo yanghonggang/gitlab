@@ -22,11 +22,13 @@ module Resolvers
     argument :search, GraphQL::STRING_TYPE,
              required: false,
              description: "Query to search users by name, username, or primary email."
+    argument :admins, GraphQL::BOOLEAN_TYPE, required: false,
+              description: 'Return only admin users'
 
-    def resolve(ids: nil, usernames: nil, sort: nil, search: nil)
+    def resolve(ids: nil, usernames: nil, sort: nil, search: nil, admins: false)
       authorize!
 
-      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort, search)).execute
+      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort, search, admins)).execute
     end
 
     def ready?(**args)
@@ -47,12 +49,13 @@ module Resolvers
 
     private
 
-    def finder_params(ids, usernames, sort, search)
+    def finder_params(ids, usernames, sort, search, admins)
       params = {}
       params[:sort] = sort if sort
       params[:username] = usernames if usernames
       params[:id] = parse_gids(ids) if ids
       params[:search] = search if search
+      params[:admins] = admins if admins
       params
     end
 
