@@ -3,19 +3,30 @@
 module Gitlab
   module Graphql
     module ConnectionRedaction
-      attr_reader :redactor
+      class RedactionState
+        attr_reader :redactor
+        attr_reader :redacted_nodes
+
+        def redactor=(redactor)
+          @redactor = redactor
+          @redacted_nodes = nil
+        end
+
+        def redacted(&block)
+          @redacted_nodes ||= redactor.present? ? redactor.redact(yield) : yield
+        end
+      end
+
+      delegate :redactor=, to: :redaction_state
 
       def nodes
-        @redacted_nodes ||= redact(super.to_a)
+        redaction_state.redacted { super.to_a }
       end
 
-      def redactor=(redactor)
-        @redactor = redactor
-        @redacted_nodes = nil
-      end
+      private
 
-      def redact(nodes)
-        redactor.present? ? redactor.redact(nodes) : nodes
+      def redaction_state
+        @redaction_state ||= RedactionState.new
       end
     end
   end
