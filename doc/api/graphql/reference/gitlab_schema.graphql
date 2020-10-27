@@ -15170,7 +15170,7 @@ type Project {
   ): ClusterAgentConnection
 
   """
-  Code coverage summary associated with the project
+  Code coverage summary associated with the project.
   """
   codeCoverageSummary: CodeCoverageSummary
 
