@@ -30,27 +30,25 @@ RSpec.describe Resolvers::EpicIssuesResolver do
     stub_licensed_features(epics: true)
   end
 
+  let(:epics) { [epic1, epic2] }
+
   describe '#resolve' do
     it 'finds all epic issues' do
-      result = [resolve_epic_issues(epic1), resolve_epic_issues(epic2)]
+      result = epics.map { |epic| resolve_epic_issues(epic).to_a }
 
-      expect(result).to contain_exactly([issue2, issue1], [issue3, issue4])
+      expect(result).to eq [[issue2, issue1], [issue3, issue4]]
     end
 
     it 'finds only epic issues that user can read' do
       guest = create(:user)
 
-      result =
-        [
-          resolve_epic_issues(epic1, {}, { current_user: guest }),
-          resolve_epic_issues(epic2, {}, { current_user: guest })
-        ]
+      result = epics.map { |e| resolve_epic_issues(e, user: guest).to_a }
 
-      expect(result).to contain_exactly([], [issue1])
+      expect(result).to eq [[issue1], []]
     end
   end
 
-  def resolve_epic_issues(object, args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: object, args: args, ctx: context)
+  def resolve_epic_issues(object, user: current_user)
+    resolve(described_class, obj: object, ctx: { current_user: user })
   end
 end

@@ -22,6 +22,10 @@ module Gitlab
         case value
         when ::Gitlab::Graphql::Lazy # self
           value.force
+        when ::Gitlab::Graphql::Deferred
+          value.execute
+        when GraphQL::Execution::Lazy
+          value.value
         when ::BatchLoader::GraphQL
           value.sync
         when ::GraphQL::Execution::Lazy

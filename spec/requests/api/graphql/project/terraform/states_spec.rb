@@ -54,18 +54,22 @@ RSpec.describe 'query terraform states' do
     state = data.dig('nodes', 0)
     version = state['latestVersion']
 
-    expect(state['id']).to eq(terraform_state.to_global_id.to_s)
-    expect(state['name']).to eq(terraform_state.name)
-    expect(state['lockedAt']).to eq(terraform_state.locked_at.iso8601)
-    expect(state['createdAt']).to eq(terraform_state.created_at.iso8601)
-    expect(state['updatedAt']).to eq(terraform_state.updated_at.iso8601)
-    expect(state.dig('lockedByUser', 'id')).to eq(terraform_state.locked_by_user.to_global_id.to_s)
+    expect(state).to match(
+      'id'           => eq(global_id_of(terraform_state)),
+      'name'         => eq(terraform_state.name),
+      'lockedAt'     => eq(terraform_state.locked_at.iso8601),
+      'createdAt'    => eq(terraform_state.created_at.iso8601),
+      'updatedAt'    => eq(terraform_state.updated_at.iso8601),
+      'lockedByUser' => match('id' => eq(global_id_of(terraform_state.locked_by_user)))
+    )
 
-    expect(version['id']).to eq(latest_version.to_global_id.to_s)
-    expect(version['createdAt']).to eq(latest_version.created_at.iso8601)
-    expect(version['updatedAt']).to eq(latest_version.updated_at.iso8601)
-    expect(version.dig('createdByUser', 'id')).to eq(latest_version.created_by_user.to_global_id.to_s)
-    expect(version.dig('job', 'name')).to eq(latest_version.build.name)
+    expect(version).to match(
+      'id'            => eq(latest_version.to_global_id.to_s),
+      'createdAt'     => eq(latest_version.created_at.iso8601),
+      'updatedAt'     => eq(latest_version.updated_at.iso8601),
+      'createdByUser' => match('id' => eq(latest_version.created_by_user.to_global_id.to_s)),
+      'job'           => match('name' => eq(latest_version.build.name))
+    )
   end
 
   it 'returns count of terraform states' do

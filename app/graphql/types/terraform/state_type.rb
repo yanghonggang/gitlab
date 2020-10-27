@@ -19,7 +19,6 @@ module Types
 
       field :locked_by_user, Types::UserType,
             null: true,
-            authorize: :read_user,
             description: 'The user currently holding a lock on the Terraform state',
             resolve: -> (state, _, _) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, state.locked_by_user_id).find }
 
