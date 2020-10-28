@@ -1051,6 +1051,7 @@ POST /projects
 | `merge_requests_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `forking_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `builds_access_level` | string | no | One of `disabled`, `private` or `enabled` |
+| `analytics_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `wiki_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `snippets_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `pages_access_level` | string | no | One of `disabled`, `private`, `enabled` or `public` |
@@ -1123,6 +1124,7 @@ POST /projects/user/:user_id
 | `merge_requests_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `forking_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `builds_access_level` | string | no | One of `disabled`, `private` or `enabled` |
+| `analytics_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `wiki_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `snippets_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `pages_access_level` | string | no | One of `disabled`, `private`, `enabled` or `public` |
@@ -1194,6 +1196,7 @@ PUT /projects/:id
 | `merge_requests_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `forking_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `builds_access_level` | string | no | One of `disabled`, `private` or `enabled` |
+| `analytics_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `wiki_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `snippets_access_level` | string | no | One of `disabled`, `private` or `enabled` |
 | `pages_access_level` | string | no | One of `disabled`, `private`, `enabled` or `public` |
@@ -2322,6 +2325,7 @@ Example response:
   "repository_access_level": "enabled",
   "merge_requests_access_level": "enabled",
   "forking_access_level": "enabled",
+  "analytics_access_level": "enabled",
   "wiki_access_level": "enabled",
   "builds_access_level": "enabled",
   "snippets_access_level": "enabled",

@@ -873,6 +873,7 @@ RSpec.describe API::Projects do
         jobs_enabled: false,
         merge_requests_enabled: false,
         forking_access_level: 'disabled',
+        analytics_access_level: 'disabled',
         wiki_enabled: false,
         resolve_outdated_diff_discussions: false,
         remove_source_branch_after_merge: true,
@@ -900,6 +901,7 @@ RSpec.describe API::Projects do
       expect(project.project_feature.issues_access_level).to eq(ProjectFeature::DISABLED)
       expect(project.project_feature.merge_requests_access_level).to eq(ProjectFeature::DISABLED)
       expect(project.project_feature.wiki_access_level).to eq(ProjectFeature::DISABLED)
+      expect(project.project_feature.analytics_access_level).to eq(ProjectFeature::DISABLED)
     end
 
     it 'creates a project using a template' do
@@ -1586,6 +1588,7 @@ RSpec.describe API::Projects do
         expect(json_response['issues_access_level']).to be_present
         expect(json_response['merge_requests_access_level']).to be_present
         expect(json_response['forking_access_level']).to be_present
+        expect(json_response['analytics_access_level']).to be_present
         expect(json_response['wiki_access_level']).to be_present
         expect(json_response['builds_access_level']).to be_present
         expect(json_response).to have_key('emails_disabled')

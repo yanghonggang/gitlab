@@ -20704,6 +20704,9 @@ msgstr ""
 msgid "ProjectSettings|Allow users to request access"
 msgstr ""
 
+msgid "ProjectSettings|Analytics"
+msgstr ""
+
 msgid "ProjectSettings|Automatically resolve merge request diff discussions when they become outdated"
 msgstr ""
 
@@ -20936,6 +20939,9 @@ msgid "ProjectSettings|View and edit files in this project"
 msgstr ""
 
 msgid "ProjectSettings|View and edit files in this project. Non-project members will only have read access"
+msgstr ""
+
+msgid "ProjectSettings|View project analytics"
 msgstr ""
 
 msgid "ProjectSettings|When conflicts arise the user is given the option to rebase"

@@ -21,6 +21,7 @@ const defaultProps = {
     wikiAccessLevel: 20,
     snippetsAccessLevel: 20,
     pagesAccessLevel: 10,
+    analyticsAccessLevel: 20,
     containerRegistryEnabled: true,
     lfsEnabled: true,
     emailsDisabled: false,
@@ -74,6 +75,8 @@ describe('Settings Panel', () => {
   const findRepositoryFeatureProjectRow = () => wrapper.find({ ref: 'repository-settings' });
   const findRepositoryFeatureSetting = () =>
     findRepositoryFeatureProjectRow().find(projectFeatureSetting);
+
+  const findAnalyticsRow = () => wrapper.find({ ref: 'analytics-settings' });
 
   beforeEach(() => {
     wrapper = mountComponent();
@@ -537,6 +540,14 @@ describe('Settings Panel', () => {
 
       expect(wrapper.vm.metricsOptionsDropdownEnabled).toBe(true);
       expect(metricsSettingsRow.find('select').attributes('disabled')).toBe('disabled');
+    });
+  });
+
+  describe('Analytics', () => {
+    it('should show the analytics toggle', () => {
+      return wrapper.vm.$nextTick(() => {
+        expect(findAnalyticsRow().exists()).toBe(true);
+      });
     });
   });
 });

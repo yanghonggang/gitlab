@@ -147,6 +147,7 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    analytics
   ]
 
   features.each do |f|
@@ -211,6 +212,7 @@ class ProjectPolicy < BasePolicy
     enable :award_emoji
     enable :read_pages_content
     enable :read_release
+    enable :read_analytics
   end
 
   # These abilities are not allowed to admins that are not members of the project,
@@ -424,6 +426,10 @@ class ProjectPolicy < BasePolicy
     prevent(*create_read_update_admin_destroy(:snippet))
   end
 
+  rule { analytics_disabled }.policy do
+    prevent(:read_analytics)
+  end
+
   rule { wiki_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:wiki))
     prevent(:download_wiki_code)
@@ -494,6 +500,7 @@ class ProjectPolicy < BasePolicy
     enable :download_wiki_code
     enable :read_cycle_analytics
     enable :read_pages_content
+    enable :read_analytics
 
     # NOTE: may be overridden by IssuePolicy
     enable :read_issue
