@@ -48,6 +48,18 @@ RSpec.describe Resolvers::UsersResolver do
       end
     end
 
+    context 'when admins is true' do
+      before do
+        user1.update!(admin: true)
+      end
+
+      it 'returns only admins' do
+        expect(
+          resolve_users(admins: true)
+        ).to contain_exactly(user1)
+      end
+    end
+
     context 'when a search term is passed' do
       it 'returns all users who match', :aggregate_failures do
         expect(resolve_users(search: "some")).to contain_exactly(user1, user2)
