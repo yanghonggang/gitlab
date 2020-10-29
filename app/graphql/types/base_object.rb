@@ -29,12 +29,6 @@ module Types
       end
     end
 
-    def self.scope_items(items, context)
-      # remove_unauthorized(items, context) unless @field.connection?
-
-      items
-    end
-
     # Mutates the input array
     def self.remove_unauthorized(array, context)
       return unless array.is_a?(Array)

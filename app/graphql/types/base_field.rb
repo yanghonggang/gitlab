@@ -61,10 +61,24 @@ module Types
         return @authorize.all? { |p| Ability.allowed?(user, p, object) }
       end
 
-      rc = @resolver_class
-      return true if rc&.respond_to?(:authorizes_object?) && !rc.authorizes_object?
+      if resolver_does_not_consider_object?
+        true # ok to proceed
+      else
+        super
+      end
+    end
 
-      super
+    # Historically our resolvers have used declarative permission checks only
+    # for _what they resolved_, not the _object they resolved these things from_
+    # We preserve these semantics here:
+    def resolver_does_not_consider_object?
+      rc = @resolver_class
+      return false if rc.nil? # no resolver => no way to know!
+
+      # Resolvers must opt-in to have their objects checked
+      return false if rc.respond_to?(:authorizes_object) && authorizes_object?
+
+      true # by default, permissions on resolvers apply to field values, not objects
     end
 
     def base_complexity
