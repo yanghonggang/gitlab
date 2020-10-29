@@ -32,7 +32,9 @@ module GraphqlHelpers
     field_options = resolver_class.field_options.merge(name: 'value')
     field = ::Types::BaseField.new(**field_options)
 
-    resolve_field(field, obj, ctx: ctx, extras: { parent: parent, lookahead: lookahead })
+    resolve_field(field, obj, args: args, ctx: ctx,
+                  parent_class: resolver_parent,
+                  extras: { parent: parent, lookahead: lookahead })
   end
 
   def resolve_field(
