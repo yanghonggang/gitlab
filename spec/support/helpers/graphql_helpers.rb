@@ -154,6 +154,8 @@ module GraphqlHelpers
                     schema: GitlabSchema,
                     query: GraphQL::Query.new(GitlabSchema),
                     parent: nil)
+    allow(context).to receive(:[]).with(:current_user).and_return(args[:current_user])
+
     field = described_class.fields[name]
     instance = described_class.authorized_new(object, context)
     field.resolve_field(instance, {}, context)

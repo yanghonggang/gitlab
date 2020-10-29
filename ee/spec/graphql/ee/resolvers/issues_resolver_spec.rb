@@ -54,11 +54,11 @@ RSpec.describe Resolvers::IssuesResolver do
           end
 
           it 'sorts issues ascending' do
-            expect(resolve_issues(sort: :sla_due_at_asc)).to eq [sla_due_first, sla_due_last]
+            expect(resolve_issues(sort: :sla_due_at_asc).to_a).to eq [sla_due_first, sla_due_last]
           end
 
           it 'sorts issues descending' do
-            expect(resolve_issues(sort: :sla_due_at_desc)).to eq [sla_due_last, sla_due_first]
+            expect(resolve_issues(sort: :sla_due_at_desc).to_a).to eq [sla_due_last, sla_due_first]
           end
         end
       end

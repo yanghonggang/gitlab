@@ -9,6 +9,12 @@ RSpec.describe GitlabSchema.types['AlertManagementPrometheusIntegration'] do
   specify { expect(described_class).to require_graphql_authorizations(:admin_project) }
 
   describe 'resolvers' do
+    before do
+      # we'll assume that authorisation is passed since this is a unit test
+      allow(Ability).to receive(:allowed?).and_call_original
+      expect(Ability).to receive(:allowed?).with(anything, :admin_project, anything) { true }
+    end
+
     shared_examples_for 'has field with value' do |field_name|
       it 'correctly renders the field' do
         expect(resolve_field(field_name, integration)).to eq(value)
