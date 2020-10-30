@@ -51,25 +51,21 @@ RSpec.describe 'query terraform states' do
   end
 
   it 'returns terraform state data', :aggregate_failures do
-    state = data.dig('nodes', 0)
-    version = state['latestVersion']
-
-    expect(state).to match(
-      'id'           => eq(global_id_of(terraform_state)),
-      'name'         => eq(terraform_state.name),
-      'lockedAt'     => eq(terraform_state.locked_at.iso8601),
-      'createdAt'    => eq(terraform_state.created_at.iso8601),
-      'updatedAt'    => eq(terraform_state.updated_at.iso8601),
-      'lockedByUser' => match('id' => eq(global_id_of(terraform_state.locked_by_user)))
-    )
-
-    expect(version).to match(
-      'id'            => eq(latest_version.to_global_id.to_s),
-      'createdAt'     => eq(latest_version.created_at.iso8601),
-      'updatedAt'     => eq(latest_version.updated_at.iso8601),
-      'createdByUser' => match('id' => eq(latest_version.created_by_user.to_global_id.to_s)),
-      'job'           => match('name' => eq(latest_version.build.name))
-    )
+    expect(data['nodes']).to contain_exactly({
+      'id'            => global_id_of(terraform_state),
+      'name'          => terraform_state.name,
+      'lockedAt'      => terraform_state.locked_at.iso8601,
+      'createdAt'     => terraform_state.created_at.iso8601,
+      'updatedAt'     => terraform_state.updated_at.iso8601,
+      'lockedByUser'  => { 'id' => global_id_of(terraform_state.locked_by_user) },
+      'latestVersion' => {
+        'id'            => eq(latest_version.to_global_id.to_s),
+        'createdAt'     => eq(latest_version.created_at.iso8601),
+        'updatedAt'     => eq(latest_version.updated_at.iso8601),
+        'createdByUser' => { 'id' => eq(latest_version.created_by_user.to_global_id.to_s) },
+        'job'           => { 'name' => eq(latest_version.build.name) }
+      }
+    })
   end
 
   it 'returns count of terraform states' do
