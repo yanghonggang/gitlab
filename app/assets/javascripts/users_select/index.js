@@ -21,8 +21,8 @@ import { loadCSSFile } from '../lib/utils/css_utils';
 window.emitSidebarEvent = window.emitSidebarEvent || $.noop;
 
 function UsersSelect(currentUser, els, options = {}) {
-  const elsClassName = els?.toString().match('.(.+$)')[1];
   const $els = $(els || '.js-user-search');
+  this.elsClassName = els?.toString().match('.(.+$)')[1];
   this.users = this.users.bind(this);
   this.user = this.user.bind(this);
   this.usersPath = '/-/autocomplete/users.json';
@@ -131,7 +131,7 @@ function UsersSelect(currentUser, els, options = {}) {
 
           firstSelected.remove();
 
-          if ($dropdown.hasClass(elsClassName)) {
+          if ($dropdown.hasClass(this.elsClassName)) {
             emitSidebarEvent('sidebar.removeReviewer', {
               id: firstSelectedId,
             });
@@ -404,7 +404,7 @@ function UsersSelect(currentUser, els, options = {}) {
       defaultLabel,
       hidden() {
         if ($dropdown.hasClass('js-multiselect')) {
-          if ($dropdown.hasClass(elsClassName)) {
+          if ($dropdown.hasClass(this.elsClassName)) {
             emitSidebarEvent('sidebar.saveReviewers');
           } else {
             emitSidebarEvent('sidebar.saveAssignees');
@@ -444,14 +444,14 @@ function UsersSelect(currentUser, els, options = {}) {
             previouslySelected.each((index, element) => {
               element.remove();
             });
-            if ($dropdown.hasClass(elsClassName)) {
+            if ($dropdown.hasClass(this.elsClassName)) {
               emitSidebarEvent('sidebar.removeAllReviewers');
             } else {
               emitSidebarEvent('sidebar.removeAllAssignees');
             }
           } else if (isActive) {
             // user selected
-            if ($dropdown.hasClass(elsClassName)) {
+            if ($dropdown.hasClass(this.elsClassName)) {
               emitSidebarEvent('sidebar.addReviewer', user);
             } else {
               emitSidebarEvent('sidebar.addAssignee', user);
@@ -472,7 +472,7 @@ function UsersSelect(currentUser, els, options = {}) {
             }
 
             // User unselected
-            if ($dropdown.hasClass(elsClassName)) {
+            if ($dropdown.hasClass(this.elsClassName)) {
               emitSidebarEvent('sidebar.removeReviewer', user);
             } else {
               emitSidebarEvent('sidebar.removeAssignee', user);
@@ -776,13 +776,18 @@ UsersSelect.prototype.renderRow = function(issuableType, user, selected, usernam
 
   return `
     <li data-user-id=${user.id}>
-      <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
+      <a href="#" class="dropdown-menu-user-link d-flex align-items-center samantha ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
-          <strong class="dropdown-menu-user-full-name">
+          <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
             ${escape(user.name)}
           </strong>
-          ${username ? `<span class="dropdown-menu-user-username">${username}</span>` : ''}
+          ${
+            username
+              ? `<span class="dropdown-menu-user-username text gl-text-gray-400">${username}</span>`
+              : ''
+          }
+          ${this.renderApprovalRules(issuableType, user.applicable_approval_rules)}
         </span>
       </a>
     </li>
@@ -803,6 +808,24 @@ UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
     ${img}
     ${mergeIcon}
   </span>`;
+};
+
+UsersSelect.prototype.renderApprovalRules = function(issuableType, approvalRules = []) {
+  if (issuableType !== 'merge_request' || !this.elsClassName?.includes('reviewer')) {
+    return '';
+  }
+  const count = approvalRules.length;
+  const [rule] = approvalRules;
+
+  const renderApprovalRulesCount =
+    count > 1 ? `<span class="ml-1">(+${count}&nbsp;rules)</span>` : '';
+
+  return count
+    ? `<div class="gl-display-flex">
+        <span class="gl-text-truncate">${rule.name}</span>
+        ${renderApprovalRulesCount}
+      </div>`
+    : '';
 };
 
 export default UsersSelect;
