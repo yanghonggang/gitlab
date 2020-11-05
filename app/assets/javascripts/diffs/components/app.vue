@@ -212,7 +212,9 @@ export default {
       return visible;
     },
     hasCommits() {
-      return this.mergeRequestDiffs.length > 0;
+      console.log(this.commit);
+      console.log(this.mergeRequestDiffs);
+      return this.commit || this.mergeRequestDiffs.length > 0;
     },
     hasChangedFiles() {
       return this.diffFiles.length > 0;

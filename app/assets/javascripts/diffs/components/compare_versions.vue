@@ -44,6 +44,7 @@ export default {
       'diffCompareDropdownSourceVersions',
     ]),
     ...mapState('diffs', [
+      'tree',
       'commit',
       'showTreeList',
       'startVersion',
@@ -51,14 +52,11 @@ export default {
       'addedLines',
       'removedLines',
     ]),
-    showDropdowns() {
-      return !this.commit && this.mergeRequestDiffs.length;
-    },
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
     },
     hasChanges() {
-      return parseInt(this.diffFilesCountText, 10) > 0;
+      return Boolean(this.tree.length);
     },
   },
   created() {
@@ -99,6 +97,7 @@ export default {
         @click="toggleShowTreeList"
       />
       <gl-sprintf
+         v-if="!commit"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
