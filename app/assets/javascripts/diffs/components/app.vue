@@ -211,6 +211,12 @@ export default {
 
       return visible;
     },
+    hasCommits() {
+      return this.mergeRequestDiffs.length > 0;
+    },
+    hasChangedFiles() {
+      return this.diffFiles.length > 0;
+    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -435,6 +441,7 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
+        v-if="hasCommits"
         :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
@@ -463,7 +470,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList"
+          v-if="showTreeList && hasChangedFiles"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
