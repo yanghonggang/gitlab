@@ -400,15 +400,6 @@ describe('diffs/components/app', () => {
       expect(wrapper.find(NoChanges).exists()).toBe(false);
       expect(wrapper.findAll(DiffFile).length).toBe(1);
     });
-
-    it('does not render empty state when versions match', () => {
-      createComponent({}, ({ state }) => {
-        state.diffs.startVersion = mergeRequestDiff;
-        state.diffs.mergeRequestDiff = mergeRequestDiff;
-      });
-
-      expect(wrapper.find(NoChanges).exists()).toBe(false);
-    });
   });
 
   describe('keyboard shortcut navigation', () => {
