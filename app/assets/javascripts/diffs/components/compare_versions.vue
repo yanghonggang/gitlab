@@ -83,7 +83,7 @@ export default {
     <div
       class="mr-version-menus-container content-block"
       :class="{
-        [CENTERED_LIMITED_CONTAINER_CLASSES]: isLimitedContainer,
+        [CENTERED_LIMITED_CONTAINER_CLASSES]: isLimitedContainer || !hasChanges,
       }"
     >
       <gl-button

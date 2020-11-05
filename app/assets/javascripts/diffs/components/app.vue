@@ -167,11 +167,7 @@ export default {
       return this.currentUser.can_fork === true && this.currentUser.can_create_merge_request;
     },
     renderDiffFiles() {
-      return (
-        this.diffFiles.length > 0 ||
-        (this.startVersion &&
-          this.startVersion.version_index === this.mergeRequestDiff.version_index)
-      );
+      return this.diffFiles.length > 0;
     },
     hideFileStats() {
       return this.treeWidth <= TREE_HIDE_STATS_WIDTH;
