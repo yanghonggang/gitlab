@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Group and project members API
 
 ## Valid access levels
@@ -180,6 +186,7 @@ Example response:
   "web_url": "http://192.168.1.8:3000/root",
   "access_level": 30,
   "email": "john@example.com",
+  "created_at": "2012-10-22T14:13:35Z",
   "expires_at": null,
   "group_saml_identity": null
 }
@@ -290,7 +297,7 @@ POST /projects/:id/members
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `user_id` | integer         | yes | The user ID of the new member |
+| `user_id` | integer/string | yes | The user ID of the new member or multiple IDs separated by commas |
 | `access_level` | integer | yes | A valid access level |
 | `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
 

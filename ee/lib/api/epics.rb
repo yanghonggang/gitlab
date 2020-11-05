@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Epics < Grape::API::Instance
+  class Epics < ::API::Base
     include PaginationParams
+
+    feature_category :epics
 
     before do
       authenticate_non_get!

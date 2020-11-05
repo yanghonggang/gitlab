@@ -278,13 +278,14 @@ RSpec.describe Gitlab::Danger::Helper do
       'scripts/foo'                                           | [:engineering_productivity]
       'lib/gitlab/danger/foo'                                 | [:engineering_productivity]
       'ee/lib/gitlab/danger/foo'                              | [:engineering_productivity]
-      '.overcommit.yml.example'                               | [:engineering_productivity]
+      'lefthook.yml'                                          | [:engineering_productivity]
       '.editorconfig'                                         | [:engineering_productivity]
-      'tooling/overcommit/foo'                                | [:engineering_productivity]
+      'tooling/bin/find_foss_tests'                           | [:engineering_productivity]
       '.codeclimate.yml'                                      | [:engineering_productivity]
       '.gitlab/CODEOWNERS'                                    | [:engineering_productivity]
 
-      'lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml'   | [:backend]
+      'lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml'   | [:ci_template]
+      'lib/gitlab/ci/templates/dotNET-Core.yml'               | [:ci_template]
 
       'ee/FOO_VERSION' | [:unknown]
 
@@ -311,6 +312,8 @@ RSpec.describe Gitlab::Danger::Helper do
 
       'db/fixtures/foo.rb'                                 | [:backend]
       'ee/db/fixtures/foo.rb'                              | [:backend]
+      'doc/api/graphql/reference/gitlab_schema.graphql'    | [:backend]
+      'doc/api/graphql/reference/gitlab_schema.json'       | [:backend]
 
       'qa/foo' | [:qa]
       'ee/qa/foo' | [:qa]
@@ -376,6 +379,7 @@ RSpec.describe Gitlab::Danger::Helper do
       :none      | ''
       :qa        | '~QA'
       :engineering_productivity | '~"Engineering Productivity" for CI, Danger'
+      :ci_template | '~"ci::templates"'
     end
 
     with_them do

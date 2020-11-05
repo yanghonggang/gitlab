@@ -17,31 +17,33 @@ export default () => {
     projectId,
     unleashApiInstanceId,
     rotateInstanceIdPath,
+    featureFlagsClientLibrariesHelpPagePath,
+    featureFlagsClientExampleHelpPagePath,
+    unleashApiUrl,
+    canUserAdminFeatureFlag,
+    newFeatureFlagPath,
+    newUserListPath,
+    featureFlagsLimitExceeded,
   } = el.dataset;
 
   return new Vue({
     el,
     store: createStore({ endpoint, projectId, unleashApiInstanceId, rotateInstanceIdPath }),
-    provide() {
-      return {
-        projectName,
-        featureFlagsHelpPagePath,
-        errorStateSvgPath,
-      };
+    provide: {
+      projectName,
+      featureFlagsHelpPagePath,
+      errorStateSvgPath,
+      featureFlagsClientLibrariesHelpPagePath,
+      featureFlagsClientExampleHelpPagePath,
+      unleashApiUrl,
+      csrfToken: csrf.token,
+      canUserConfigure: canUserAdminFeatureFlag !== undefined,
+      newFeatureFlagPath,
+      newUserListPath,
+      featureFlagsLimitExceeded,
     },
     render(createElement) {
-      return createElement(FeatureFlagsComponent, {
-        props: {
-          featureFlagsClientLibrariesHelpPagePath:
-            el.dataset.featureFlagsClientLibrariesHelpPagePath,
-          featureFlagsClientExampleHelpPagePath: el.dataset.featureFlagsClientExampleHelpPagePath,
-          unleashApiUrl: el.dataset.unleashApiUrl,
-          csrfToken: csrf.token,
-          canUserConfigure: el.dataset.canUserAdminFeatureFlag,
-          newFeatureFlagPath: el.dataset.newFeatureFlagPath,
-          newUserListPath: el.dataset.newUserListPath,
-        },
-      });
+      return createElement(FeatureFlagsComponent);
     },
   });
 };

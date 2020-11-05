@@ -1,5 +1,4 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlBadge,
@@ -12,6 +11,7 @@ import {
   GlButton,
   GlSafeHtmlDirective,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
 import alertQuery from '../graphql/queries/details.query.graphql';
 import sidebarStatusQuery from '../graphql/queries/sidebar_status.query.graphql';
@@ -147,6 +147,12 @@ export default {
         this.$router.replace({ name: 'tab', params: { tabId } });
       },
     },
+    environmentName() {
+      return this.alert?.environment?.name;
+    },
+    environmentPath() {
+      return this.alert?.environment?.path;
+    },
   },
   mounted() {
     this.trackPageViews();
@@ -274,10 +280,9 @@ export default {
           variant="default"
           class="d-sm-none gl-absolute toggle-sidebar-mobile-button"
           type="button"
+          icon="chevron-double-lg-left"
           @click="toggleSidebar"
-        >
-          <i class="fa fa-angle-double-left"></i>
-        </gl-button>
+        />
       </div>
       <div
         v-if="alert"
@@ -299,19 +304,18 @@ export default {
             </span>
           </alert-summary-row>
           <alert-summary-row
-            v-if="alert.environment"
+            v-if="environmentName"
             :label="`${s__('AlertManagement|Environment')}:`"
           >
             <gl-link
-              v-if="alert.environmentUrl"
+              v-if="environmentPath"
               class="gl-display-inline-block"
-              data-testid="environmentUrl"
-              :href="alert.environmentUrl"
-              target="_blank"
+              data-testid="environmentPath"
+              :href="environmentPath"
             >
-              {{ alert.environment }}
+              {{ environmentName }}
             </gl-link>
-            <span v-else data-testid="environment">{{ alert.environment }}</span>
+            <span v-else data-testid="environmentName">{{ environmentName }}</span>
           </alert-summary-row>
           <alert-summary-row
             v-if="alert.startedAt"

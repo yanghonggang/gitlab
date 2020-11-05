@@ -1,5 +1,4 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlButton,
@@ -10,6 +9,7 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { redirectTo } from '~/lib/utils/url_utility';
 import {
@@ -21,7 +21,6 @@ import {
   SITE_PROFILES_QUERY,
 } from '../settings';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
-import DismissibleFeedbackAlert from '~/vue_shared/components/dismissible_feedback_alert.vue';
 import OnDemandScansScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import OnDemandScansSiteProfileSelector from './profile_selector/site_profile_selector.vue';
 
@@ -53,7 +52,6 @@ export default {
     GlLink,
     GlSkeletonLoader,
     GlSprintf,
-    DismissibleFeedbackAlert,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -162,15 +160,6 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
-    <!--
-      This is a temporary change to solicit feedback from users
-      and shall be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/255889
-    -->
-    <dismissible-feedback-alert
-      feature-name="on-demand DAST scans"
-      feedback-link="https://gitlab.com/gitlab-org/gitlab/-/issues/249684"
-    />
-
     <header class="gl-mb-6">
       <h2>{{ s__('OnDemandScans|New on-demand DAST scan') }}</h2>
       <p>

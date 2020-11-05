@@ -6,6 +6,13 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
 
   layout 'fullscreen'
 
+  content_security_policy do |policy|
+    next if policy.directives.blank?
+
+    frame_src_values = Array.wrap(policy.directives['frame-src']) | ['https://www.youtube.com']
+    policy.frame_src(*frame_src_values)
+  end
+
   prepend_before_action :authenticate_user!, only: [:show]
   before_action :assign_ref_and_path, only: [:show]
   before_action :authorize_edit_tree!, only: [:show]
@@ -27,6 +34,8 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
     ).execute
 
     if service_response.success?
+      Gitlab::UsageDataCounters::StaticSiteEditorCounter.increment_views_count
+
       @data = serialize_necessary_payload_values_to_json(service_response.payload)
     else
       # TODO: For now, if the service returns any error, the user is redirected
@@ -45,6 +54,8 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
     payload.transform_values do |value|
       if value.is_a?(String) || value.is_a?(Integer)
         value
+      elsif value.nil?
+        ''
       else
         value.to_json
       end

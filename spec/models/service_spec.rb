@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Service do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
 
@@ -15,8 +17,6 @@ RSpec.describe Service do
   end
 
   describe 'validations' do
-    using RSpec::Parameterized::TableSyntax
-
     it { is_expected.to validate_presence_of(:type) }
 
     where(:project_id, :group_id, :template, :instance, :valid) do
@@ -481,15 +481,138 @@ RSpec.describe Service do
             expect(described_class.default_integration('JiraService', subgroup)).to eq(group_service)
           end
 
-          context 'having a service' do
+          context 'having a service with custom settings' do
             let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil) }
 
             it 'returns the closest group service for a project' do
               expect(described_class.default_integration('JiraService', project)).to eq(subgroup_service)
             end
           end
+
+          context 'having a service inheriting settings' do
+            let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil, inherit_from_id: group_service.id) }
+
+            it 'returns the closest group service which does not inherit from its parent for a project' do
+              expect(described_class.default_integration('JiraService', project)).to eq(group_service)
+            end
+          end
         end
       end
+    end
+  end
+
+  describe '.create_from_active_default_integrations' do
+    context 'with an active service template' do
+      let_it_be(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
+
+      it 'creates a service from the template' do
+        described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
+
+        expect(project.reload.services.size).to eq(1)
+        expect(project.reload.services.first.api_url).to eq(template_integration.api_url)
+        expect(project.reload.services.first.inherit_from_id).to be_nil
+      end
+
+      context 'with an active instance-level integration' do
+        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+
+        it 'creates a service from the instance-level integration' do
+          described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
+
+          expect(project.reload.services.size).to eq(1)
+          expect(project.reload.services.first.api_url).to eq(instance_integration.api_url)
+          expect(project.reload.services.first.inherit_from_id).to eq(instance_integration.id)
+        end
+
+        context 'passing a group' do
+          it 'creates a service from the instance-level integration' do
+            described_class.create_from_active_default_integrations(group, :group_id)
+
+            expect(group.reload.services.size).to eq(1)
+            expect(group.reload.services.first.api_url).to eq(instance_integration.api_url)
+            expect(group.reload.services.first.inherit_from_id).to eq(instance_integration.id)
+          end
+        end
+
+        context 'with an active group-level integration' do
+          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+
+          it 'creates a service from the group-level integration' do
+            described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
+
+            expect(project.reload.services.size).to eq(1)
+            expect(project.reload.services.first.api_url).to eq(group_integration.api_url)
+            expect(project.reload.services.first.inherit_from_id).to eq(group_integration.id)
+          end
+
+          context 'passing a group' do
+            let!(:subgroup) { create(:group, parent: group) }
+
+            it 'creates a service from the group-level integration' do
+              described_class.create_from_active_default_integrations(subgroup, :group_id)
+
+              expect(subgroup.reload.services.size).to eq(1)
+              expect(subgroup.reload.services.first.api_url).to eq(group_integration.api_url)
+              expect(subgroup.reload.services.first.inherit_from_id).to eq(group_integration.id)
+            end
+          end
+
+          context 'with an active subgroup' do
+            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup) { create(:group, parent: group) }
+            let(:project) { create(:project, group: subgroup) }
+
+            it 'creates a service from the subgroup-level integration' do
+              described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
+
+              expect(project.reload.services.size).to eq(1)
+              expect(project.reload.services.first.api_url).to eq(subgroup_integration.api_url)
+              expect(project.reload.services.first.inherit_from_id).to eq(subgroup_integration.id)
+            end
+
+            context 'passing a group' do
+              let!(:sub_subgroup) { create(:group, parent: subgroup) }
+
+              it 'creates a service from the subgroup-level integration' do
+                described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+
+                expect(sub_subgroup.reload.services.size).to eq(1)
+                expect(sub_subgroup.reload.services.first.api_url).to eq(subgroup_integration.api_url)
+                expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(subgroup_integration.id)
+              end
+
+              context 'having a service inheriting settings' do
+                let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
+
+                it 'creates a service from the group-level integration' do
+                  described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+
+                  expect(sub_subgroup.reload.services.size).to eq(1)
+                  expect(sub_subgroup.reload.services.first.api_url).to eq(group_integration.api_url)
+                  expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(group_integration.id)
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe '.inherited_descendants_from_self_or_ancestors_from' do
+    let_it_be(:subgroup1) { create(:group, parent: group) }
+    let_it_be(:subgroup2) { create(:group, parent: group) }
+    let_it_be(:project1) { create(:project, group: subgroup1) }
+    let_it_be(:project2) { create(:project, group: subgroup2) }
+    let_it_be(:group_integration) { create(:prometheus_service, group: group, project: nil) }
+    let_it_be(:subgroup_integration1) { create(:prometheus_service, group: subgroup1, project: nil, inherit_from_id: group_integration.id) }
+    let_it_be(:subgroup_integration2) { create(:prometheus_service, group: subgroup2, project: nil) }
+    let_it_be(:project_integration1) { create(:prometheus_service, group: nil, project: project1, inherit_from_id: group_integration.id) }
+    let_it_be(:project_integration2) { create(:prometheus_service, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
+
+    it 'returns the groups and projects inheriting from integration ancestors', :aggregate_failures do
+      expect(described_class.inherited_descendants_from_self_or_ancestors_from(group_integration)).to eq([subgroup_integration1, project_integration1])
+      expect(described_class.inherited_descendants_from_self_or_ancestors_from(subgroup_integration2)).to eq([project_integration2])
     end
   end
 
@@ -719,6 +842,53 @@ RSpec.describe Service do
       expect(Gitlab::JsonLogger).to receive(:error).with(arguments)
 
       service.log_error(test_message, additional_argument: 'some argument')
+    end
+
+    context 'when project is nil' do
+      let(:project) { nil }
+      let(:arguments) do
+        {
+          service_class: service.class.name,
+          project_path: nil,
+          project_id: nil,
+          message: test_message,
+          additional_argument: 'some argument'
+        }
+      end
+
+      it 'logs info messages using json logger' do
+        expect(Gitlab::JsonLogger).to receive(:info).with(arguments)
+
+        service.log_info(test_message, additional_argument: 'some argument')
+      end
+    end
+  end
+
+  describe '#external_issue_tracker?' do
+    where(:category, :active, :result) do
+      :issue_tracker | true  | true
+      :issue_tracker | false | false
+      :common        | true  | false
+    end
+
+    with_them do
+      it 'returns the right result' do
+        expect(build(:service, category: category, active: active).external_issue_tracker?).to eq(result)
+      end
+    end
+  end
+
+  describe '#external_wiki?' do
+    where(:type, :active, :result) do
+      'ExternalWikiService' | true  | true
+      'ExternalWikiService' | false | false
+      'SlackService'        | true  | false
+    end
+
+    with_them do
+      it 'returns the right result' do
+        expect(build(:service, type: type, active: active).external_wiki?).to eq(result)
+      end
     end
   end
 end

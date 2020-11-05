@@ -282,7 +282,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end
@@ -292,9 +293,7 @@ class Snippet < ApplicationRecord
     @storage ||= Storage::Hashed.new(self, prefix: Storage::Hashed::SNIPPET_REPOSITORY_PATH_PREFIX)
   end
 
-  # This is the full_path used to identify the
-  # the snippet repository. It will be used mostly
-  # for logging purposes.
+  # This is the full_path used to identify the the snippet repository.
   override :full_path
   def full_path
     return unless persisted?
@@ -302,7 +301,7 @@ class Snippet < ApplicationRecord
     @full_path ||= begin
       components = []
       components << project.full_path if project_id?
-      components << '@snippets'
+      components << 'snippets'
       components << self.id
       components.join('/')
     end

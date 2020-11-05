@@ -361,7 +361,7 @@ RSpec.describe NotificationService, :mailer do
 
           context 'where the project has disabled the feature' do
             before do
-              project.update(service_desk_enabled: false)
+              project.update!(service_desk_enabled: false)
             end
 
             it_should_not_email!
@@ -453,7 +453,7 @@ RSpec.describe NotificationService, :mailer do
           context 'by note' do
             before do
               note.author = @u_lazy_participant
-              note.save
+              note.save!
             end
 
             it { expect { subject }.not_to have_enqueued_email(@u_lazy_participant.id, note.id, mail: "note_issue_email") }
@@ -467,7 +467,7 @@ RSpec.describe NotificationService, :mailer do
             note.project.namespace_id = group.id
             group.add_user(@u_watcher, GroupMember::MAINTAINER)
             group.add_user(@u_custom_global, GroupMember::MAINTAINER)
-            note.project.save
+            note.project.save!
 
             @u_watcher.notification_settings_for(note.project).participating!
             @u_watcher.notification_settings_for(group).global!
@@ -1719,7 +1719,7 @@ RSpec.describe NotificationService, :mailer do
 
           before do
             merge_request.author = participant
-            merge_request.save
+            merge_request.save!
             notification.new_merge_request(merge_request, @u_disabled)
           end
 
@@ -1962,7 +1962,7 @@ RSpec.describe NotificationService, :mailer do
 
       describe 'when merge_when_pipeline_succeeds is true' do
         before do
-          merge_request.update(
+          merge_request.update!(
             merge_when_pipeline_succeeds: true,
             merge_user: create(:user)
           )
@@ -2725,7 +2725,7 @@ RSpec.describe NotificationService, :mailer do
             before do
               group = create(:group)
 
-              project.update(group: group)
+              project.update!(group: group)
 
               create(:email, :confirmed, user: u_custom_notification_enabled, email: group_notification_email)
               create(:notification_setting, user: u_custom_notification_enabled, source: group, notification_email: group_notification_email)
@@ -2761,7 +2761,7 @@ RSpec.describe NotificationService, :mailer do
             before do
               group = create(:group)
 
-              project.update(group: group)
+              project.update!(group: group)
               create(:email, :confirmed, user: u_member, email: group_notification_email)
               create(:notification_setting, user: u_member, source: group, notification_email: group_notification_email)
             end
@@ -2821,7 +2821,7 @@ RSpec.describe NotificationService, :mailer do
         context 'when the creator has no read_build access' do
           before do
             pipeline = create_pipeline(u_member, :failed)
-            project.update(public_builds: false)
+            project.update!(public_builds: false)
             project.team.truncate
             notification.pipeline_finished(pipeline)
           end
@@ -2855,7 +2855,7 @@ RSpec.describe NotificationService, :mailer do
             before do
               group = create(:group)
 
-              project.update(group: group)
+              project.update!(group: group)
               create(:email, :confirmed, user: u_member, email: group_notification_email)
               create(:notification_setting, user: u_member, source: group, notification_email: group_notification_email)
             end
@@ -3100,26 +3100,26 @@ RSpec.describe NotificationService, :mailer do
   end
 
   describe '#prometheus_alerts_fired' do
-    let!(:project) { create(:project) }
-    let!(:master) { create(:user) }
-    let!(:developer) { create(:user) }
-    let(:alert_attributes) { build(:alert_management_alert, project: project).attributes }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:master) { create(:user) }
+    let_it_be(:developer) { create(:user) }
+    let_it_be(:alert) { create(:alert_management_alert, project: project) }
 
     before do
       project.add_maintainer(master)
     end
 
     it 'sends the email to owners and masters' do
-      expect(Notify).to receive(:prometheus_alert_fired_email).with(project.id, master.id, alert_attributes).and_call_original
-      expect(Notify).to receive(:prometheus_alert_fired_email).with(project.id, project.owner.id, alert_attributes).and_call_original
-      expect(Notify).not_to receive(:prometheus_alert_fired_email).with(project.id, developer.id, alert_attributes)
+      expect(Notify).to receive(:prometheus_alert_fired_email).with(project, master, alert).and_call_original
+      expect(Notify).to receive(:prometheus_alert_fired_email).with(project, project.owner, alert).and_call_original
+      expect(Notify).not_to receive(:prometheus_alert_fired_email).with(project, developer, alert)
 
-      subject.prometheus_alerts_fired(project, [alert_attributes])
+      subject.prometheus_alerts_fired(project, [alert])
     end
 
     it_behaves_like 'project emails are disabled' do
       let(:notification_target)  { project }
-      let(:notification_trigger) { subject.prometheus_alerts_fired(project, [alert_attributes]) }
+      let(:notification_trigger) { subject.prometheus_alerts_fired(project, [alert]) }
 
       around do |example|
         perform_enqueued_jobs { example.run }
@@ -3212,7 +3212,7 @@ RSpec.describe NotificationService, :mailer do
   # with different notification settings
   def build_group(project, visibility: :public)
     group = create_nested_group(visibility)
-    project.update(namespace_id: group.id)
+    project.update!(namespace_id: group.id)
 
     # Group member: global=disabled, group=watch
     @g_watcher ||= create_user_with_notification(:watch, 'group_watcher', project.group)
@@ -3277,11 +3277,11 @@ RSpec.describe NotificationService, :mailer do
   end
 
   def add_user_subscriptions(issuable)
-    issuable.subscriptions.create(user: @unsubscribed_mentioned, project: project, subscribed: false)
-    issuable.subscriptions.create(user: @subscriber, project: project, subscribed: true)
-    issuable.subscriptions.create(user: @subscribed_participant, project: project, subscribed: true)
-    issuable.subscriptions.create(user: @unsubscriber, project: project, subscribed: false)
+    issuable.subscriptions.create!(user: @unsubscribed_mentioned, project: project, subscribed: false)
+    issuable.subscriptions.create!(user: @subscriber, project: project, subscribed: true)
+    issuable.subscriptions.create!(user: @subscribed_participant, project: project, subscribed: true)
+    issuable.subscriptions.create!(user: @unsubscriber, project: project, subscribed: false)
     # Make the watcher a subscriber to detect dupes
-    issuable.subscriptions.create(user: @watcher_and_subscriber, project: project, subscribed: true)
+    issuable.subscriptions.create!(user: @watcher_and_subscriber, project: project, subscribed: true)
   end
 end

@@ -45,6 +45,10 @@ module Ci
 
       def get_store_class(store)
         @stores ||= {}
+
+        # Can't memoize this because the feature flag may alter this
+        return fog_store_class.new if store.to_sym == :fog
+
         @stores[store] ||= "Ci::BuildTraceChunks::#{store.capitalize}".constantize.new
       end
 
@@ -73,6 +77,14 @@ module Ci
       #
       def metadata_attributes
         attribute_names - %w[raw_data]
+      end
+
+      def fog_store_class
+        if Feature.enabled?(:ci_trace_new_fog_store, default_enabled: true)
+          Ci::BuildTraceChunks::Fog
+        else
+          Ci::BuildTraceChunks::LegacyFog
+        end
       end
     end
 
@@ -136,6 +148,11 @@ module Ci
     # We are using optimistic locking combined with Redis locking to ensure
     # that a chunk gets migrated properly.
     #
+    # We are using until_executed deduplication strategy for workers,
+    # which should prevent duplicated workers running in parallel for the same build trace,
+    # and causing an exception related to an exclusive lock not being
+    # acquired
+    #
     def persist_data!
       in_lock(*lock_params) do         # exclusive Redis lock is acquired first
         raise FailedToPersistDataError, 'Modifed build trace chunk detected' if has_changes_to_save?
@@ -144,6 +161,10 @@ module Ci
           chunk.unsafe_persist_data!   # we migrate the data and update data store
         end
       end
+    rescue FailedToObtainLockError
+      metrics.increment_trace_operation(operation: :stalled)
+
+      raise FailedToPersistDataError, 'Data migration failed due to a worker duplication'
     rescue ActiveRecord::StaleObjectError
       raise FailedToPersistDataError, <<~MSG
         Data migration race condition detected

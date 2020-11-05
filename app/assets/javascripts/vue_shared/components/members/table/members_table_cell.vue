@@ -1,6 +1,7 @@
 <script>
 import { mapState } from 'vuex';
 import { MEMBER_TYPES } from '../constants';
+import { isGroup, isDirectMember, isCurrentUser, canRemove, canResend, canUpdate } from '../utils';
 
 export default {
   name: 'MembersTableCell',
@@ -13,7 +14,7 @@ export default {
   computed: {
     ...mapState(['sourceId', 'currentUserId']),
     isGroup() {
-      return Boolean(this.member.sharedWithGroup);
+      return isGroup(this.member);
     },
     isInvite() {
       return Boolean(this.member.invite);
@@ -33,16 +34,19 @@ export default {
       return MEMBER_TYPES.user;
     },
     isDirectMember() {
-      return this.member.source?.id === this.sourceId;
+      return isDirectMember(this.member, this.sourceId);
     },
     isCurrentUser() {
-      return this.member.user?.id === this.currentUserId;
+      return isCurrentUser(this.member, this.currentUserId);
     },
     canRemove() {
-      return this.isDirectMember && this.member.canRemove;
+      return canRemove(this.member, this.sourceId);
     },
     canResend() {
-      return Boolean(this.member.invite?.canResend);
+      return canResend(this.member);
+    },
+    canUpdate() {
+      return canUpdate(this.member, this.currentUserId, this.sourceId);
     },
   },
   render() {
@@ -53,6 +57,7 @@ export default {
       permissions: {
         canRemove: this.canRemove,
         canResend: this.canResend,
+        canUpdate: this.canUpdate,
       },
     });
   },

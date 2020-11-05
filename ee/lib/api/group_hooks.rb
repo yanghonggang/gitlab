@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class GroupHooks < Grape::API::Instance
+  class GroupHooks < ::API::Base
     include ::API::PaginationParams
+
+    feature_category :integrations
 
     before { authenticate! }
     before { authorize! :admin_group, user_group }

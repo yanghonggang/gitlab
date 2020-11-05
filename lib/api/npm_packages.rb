@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 module API
-  class NpmPackages < Grape::API::Instance
+  class NpmPackages < ::API::Base
     helpers ::API::Helpers::PackagesHelpers
     helpers ::API::Helpers::Packages::DependencyProxyHelpers
+
+    feature_category :package_registry
 
     NPM_ENDPOINT_REQUIREMENTS = {
       package_name: API::NO_SLASH_URL_PART_REGEX

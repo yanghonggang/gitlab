@@ -112,6 +112,16 @@ module GraphqlHelpers
     end
   end
 
+  def resolve_field(name, object, args = {})
+    context = double("Context",
+                    schema: GitlabSchema,
+                    query: GraphQL::Query.new(GitlabSchema),
+                    parent: nil)
+    field = described_class.fields[name]
+    instance = described_class.authorized_new(object, context)
+    field.resolve_field(instance, {}, context)
+  end
+
   # Recursively convert a Hash with Ruby-style keys to GraphQL fieldname-style keys
   #
   # prepare_input_for_mutation({ 'my_key' => 1 })
@@ -219,7 +229,7 @@ module GraphqlHelpers
   def as_graphql_literal(value)
     case value
     when Array then "[#{value.map { |v| as_graphql_literal(v) }.join(',')}]"
-    when Hash then "{#{value.map { |k, v| "#{k}:#{as_graphql_literal(v)}" }.join(',')}}"
+    when Hash then "{#{attributes_to_graphql(value)}}"
     when Integer, Float then value.to_s
     when String then "\"#{value.gsub(/"/, '\\"')}\""
     when Symbol then value
@@ -467,6 +477,8 @@ module GraphqlHelpers
       use GraphQL::Pagination::Connections
       use Gitlab::Graphql::Authorize
       use Gitlab::Graphql::Pagination::Connections
+
+      lazy_resolve ::Gitlab::Graphql::Lazy, :force
 
       query(query_type)
     end

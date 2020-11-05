@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
-  let_it_be(:dast_scanner_profile_2, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
+  let_it_be(:dast_scanner_profile_2, reload: true) { create(:dast_scanner_profile) }
   let(:project) { dast_scanner_profile.project }
   let(:project_2) { dast_scanner_profile_2.project }
 
@@ -13,8 +13,8 @@ RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
   let_it_be(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
-  let_it_be(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
-  let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
+  let(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
+  let(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -118,6 +118,21 @@ RSpec.describe DastScannerProfiles::UpdateService do
         end
       end
 
+      context 'when setting properties to false' do
+        let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000, use_ajax_spider: true, show_debug_messages: true) }
+        let(:new_use_ajax_spider) { false }
+        let(:new_show_debug_messages) { false }
+
+        it 'updates the dast_scanner_profile' do
+          updated_dast_scanner_profile = payload.reload
+
+          aggregate_failures do
+            expect(updated_dast_scanner_profile.use_ajax_spider).to eq(new_use_ajax_spider)
+            expect(updated_dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
+          end
+        end
+      end
+
       it 'returns a dast_scanner_profile payload' do
         expect(payload).to be_a(DastScannerProfile)
       end
@@ -133,20 +148,6 @@ RSpec.describe DastScannerProfiles::UpdateService do
 
         it 'populates message' do
           expect(message).to eq('Scanner profile not found for given parameters')
-        end
-      end
-
-      context 'when on demand scan feature is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates message' do
-          expect(message).to eq('You are not authorized to update this scanner profile')
         end
       end
 

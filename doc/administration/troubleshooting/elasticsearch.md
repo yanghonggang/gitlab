@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Troubleshooting Elasticsearch
 
 To install and configure Elasticsearch, and for common and known issues,
@@ -164,7 +170,7 @@ Troubleshooting search result issues is rather straight forward on Elasticsearch
 The first step is to confirm GitLab is using Elasticsearch for the search function.
 To do this:
 
-1. Confirm the integration is enabled in **Admin Area > Settings > Integrations**.
+1. Confirm the integration is enabled in **Admin Area > Settings > General**.
 1. Confirm searches utilize Elasticsearch by accessing the rails console
    (`sudo gitlab-rails console`) and running the following commands:
 

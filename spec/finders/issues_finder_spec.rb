@@ -472,6 +472,10 @@ RSpec.describe IssuesFinder do
         it 'returns issues with title and description match for search term' do
           expect(issues).to contain_exactly(issue1, issue2)
         end
+
+        it 'uses optimizer hints' do
+          expect(issues.to_sql).to match(/BitmapScan/)
+        end
       end
 
       context 'filtering by issue term in title' do
@@ -842,6 +846,16 @@ RSpec.describe IssuesFinder do
       finder = described_class.new(admin, state: 'closed')
 
       expect(finder.row_count).to be_zero
+    end
+
+    it 'returns -1 if the query times out' do
+      finder = described_class.new(admin)
+
+      expect_next_instance_of(described_class) do |subfinder|
+        expect(subfinder).to receive(:execute).and_raise(ActiveRecord::QueryCanceled)
+      end
+
+      expect(finder.row_count).to eq(-1)
     end
   end
 

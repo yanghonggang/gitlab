@@ -37,12 +37,14 @@ class Packages::Package < ApplicationRecord
   validate :package_already_taken, if: :npm?
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
-  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: :npm?
+  validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.nuget_version_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
   validates :version, format: { with: Gitlab::Regex.prefixed_semver_regex }, if: :golang?
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { composer_tag_version? || npm? }
+
   validates :version,
     presence: true,
     format: { with: Gitlab::Regex.generic_package_version_regex },
@@ -52,6 +54,7 @@ class Packages::Package < ApplicationRecord
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
+  scope :with_normalized_pypi_name, ->(name) { where("LOWER(regexp_replace(name, '[-_.]+', '-', 'g')) = ?", name.downcase) }
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
   scope :with_version, ->(version) { where(version: version) }
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
@@ -172,6 +175,10 @@ class Packages::Package < ApplicationRecord
   end
 
   private
+
+  def composer_tag_version?
+    composer? && !Gitlab::Regex.composer_dev_version_regex.match(version.to_s)
+  end
 
   def valid_conan_package_recipe
     recipe_exists = project.packages

@@ -21,6 +21,7 @@ class Issue < ApplicationRecord
   include IdInOrdered
   include Presentable
   include IssueAvailableFeatures
+  include Todoable
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -90,6 +91,7 @@ class Issue < ApplicationRecord
   alias_method :issuing_parent, :project
 
   scope :in_projects, ->(project_ids) { where(project_id: project_ids) }
+  scope :not_in_projects, ->(project_ids) { where.not(project_id: project_ids) }
 
   scope :with_due_date, -> { where.not(due_date: nil) }
   scope :without_due_date, -> { where(due_date: nil) }

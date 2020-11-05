@@ -95,6 +95,12 @@ RSpec.describe Admin::CredentialsController do
     end
   end
 
+  describe 'POST #destroy' do
+    let(:credentials_path) { admin_credentials_path(filter: 'ssh_keys') }
+
+    it_behaves_like 'credentials inventory controller delete SSH key'
+  end
+
   describe 'PUT #revoke' do
     context 'admin user' do
       before do
@@ -157,6 +163,24 @@ RSpec.describe Admin::CredentialsController do
 
               expect(response).to redirect_to(admin_credentials_path)
               expect(flash[:notice]).to eql 'Revoked personal access token %{personal_access_token_name}!' % { personal_access_token_name: personal_access_token.name }
+            end
+
+            it 'informs the token owner' do
+              expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
+
+              put :revoke, params: { id: personal_access_token.id }
+            end
+
+            context 'when credentials_inventory_revocation_emails flag is disabled' do
+              before do
+                stub_feature_flags(credentials_inventory_revocation_emails: false)
+              end
+
+              it 'does not inform the token owner' do
+                expect do
+                  put :revoke, params: { id: personal_access_token.id }
+                end.not_to change { ActionMailer::Base.deliveries.size }
+              end
             end
           end
         end

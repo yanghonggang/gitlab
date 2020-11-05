@@ -76,6 +76,7 @@ class Group < Namespace
   validate :visibility_level_allowed_by_projects
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
+  validate :two_factor_authentication_allowed
   validates :variables, variable_duplicates: true
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -96,6 +97,19 @@ class Group < Namespace
   scope :with_users, -> { includes(:users) }
 
   scope :by_id, ->(groups) { where(id: groups) }
+
+  scope :for_authorized_group_members, -> (user_ids) do
+    joins(:group_members)
+      .where("members.user_id IN (?)", user_ids)
+      .where("access_level >= ?", Gitlab::Access::GUEST)
+  end
+
+  scope :for_authorized_project_members, -> (user_ids) do
+    joins(projects: :project_authorizations)
+      .where("project_authorizations.user_id IN (?)", user_ids)
+  end
+
+  delegate :default_branch_name, to: :namespace_settings
 
   class << self
     def sort_by_attribute(method)
@@ -551,6 +565,10 @@ class Group < Namespace
     owners.first || parent&.default_owner || owner
   end
 
+  def default_branch_name
+    namespace_settings&.default_branch_name
+  end
+
   def access_level_roles
     GroupMember.access_level_roles
   end
@@ -559,12 +577,19 @@ class Group < Namespace
     access_level_roles.values
   end
 
+  def parent_allows_two_factor_authentication?
+    return true unless has_parent?
+
+    ancestor_settings = ancestors.find_by(parent_id: nil).namespace_settings
+    ancestor_settings.allow_mfa_for_subgroups
+  end
+
   private
 
   def update_two_factor_requirement
     return unless saved_change_to_require_two_factor_authentication? || saved_change_to_two_factor_grace_period?
 
-    members_with_descendants.find_each(&:update_two_factor_requirement)
+    direct_and_indirect_members.find_each(&:update_two_factor_requirement)
   end
 
   def path_changed_hook
@@ -587,6 +612,15 @@ class Group < Namespace
     return if visibility_level_allowed_by_sub_groups?
 
     errors.add(:visibility_level, "#{visibility} is not allowed since there are sub-groups with higher visibility.")
+  end
+
+  def two_factor_authentication_allowed
+    return unless has_parent?
+    return unless require_two_factor_authentication
+
+    return if parent_allows_two_factor_authentication?
+
+    errors.add(:require_two_factor_authentication, _('is forbidden by a top-level group'))
   end
 
   def members_from_self_and_ancestor_group_shares

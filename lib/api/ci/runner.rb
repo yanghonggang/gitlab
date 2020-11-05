@@ -2,8 +2,12 @@
 
 module API
   module Ci
-    class Runner < Grape::API::Instance
+    class Runner < ::API::Base
       helpers ::API::Helpers::Runner
+
+      content_type :txt, 'text/plain'
+
+      feature_category :continuous_integration
 
       resource :runners do
         desc 'Registers a new Runner' do
@@ -72,6 +76,7 @@ module API
         post '/verify' do
           authenticate_runner!
           status 200
+          body "200"
         end
       end
 
@@ -183,6 +188,7 @@ module API
           service.execute.then do |result|
             header 'X-GitLab-Trace-Update-Interval', result.backoff
             status result.status
+            body result.status.to_s
           end
         end
 
@@ -201,27 +207,18 @@ module API
 
           error!('400 Missing header Content-Range', 400) unless request.headers.key?('Content-Range')
           content_range = request.headers['Content-Range']
-          content_range = content_range.split('-')
 
-          # TODO:
-          # it seems that `Content-Range` as formatted by runner is wrong,
-          # the `byte_end` should point to final byte, but it points byte+1
-          # that means that we have to calculate end of body,
-          # as we cannot use `content_length[1]`
-          # Issue: https://gitlab.com/gitlab-org/gitlab-runner/issues/3275
+          result = ::Ci::AppendBuildTraceService
+            .new(job, content_range: content_range)
+            .execute(request.body.read)
 
-          body_data = request.body.read
-          body_start = content_range[0].to_i
-          body_end = body_start + body_data.bytesize
-
-          stream_size = job.trace.append(body_data, body_start)
-          unless stream_size == body_end
-            break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{stream_size}" })
+          if result.status == 416
+            break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{result.stream_size}" })
           end
 
-          status 202
+          status result.status
           header 'Job-Status', job.status
-          header 'Range', "0-#{stream_size}"
+          header 'Range', "0-#{result.stream_size}"
           header 'X-GitLab-Trace-Update-Interval', job.trace.update_interval.to_s
         end
 
@@ -293,6 +290,7 @@ module API
 
           if result[:status] == :success
             status :created
+            body "201"
           else
             render_api_error!(result[:message], result[:http_status])
           end

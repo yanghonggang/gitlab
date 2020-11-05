@@ -53,6 +53,49 @@ RSpec.describe API::Releases do
         expect(json_response.second['tag_name']).to eq(release_1.tag)
       end
 
+      RSpec.shared_examples 'release sorting' do |order_by|
+        subject { get api(url, access_level), params: { sort: sort, order_by: order_by } }
+
+        context "sorting by #{order_by}" do
+          context 'ascending order' do
+            let(:sort) { 'asc' }
+
+            it 'returns the sorted releases' do
+              subject
+
+              expect(json_response.map { |release| release['name'] }).to eq(releases.map(&:name))
+            end
+          end
+
+          context 'descending order' do
+            let(:sort) { 'desc' }
+
+            it 'returns the sorted releases' do
+              subject
+
+              expect(json_response.map { |release| release['name'] }).to eq(releases.reverse.map(&:name))
+            end
+          end
+        end
+      end
+
+      context 'return releases in sorted order' do
+        before do
+          release_2.update_attribute(:created_at, 3.days.ago)
+        end
+
+        let(:url) { "/projects/#{project.id}/releases" }
+        let(:access_level) { maintainer }
+
+        it_behaves_like 'release sorting', 'released_at' do
+          let(:releases) { [release_1, release_2] }
+        end
+
+        it_behaves_like 'release sorting', 'created_at' do
+          let(:releases) { [release_2, release_1] }
+        end
+      end
+
       it 'matches response schema' do
         get api("/projects/#{project.id}/releases", maintainer)
 
@@ -66,22 +109,6 @@ RSpec.describe API::Releases do
         expect(json_response.first['tag_path']).to eq("/#{release_2.project.full_path}/-/tags/#{release_2.tag}")
         expect(json_response.second['commit_path']).to eq("/#{release_1.project.full_path}/-/commit/#{release_1.commit.id}")
         expect(json_response.second['tag_path']).to eq("/#{release_1.project.full_path}/-/tags/#{release_1.tag}")
-      end
-
-      it 'returns the merge requests and issues links, with correct query' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
-        links = json_response.first['_links']
-        release = json_response.first['tag_name']
-        expected_query = "release_tag=#{release}&scope=all&state=opened"
-        path_base = "/#{project.namespace.path}/#{project.path}"
-        mr_uri = URI.parse(links['merge_requests_url'])
-        issue_uri = URI.parse(links['issues_url'])
-
-        expect(mr_uri.path).to eq("#{path_base}/-/merge_requests")
-        expect(issue_uri.path).to eq("#{path_base}/-/issues")
-        expect(mr_uri.query).to eq(expected_query)
-        expect(issue_uri.query).to eq(expected_query)
       end
     end
 

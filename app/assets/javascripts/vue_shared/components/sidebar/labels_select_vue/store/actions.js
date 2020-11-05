@@ -20,7 +20,7 @@ export const receiveLabelsFailure = ({ commit }) => {
 };
 export const fetchLabels = ({ state, dispatch }) => {
   dispatch('requestLabels');
-  axios
+  return axios
     .get(state.labelsFetchPath)
     .then(({ data }) => {
       dispatch('receiveLabelsSuccess', data);
@@ -53,9 +53,6 @@ export const createLabel = ({ state, dispatch }, label) => {
       dispatch('receiveCreateLabelFailure');
     });
 };
-
-export const replaceSelectedLabels = ({ commit }, selectedLabels) =>
-  commit(types.REPLACE_SELECTED_LABELS, selectedLabels);
 
 export const updateSelectedLabels = ({ commit }, labels) =>
   commit(types.UPDATE_SELECTED_LABELS, { labels });

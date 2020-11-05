@@ -7,10 +7,10 @@ module EE
   # and be prepended in the `ApplicationSetting` model
   module ApplicationSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
-      INSTANCE_REVIEW_MIN_USERS = 50
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
       belongs_to :file_template_project, class_name: "Project"
@@ -94,6 +94,18 @@ module EE
 
       validate :allowed_frameworks, if: :compliance_frameworks_changed?
 
+      validates :new_user_signups_cap,
+                allow_blank: true,
+                numericality: { only_integer: true, greater_than: 0 }
+      validates :new_user_signups_cap,
+                allow_blank: true,
+                numericality: {
+                  only_integer: true,
+                  greater_than: 0,
+                  less_than_or_equal_to: proc { License.current&.restricted_user_count }
+                },
+                if: proc { License.current&.restricted_user_count? }
+
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
     end
@@ -119,6 +131,10 @@ module EE
           elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
           elasticsearch_client_request_timeout: 0,
+          elasticsearch_analyzers_smartcn_enabled: false,
+          elasticsearch_analyzers_smartcn_search: false,
+          elasticsearch_analyzers_kuromoji_enabled: false,
+          elasticsearch_analyzers_kuromoji_search: false,
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
@@ -299,14 +315,11 @@ module EE
       ::Project.where(namespace_id: group_id)
     end
 
+    override :instance_review_permitted?
     def instance_review_permitted?
-      return if License.current
+      return false if License.current
 
-      users_count = Rails.cache.fetch('limited_users_count', expires_in: 1.day) do
-        ::User.limit(INSTANCE_REVIEW_MIN_USERS + 1).count(:all)
-      end
-
-      users_count >= INSTANCE_REVIEW_MIN_USERS
+      super
     end
 
     def max_personal_access_token_lifetime_from_now
@@ -396,7 +409,7 @@ module EE
     end
 
     def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
+      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
         errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
       end
     end

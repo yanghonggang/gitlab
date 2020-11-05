@@ -4,6 +4,7 @@ import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_
 import MRWidgetService from 'ee_else_ce/vue_merge_request_widget/services/mr_widget_service';
 import MrWidgetApprovals from 'ee_else_ce/vue_merge_request_widget/components/approvals/approvals.vue';
 import stateMaps from 'ee_else_ce/vue_merge_request_widget/stores/state_maps';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
@@ -36,6 +37,7 @@ import FailedToMerge from './components/states/mr_widget_failed_to_merge.vue';
 import MrWidgetAutoMergeEnabled from './components/states/mr_widget_auto_merge_enabled.vue';
 import AutoMergeFailed from './components/states/mr_widget_auto_merge_failed.vue';
 import CheckingState from './components/states/mr_widget_checking.vue';
+// import ExtensionsContainer from './components/extensions/container';
 import eventHub from './event_hub';
 import notify from '~/lib/utils/notify';
 import SourceBranchRemovalStatus from './components/source_branch_removal_status.vue';
@@ -45,15 +47,18 @@ import GroupedTestReportsApp from '../reports/components/grouped_test_reports_ap
 import { setFaviconOverlay } from '../lib/utils/common_utils';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import getStateQuery from './queries/get_state.query.graphql';
-import { isExperimentEnabled } from '~/lib/utils/experimentation';
 
 export default {
   el: '#js-vue-mr-widget',
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'MRWidget',
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+  },
   components: {
     Loading,
+    // ExtensionsContainer,
     'mr-widget-header': WidgetHeader,
     'mr-widget-suggest-pipeline': WidgetSuggestPipeline,
     'mr-widget-merge-help': WidgetMergeHelp,
@@ -86,6 +91,7 @@ export default {
     TerraformPlan,
     GroupedAccessibilityReportsApp,
     MrWidgetApprovals,
+    SecurityReportsApp: () => import('~/vue_shared/security_reports/security_reports_app.vue'),
   },
   apollo: {
     state: {
@@ -149,7 +155,7 @@ export default {
     },
     shouldSuggestPipelines() {
       return (
-        isExperimentEnabled('suggestPipeline') &&
+        gon.features?.suggestPipeline &&
         !this.mr.hasCI &&
         this.mr.mergeRequestAddCiConfigPath &&
         !this.mr.isDismissedSuggestPipeline
@@ -178,6 +184,9 @@ export default {
       return Boolean(
         this.mr.mergePipelinesEnabled && this.mr.sourceProjectId !== this.mr.targetProjectId,
       );
+    },
+    shouldRenderSecurityReport() {
+      return Boolean(window.gon?.features?.coreSecurityMrWidget && this.mr.pipeline.id);
     },
     mergeError() {
       let { mergeError } = this.mr;
@@ -447,6 +456,7 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <!-- <extensions-container :mr="mr" /> -->
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
         :base-path="mr.codeclimate.base_path"
@@ -454,6 +464,13 @@ export default {
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
         :codequality-help-path="mr.codequalityHelpPath"
+      />
+
+      <security-reports-app
+        v-if="shouldRenderSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.targetProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
       />
 
       <grouped-test-reports-app
@@ -499,7 +516,7 @@ export default {
           </mr-widget-alert-message>
 
           <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            {{ mergeError }}
+            <span v-safe-html="mergeError"></span>
           </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />

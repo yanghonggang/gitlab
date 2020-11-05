@@ -30,7 +30,7 @@ module EE
       after_update :remove_mirror_repository_reference,
         if: ->(project) { project.mirror? && project.import_url_updated? }
 
-      belongs_to :mirror_user, foreign_key: 'mirror_user_id', class_name: 'User'
+      belongs_to :mirror_user, class_name: 'User'
       belongs_to :deleting_user, foreign_key: 'marked_for_deletion_by_user_id', class_name: 'User'
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
@@ -134,7 +134,7 @@ module EE
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
-      scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
+      scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
@@ -164,6 +164,16 @@ module EE
       scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
       scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
 
+      scope :order_by_total_repository_size_excess_desc, -> (limit) do
+        excess = ::ProjectStatistics.arel_table[:repository_size] +
+                   ::ProjectStatistics.arel_table[:lfs_objects_size] -
+                   ::Project.arel_table.coalesce(::Project.arel_table[:repository_size_limit], limit, 0)
+
+        joins(:statistics).order(
+          Arel.sql(Arel::Nodes::Descending.new(excess).to_sql)
+        )
+      end
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
@@ -177,7 +187,10 @@ module EE
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
       delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
+
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -195,6 +208,17 @@ module EE
         validates :mirror_user, presence: true
       end
 
+      # Because we use default_value_for we need to be sure
+      # requirements_enabled= method does exist even if we rollback migration.
+      # Otherwise many tests from spec/migrations will fail.
+      def requirements_enabled=(value)
+        if has_attribute?(:requirements_enabled)
+          write_attribute(:requirements_enabled, value)
+        end
+      end
+
+      default_value_for :requirements_enabled, true
+
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
@@ -204,8 +228,12 @@ module EE
     class_methods do
       extend ::Gitlab::Utils::Override
 
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        node.projects
+      # @param primary_key_in [Range, Project] arg to pass to primary_key_in scope
+      # @return [ActiveRecord::Relation<Project>] everything that should be synced to this node, restricted by primary key
+      def replicables_for_current_secondary(primary_key_in)
+        node = ::Gitlab::Geo.current_node
+
+        node.projects.primary_key_in(primary_key_in)
       end
 
       def search_by_visibility(level)
@@ -230,10 +258,7 @@ module EE
 
     def has_regulated_settings?
       strong_memoize(:has_regulated_settings) do
-        next false unless compliance_framework_setting
-
-        compliance_framework_id = ::ComplianceManagement::ComplianceFramework::FRAMEWORKS[compliance_framework_setting.framework.to_sym]
-        ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_id)
+        compliance_framework_setting&.compliance_management_framework&.merge_request_approval_rules_enforced?
       end
     end
 
@@ -306,20 +331,6 @@ module EE
     def shared_runners_minutes_limit_enabled?
       shared_runners_enabled? && shared_runners_limit_namespace.shared_runners_minutes_limit_enabled?
     end
-
-    # This makes the feature disabled by default, in contrary to how
-    # `#feature_available?` makes a feature enabled by default.
-    #
-    # This allows to:
-    # - Enable the feature flag for a given project, regardless of the license.
-    #   This is useful for early testing a feature in production on a given project.
-    # - Enable the feature flag globally and still check that the license allows
-    #   it. This is the case when we're ready to enable a feature for anyone
-    #   with the correct license.
-    def beta_feature_available?(feature)
-      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
-    end
-    alias_method :alpha_feature_available?, :beta_feature_available?
 
     def push_audit_events_enabled?
       ::Feature.enabled?(:repository_push_audit_event, self)
@@ -527,6 +538,7 @@ module EE
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
           limit: actual_size_limit,
+          namespace: namespace,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end

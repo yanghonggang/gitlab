@@ -1,9 +1,12 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 description: 'Learn how to use and administer GitLab, the most scalable Git-based fully integrated platform for software development.'
 ---
 
-<div class="display-none">
+<div class="d-none">
   <em>Visit <a href="https://docs.gitlab.com/ee/">docs.gitlab.com</a> for optimized
   navigation, discoverability, and readability.</em>
 </div>
@@ -85,7 +88,7 @@ The following sections provide links to documentation for each DevOps stage:
 
 ### Manage
 
-GitLab provides statistics and insight into ways you can maximize the value of GitLab in your organization.
+GitLab provides statistics and insights into ways you can maximize the value of GitLab in your organization.
 
 The following documentation relates to the DevOps **Manage** stage:
 
@@ -267,9 +270,7 @@ The following documentation relates to the DevOps **Package** stage:
 |:----------------------------------------------------------------|:-------------------------------------------------------|
 | [Container Registry](user/packages/container_registry/index.md)   | The GitLab Container Registry enables every project in GitLab to have its own space to store [Docker](https://www.docker.com/) images. |
 | [Dependency Proxy](user/packages/dependency_proxy/index.md) **(PREMIUM)** | The GitLab Dependency Proxy sets up a local proxy for frequently used upstream images/packages. |
-| [Conan Repository](user/packages/conan_repository/index.md) | The GitLab Conan Repository enables every project in GitLab to have its own space to store [Conan](https://conan.io/) packages. |
-| [Maven Repository](user/packages/maven_repository/index.md) | The GitLab Maven Repository enables every project in GitLab to have its own space to store [Maven](https://maven.apache.org/) packages. |
-| [NPM Registry](user/packages/npm_registry/index.md) | The GitLab NPM Registry enables every project in GitLab to have its own space to store [NPM](https://www.npmjs.com/) packages. |
+| [Package Registry](user/packages/package_registry/index.md) | Use GitLab as a private or public registry for a variety of common package managers, including [NPM](user/packages/npm_registry/index.md), [Maven](user/packages/maven_repository/index.md), [PyPI](user/packages/pypi_repository/index.md), and others. You can also store generic files. |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -451,7 +452,7 @@ Learn more about using Git, and using Git with GitLab:
 
 ## Coming to GitLab from another platform
 
-If you are coming to GitLab from another platform, you'll find the following information useful:
+If you are coming to GitLab from another platform, the following information is useful:
 
 | Topic                                                          | Description                                                                            |
 |:---------------------------------------------------------------|:---------------------------------------------------------------------------------------|

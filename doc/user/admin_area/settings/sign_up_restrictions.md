@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -7,6 +10,7 @@ type: reference
 You can use sign-up restrictions to:
 
 - Disable new sign-ups.
+- Require admin approval for new sign-ups.
 - Require user email confirmation.
 - Denylist or allowlist email addresses belonging to specific domains.
 
@@ -32,12 +36,20 @@ Alternatively, you could also consider setting up a
 [allowlist](#allowlist-email-domains) or [denylist](#denylist-email-domains) on
 email domains to prevent malicious users from creating accounts.
 
+## Require admin approval for new sign-ups
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4491) in GitLab 13.5.
+
+When this setting is enabled, any user visiting your GitLab domain and signing up for a new account will have to be explicitly [approved](../approving_users.md#approving-a-user) by an administrator before they can start using their account.
+
+![Require admin approval for new signups](img/sign_up_restrictions_v13_5.png)
+
 ## Require email confirmation
 
 You can send confirmation emails during sign-up and require that users confirm
 their email address before they are allowed to sign in.
 
-![Email confirmation](img/email_confirmation_v12_7.png)
+![Email confirmation](img/sign_up_restrictions_v13_5.png)
 
 ## Minimum password length limit
 

@@ -195,6 +195,16 @@ RSpec.describe Project do
       end
     end
 
+    describe '.with_enabled_incident_sla' do
+      it 'returns the correct project' do
+        project_with_enabled_incident_sla = create(:project_incident_management_setting, :sla_enabled).project
+        project_without_enabled_incident_sla = create(:project_incident_management_setting).project
+
+        expect(described_class.with_enabled_incident_sla).to include(project_with_enabled_incident_sla)
+        expect(described_class.with_enabled_incident_sla).not_to include(project_without_enabled_incident_sla)
+      end
+    end
+
     describe '.with_shared_runners_limit_enabled' do
       let(:public_cost_factor) { 1.0 }
 
@@ -269,6 +279,17 @@ RSpec.describe Project do
         expect(described_class.not_aimed_for_deletion).to contain_exactly(project)
       end
     end
+
+    describe '.order_by_total_repository_size_excess_desc' do
+      let_it_be(:project_1) { create(:project_statistics, lfs_objects_size: 10, repository_size: 10).project }
+      let_it_be(:project_2) { create(:project_statistics, lfs_objects_size: 5, repository_size: 55).project }
+      let_it_be(:project_3) { create(:project, repository_size_limit: 30, statistics: create(:project_statistics, lfs_objects_size: 8, repository_size: 32)) }
+      let(:limit) { 20 }
+
+      subject { described_class.order_by_total_repository_size_excess_desc(limit) }
+
+      it { is_expected.to eq([project_2, project_3, project_1]) }
+    end
   end
 
   describe 'validations' do
@@ -332,7 +353,7 @@ RSpec.describe Project do
       it 'creates import_state and sets next_execution_timestamp to now' do
         project = build(:project, :mirror, creator: create(:user))
 
-        Timecop.freeze do
+        freeze_time do
           expect do
             project.save!
           end.to change { ProjectImportState.count }.by(1)
@@ -347,7 +368,7 @@ RSpec.describe Project do
         it 'creates import_state and sets next_execution_timestamp to now' do
           project = create(:project)
 
-          Timecop.freeze do
+          freeze_time do
             expect do
               project.update(mirror: true, mirror_user_id: project.creator.id, import_url: generate(:url))
             end.to change { ProjectImportState.count }.by(1)
@@ -361,7 +382,7 @@ RSpec.describe Project do
         it 'sets current import_state next_execution_timestamp to now' do
           project = create(:project, import_url: generate(:url))
 
-          Timecop.freeze do
+          freeze_time do
             expect do
               project.update(mirror: true, mirror_user_id: project.creator.id)
             end.not_to change { ProjectImportState.count }
@@ -625,15 +646,15 @@ RSpec.describe Project do
   end
 
   describe '#has_regulated_settings?' do
-    let(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
-    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework.first.to_s) }
+    let(:gdpr_framework_definition) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:gdpr] }
+    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, :gdpr) }
     let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
 
     subject { project.has_regulated_settings? }
 
     context 'framework is regulated' do
       before do
-        stub_application_setting(compliance_frameworks: [framework.last])
+        stub_application_setting(compliance_frameworks: [gdpr_framework_definition.id])
       end
 
       it { is_expected.to be_truthy }
@@ -784,12 +805,6 @@ RSpec.describe Project do
     it "returns false" do
       project.namespace.update(share_with_group_lock: true)
       expect(project.allowed_to_share_with_group?).to be_falsey
-    end
-  end
-
-  describe '#alpha/beta_feature_available?' do
-    it_behaves_like 'an entity with alpha/beta feature support' do
-      let(:entity) { create(:project) }
     end
   end
 

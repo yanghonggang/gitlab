@@ -18,13 +18,20 @@ const mockAlert = {
   __typename: 'AlertManagementAlert',
 };
 
+const environmentName = 'Production';
+const environmentPath = '/fake/path';
+
 describe('AlertDetails', () => {
+  let environmentData = { name: environmentName, path: environmentPath };
   let wrapper;
 
   function mountComponent(propsData = {}) {
     wrapper = mount(AlertDetailsTable, {
       propsData: {
-        alert: mockAlert,
+        alert: {
+          ...mockAlert,
+          environment: environmentData,
+        },
         loading: false,
         ...propsData,
       },
@@ -38,6 +45,12 @@ describe('AlertDetails', () => {
 
   const findTableComponent = () => wrapper.find(GlTable);
   const findTableKeys = () => findTableComponent().findAll('tbody td:first-child');
+  const findTableFieldValueByKey = fieldKey =>
+    findTableComponent()
+      .findAll('tbody tr')
+      .filter(row => row.text().includes(fieldKey))
+      .at(0)
+      .find('td:nth-child(2)');
   const findTableField = (fields, fieldName) => fields.filter(row => row.text() === fieldName);
 
   describe('Alert details', () => {
@@ -62,11 +75,7 @@ describe('AlertDetails', () => {
     });
 
     describe('with table data', () => {
-      const environment = 'myEnvironment';
-      const environmentUrl = 'fake/url';
-      beforeEach(() => {
-        mountComponent({ alert: { ...mockAlert, environment, environmentUrl } });
-      });
+      beforeEach(mountComponent);
 
       it('renders a table', () => {
         expect(findTableComponent().exists()).toBe(true);
@@ -83,8 +92,8 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Title').exists()).toBe(true);
         expect(findTableField(fields, 'Severity').exists()).toBe(true);
         expect(findTableField(fields, 'Status').exists()).toBe(true);
-        expect(findTableField(fields, 'Environment').exists()).toBe(true);
         expect(findTableField(fields, 'Hosts').exists()).toBe(true);
+        expect(findTableField(fields, 'Environment').exists()).toBe(true);
       });
 
       it('should not show disallowed alert fields', () => {
@@ -94,7 +103,17 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Todos').exists()).toBe(false);
         expect(findTableField(fields, 'Notes').exists()).toBe(false);
         expect(findTableField(fields, 'Assignees').exists()).toBe(false);
-        expect(findTableField(fields, 'EnvironmentUrl').exists()).toBe(false);
+      });
+
+      it('should display only the name for the environment', () => {
+        expect(findTableFieldValueByKey('Environment').text()).toBe(environmentName);
+      });
+
+      it('should not display the environment row if there is not data', () => {
+        environmentData = { name: null, path: null };
+        mountComponent();
+
+        expect(findTableFieldValueByKey('Environment').text()).toBeFalsy();
       });
     });
   });

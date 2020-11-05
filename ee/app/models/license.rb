@@ -6,6 +6,7 @@ class License < ApplicationRecord
   STARTER_PLAN = 'starter'.freeze
   PREMIUM_PLAN = 'premium'.freeze
   ULTIMATE_PLAN = 'ultimate'.freeze
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
 
   EES_FEATURES = %i[
     audit_events
@@ -83,10 +84,12 @@ class License < ApplicationRecord
     group_forking_protection
     group_ip_restriction
     group_merge_request_analytics
+    group_milestone_project_releases
     group_project_templates
     group_repository_analytics
     group_saml
     group_wikis
+    incident_sla
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -96,6 +99,7 @@ class License < ApplicationRecord
     admin_merge_request_approvers_rules
     merge_trains
     metrics_reports
+    multiple_alert_http_integrations
     multiple_approval_rules
     multiple_group_issue_boards
     object_storage
@@ -121,6 +125,7 @@ class License < ApplicationRecord
   EEP_FEATURES.freeze
 
   EEU_FEATURES = EEP_FEATURES + %i[
+    auto_rollback
     container_scanning
     coverage_fuzzing
     credentials_inventory
@@ -133,9 +138,9 @@ class License < ApplicationRecord
     insights
     issuable_health_status
     license_scanning
-    personal_access_token_api_management
     personal_access_token_expiration_policy
     enforce_pat_expiration
+    group_saml_group_sync
     prometheus_alerts
     pseudonymizer
     release_evidence_test_artifacts
@@ -394,6 +399,10 @@ class License < ApplicationRecord
     restricted_attr(:active_user_count)
   end
 
+  def restricted_user_count?
+    restricted_user_count.to_i > 0
+  end
+
   def previous_user_count
     restricted_attr(:previous_user_count)
   end
@@ -547,11 +556,18 @@ class License < ApplicationRecord
 
   def prior_historical_max
     @prior_historical_max ||= begin
-      from = starts_at - 1.year
-      to   = starts_at
+      from = (starts_at - 1.year).beginning_of_day
+      to   = starts_at.end_of_day
 
       historical_max(from, to)
     end
+  end
+
+  def restricted_user_count_with_threshold
+    # overage should only be applied for new subscriptions not for renewals.
+    return restricted_user_count if previous_user_count
+
+    (restricted_user_count * (1 + ALLOWED_PERCENTAGE_OF_USERS_OVERAGE)).to_i
   end
 
   def check_users_limit
@@ -560,7 +576,7 @@ class License < ApplicationRecord
     if previous_user_count && (prior_historical_max <= previous_user_count)
       return if restricted_user_count >= current_active_users_count
     else
-      return if restricted_user_count >= prior_historical_max
+      return if restricted_user_count_with_threshold >= prior_historical_max
     end
 
     user_count = prior_historical_max == 0 ? current_active_users_count : prior_historical_max
@@ -570,8 +586,8 @@ class License < ApplicationRecord
 
   def check_trueup
     trueup_qty          = restrictions[:trueup_quantity]
-    trueup_from         = Date.parse(restrictions[:trueup_from]) rescue (starts_at - 1.year)
-    trueup_to           = Date.parse(restrictions[:trueup_to]) rescue starts_at
+    trueup_from         = Date.parse(restrictions[:trueup_from]).beginning_of_day rescue (starts_at - 1.year).beginning_of_day
+    trueup_to           = Date.parse(restrictions[:trueup_to]).end_of_day rescue starts_at.end_of_day
     max_historical      = historical_max(trueup_from, trueup_to)
     expected_trueup_qty = if previous_user_count
                             max_historical - previous_user_count

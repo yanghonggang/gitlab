@@ -119,6 +119,9 @@ export default {
     },
   },
   methods: {
+    hideTooltips() {
+      this.$root.$emit('bv::hide::tooltip');
+    },
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
     },
@@ -126,7 +129,7 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-component">
+  <div class="ci-job-component" data-qa-selector="job_item_container">
     <gl-link
       v-if="status.has_details"
       v-gl-tooltip="{ boundary, placement: 'bottom' }"
@@ -135,7 +138,7 @@ export default {
       :class="jobClasses"
       class="js-pipeline-graph-job-link qa-job-link menu-item"
       data-testid="job-with-link"
-      @click.stop
+      @click.stop="hideTooltips"
     >
       <job-name-component :name="job.name" :status="job.status" />
     </gl-link>
@@ -156,6 +159,7 @@ export default {
       :tooltip-text="status.action.title"
       :link="status.action.path"
       :action-icon="status.action.icon"
+      data-qa-selector="action_button"
       @pipelineActionRequestComplete="pipelineActionRequestComplete"
     />
   </div>

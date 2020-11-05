@@ -70,17 +70,15 @@ class Deployment < ApplicationRecord
     end
 
     after_transition any => :running do |deployment|
-      next unless deployment.project.forward_deployment_enabled?
+      next unless deployment.project.ci_forward_deployment_enabled?
 
       deployment.run_after_commit do
-        Deployments::ForwardDeploymentWorker.perform_async(id)
+        Deployments::DropOlderDeploymentsWorker.perform_async(id)
       end
     end
 
     after_transition any => :running do |deployment|
       deployment.run_after_commit do
-        next unless Feature.enabled?(:ci_send_deployment_hook_when_start, deployment.project)
-
         Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end

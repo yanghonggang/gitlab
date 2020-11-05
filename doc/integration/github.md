@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Integrate your GitLab instance with GitHub
 
 You can integrate your GitLab instance with GitHub.com as well as GitHub Enterprise to enable users to import projects from GitHub and/or to login to your GitLab instance with your GitHub account.
@@ -150,7 +156,7 @@ via Omnibus, or [restart GitLab](../administration/restart_gitlab.md#installatio
 Check the [`production.log`](../administration/logs.md#productionlog)
 on your GitLab server to obtain further details. If you are getting the error like
 `Faraday::ConnectionFailed (execution expired)` in the log, there may be a connectivity issue
-between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session)
+between your GitLab instance and GitHub Enterprise. To verify it, [start the rails console](../administration/operations/rails_console.md#starting-a-rails-console-session)
 and run the commands below replacing `<github_url>` with the URL of your GitHub Enterprise instance:
 
 ```ruby

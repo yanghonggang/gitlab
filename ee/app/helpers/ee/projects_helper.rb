@@ -17,13 +17,6 @@ module EE
       super + %w(path_locks)
     end
 
-    override :sidebar_operations_paths
-    def sidebar_operations_paths
-      super + %w[
-        feature_flags
-      ]
-    end
-
     override :get_project_nav_tabs
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
@@ -38,10 +31,6 @@ module EE
         nav_tabs << :merge_request_analytics
       end
 
-      if can?(current_user, :read_feature_flag, project) && !nav_tabs.include?(:operations)
-        nav_tabs << :operations
-      end
-
       if project.feature_available?(:issues_analytics) && can?(current_user, :read_project, project)
         nav_tabs << :issues_analytics
       end
@@ -50,14 +39,25 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
       nav_tabs
     end
 
-    override :tab_ability_map
-    def tab_ability_map
-      tab_ability_map = super
-      tab_ability_map[:feature_flags] = :read_feature_flag
-      tab_ability_map
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
     end
 
     override :default_url_to_repo
@@ -77,11 +77,6 @@ module EE
       else
         super
       end
-    end
-
-    override :sidebar_operations_link_path
-    def sidebar_operations_link_path(project = @project)
-      super || project_feature_flags_path(project)
     end
 
     override :remove_project_message
@@ -231,7 +226,8 @@ module EE
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -267,8 +263,7 @@ module EE
       !!current_user &&
         ::Gitlab.com? &&
         !project.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_namespace, project.root_ancestor) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_namespace, project.root_ancestor)
     end
 
     override :can_import_members?
@@ -277,7 +272,7 @@ module EE
     end
 
     def show_compliance_framework_badge?(project)
-      project&.compliance_framework_setting&.present?
+      project&.compliance_framework_setting&.compliance_management_framework.present?
     end
 
     def scheduled_for_deletion?(project)

@@ -16,7 +16,7 @@ Error Tracking allows developers to easily discover and view the errors that the
 
 ### Deploying Sentry
 
-You can sign up to the cloud hosted <https://sentry.io>, deploy your own [on-premise instance](https://github.com/getsentry/onpremise/) or use GitLab to [install Sentry to a Kubernetes cluster](../user/clusters/applications.md#install-sentry-using-gitlab-cicd).
+You can sign up to the cloud hosted [Sentry](https://sentry.io), deploy your own [on-premise instance](https://github.com/getsentry/onpremise/), or use GitLab to [install Sentry to a Kubernetes cluster](../user/clusters/applications.md#install-sentry-using-gitlab-cicd). To make this easier, we are [considering shipping Sentry with GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5343).
 
 ### Enabling Sentry
 
@@ -44,7 +44,6 @@ You may also want to enable Sentry's GitLab integration by following the steps i
 
 ## Error Tracking List
 
-NOTE: **Note:**
 Users with at least Reporter [permissions](../user/permissions.md)
 can find the Error Tracking list at **Operations > Error Tracking** in your project's sidebar.
 Here, you can filter errors by title or by status (one of Ignored , Resolved, or Unresolved) and sort in descending order by Frequency, First Seen, or Last Seen. By default, the error list is ordered by Last Seen and filtered to Unresolved errors.

@@ -9,7 +9,6 @@ import {
   GlButtonGroup,
   GlDropdown,
   GlDropdownItem,
-  GlDropdownSectionHeader,
   GlDropdownDivider,
 } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -19,6 +18,8 @@ import { __, s__, sprintf } from '~/locale';
 import { diffViewerModes } from '~/ide/constants';
 import DiffStats from './diff_stats.vue';
 import { scrollToElement } from '~/lib/utils/common_utils';
+import { isCollapsed } from '../diff_file';
+import { DIFF_FILE_HEADER } from '../i18n';
 
 export default {
   components: {
@@ -30,12 +31,14 @@ export default {
     GlButtonGroup,
     GlDropdown,
     GlDropdownItem,
-    GlDropdownSectionHeader,
     GlDropdownDivider,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
     SafeHtml: GlSafeHtmlDirective,
+  },
+  i18n: {
+    ...DIFF_FILE_HEADER,
   },
   props: {
     discussionPath: {
@@ -122,6 +125,9 @@ export default {
     },
     isUsingLfs() {
       return this.diffFile.stored_externally && this.diffFile.external_storage === 'lfs';
+    },
+    isCollapsed() {
+      return isCollapsed(this.diffFile, { fileByFile: this.viewDiffsFileByFile });
     },
     collapseIcon() {
       return this.expanded ? 'chevron-down' : 'chevron-right';
@@ -220,7 +226,7 @@ export default {
       <a
         ref="titleWrapper"
         :v-once="!viewDiffsFileByFile"
-        class="gl-mr-2 gl-text-decoration-none!"
+        class="gl-mr-2 gl-text-decoration-none! gl-text-truncate"
         :href="titleLink"
         @click="handleFileNameClick"
       >
@@ -290,7 +296,7 @@ export default {
           icon="external-link"
         />
         <gl-dropdown
-          v-gl-tooltip.hover.focus="__('More actions')"
+          v-gl-tooltip.hover.focus="$options.i18n.optionsDropdownTitle"
           right
           toggle-class="btn-icon js-diff-more-actions"
           class="gl-pt-0!"
@@ -299,11 +305,8 @@ export default {
         >
           <template #button-content>
             <gl-icon name="ellipsis_v" class="mr-0" />
-            <span class="sr-only">{{ __('More actions') }}</span>
+            <span class="sr-only">{{ $options.i18n.optionsDropdownTitle }}</span>
           </template>
-          <gl-dropdown-section-header>
-            {{ __('More actions') }}
-          </gl-dropdown-section-header>
           <gl-dropdown-item
             v-if="diffFile.replaced_view_path"
             ref="replacedFileButton"
@@ -335,7 +338,7 @@ export default {
             </gl-dropdown-item>
           </template>
 
-          <template v-if="!diffFile.viewer.automaticallyCollapsed">
+          <template v-if="!isCollapsed">
             <gl-dropdown-divider
               v-if="!diffFile.is_fully_expanded || diffHasDiscussions(diffFile)"
             />

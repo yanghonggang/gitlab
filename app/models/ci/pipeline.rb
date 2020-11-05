@@ -829,16 +829,28 @@ module Ci
     end
 
     def same_family_pipeline_ids
-      if ::Gitlab::Ci::Features.child_of_child_pipeline_enabled?(project)
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(
-          base_and_ancestors(same_project: true), options: { same_project: true }
-        ).base_and_descendants.select(:id)
-      else
-        # If pipeline is a child of another pipeline, include the parent
-        # and the siblings, otherwise return only itself and children.
-        parent = parent_pipeline || self
-        [parent.id] + parent.child_pipelines.pluck(:id)
-      end
+      ::Gitlab::Ci::PipelineObjectHierarchy.new(
+        base_and_ancestors(same_project: true), options: { same_project: true }
+      ).base_and_descendants.select(:id)
+    end
+
+    def build_with_artifacts_in_self_and_descendants(name)
+      builds_in_self_and_descendants
+        .ordered_by_pipeline # find job in hierarchical order
+        .with_downloadable_artifacts
+        .find_by_name(name)
+    end
+
+    def builds_in_self_and_descendants
+      Ci::Build.latest.where(pipeline: self_and_descendants)
+    end
+
+    # Without using `unscoped`, caller scope is also included into the query.
+    # Using `unscoped` here will be redundant after Rails 6.1
+    def self_and_descendants
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+        .base_and_descendants
     end
 
     def bridge_triggered?
@@ -914,7 +926,7 @@ module Ci
 
     def accessibility_reports
       Gitlab::Ci::Reports::AccessibilityReports.new.tap do |accessibility_reports|
-        builds.latest.with_reports(Ci::JobArtifact.accessibility_reports).each do |build|
+        latest_report_builds(Ci::JobArtifact.accessibility_reports).each do |build|
           build.collect_accessibility_reports!(accessibility_reports)
         end
       end

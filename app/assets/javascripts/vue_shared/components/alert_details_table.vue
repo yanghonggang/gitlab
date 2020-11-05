@@ -10,6 +10,7 @@ import {
 
 const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
 const tdClass = 'gl-border-gray-100! gl-p-5!';
+
 const allowedFields = [
   'iid',
   'title',
@@ -22,11 +23,9 @@ const allowedFields = [
   'description',
   'endedAt',
   'details',
-  'environment',
   'hosts',
+  'environment',
 ];
-
-const isAllowed = fieldName => allowedFields.includes(fieldName);
 
 export default {
   components: {
@@ -66,14 +65,25 @@ export default {
       }
       return reduce(
         this.alert,
-        (allowedItems, value, fieldName) => {
-          if (isAllowed(fieldName)) {
+        (allowedItems, fieldValue, fieldName) => {
+          if (this.isAllowed(fieldName)) {
+            let value;
+            if (fieldName === 'environment') {
+              value = fieldValue?.name;
+            } else {
+              value = fieldValue;
+            }
             return [...allowedItems, { fieldName, value }];
           }
           return allowedItems;
         },
         [],
       );
+    },
+  },
+  methods: {
+    isAllowed(fieldName) {
+      return allowedFields.includes(fieldName);
     },
   },
 };

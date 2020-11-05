@@ -12,6 +12,7 @@ RSpec.describe Issue do
 
     it { is_expected.to have_many(:resource_weight_events) }
     it { is_expected.to have_many(:resource_iteration_events) }
+    it { is_expected.to have_one(:issuable_sla) }
   end
 
   describe 'modules' do
@@ -99,6 +100,26 @@ RSpec.describe Issue do
       end
     end
 
+    describe '.with_feature' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:issue) { create(:issue, project: project) }
+      let_it_be(:incident) { create(:incident, project: project) }
+      let_it_be(:test_case) { create(:quality_test_case, project: project) }
+
+      it 'gives issues that support the given feature', :aggregate_failures do
+        expect(described_class.with_feature('epics'))
+          .to contain_exactly(issue)
+
+        expect(described_class.with_feature('sla'))
+          .to contain_exactly(incident)
+      end
+
+      it 'returns an empty collection when given an unknown feature' do
+        expect(described_class.with_feature('something-unknown'))
+          .to be_empty
+      end
+    end
+
     context 'epics' do
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
@@ -128,6 +149,13 @@ RSpec.describe Issue do
         it 'returns only issues in selected epics' do
           expect(described_class.count).to eq 3
           expect(described_class.in_epics([epic1])).to eq [epic_issue1.issue]
+        end
+      end
+
+      describe '.not_in_epics' do
+        it 'returns only issues not in selected epics' do
+          expect(described_class.count).to eq 3
+          expect(described_class.not_in_epics([epic1])).to match_array([epic_issue2.issue, issue_no_epic])
         end
       end
 
@@ -197,6 +225,30 @@ RSpec.describe Issue do
         subject { described_class.order_status_page_published_last }
 
         it { is_expected.to eq([not_published, published]) }
+      end
+    end
+
+    context 'sla due at' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:sla_due_first) { create(:issue, project: project) }
+      let_it_be(:sla_due_last)  { create(:issue, project: project) }
+      let_it_be(:no_sla) { create(:issue, project: project) }
+
+      before_all do
+        create(:issuable_sla, :exceeded, issue: sla_due_first)
+        create(:issuable_sla, issue: sla_due_last)
+      end
+
+      describe '.order_sla_due_at_asc' do
+        subject { described_class.order_sla_due_at_asc }
+
+        it { is_expected.to eq([sla_due_first, sla_due_last, no_sla]) }
+      end
+
+      describe '.order_sla_due_at_desc' do
+        subject { described_class.order_sla_due_at_desc }
+
+        it { is_expected.to eq([sla_due_last, sla_due_first, no_sla]) }
       end
     end
   end
@@ -800,6 +852,31 @@ RSpec.describe Issue do
       expect(issue.issue_type_supports?(:epics)).to be(true)
       expect(test_case.issue_type_supports?(:epics)).to be(false)
       expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
+
+  describe '#sla_available?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    subject { issue.sla_available? }
+
+    where(:incident_type, :license_available, :sla_available) do
+      false | true  | false
+      true  | false | false
+      true  | true  | true
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(incident_sla: license_available)
+        issue_type = incident_type ? 'incident' : 'issue'
+        issue.update(issue_type: issue_type)
+      end
+
+      it 'returns the expected value' do
+        expect(subject).to eq(sla_available)
+      end
     end
   end
 end

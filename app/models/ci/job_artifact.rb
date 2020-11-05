@@ -66,11 +66,8 @@ module Ci
       cluster_applications: :gzip,
       lsif: :zip,
 
-      # All these file formats use `raw` as we need to store them uncompressed
-      # for Frontend to fetch the files and do analysis
-      # When they will be only used by backend, they can be `gzipped`.
-      accessibility: :raw,
-      codequality: :raw,
+      # Security reports and license scanning reports are raw artifacts
+      # because they used to be fetched by the frontend, but this is not the case anymore.
       sast: :raw,
       secret_detection: :raw,
       dependency_scanning: :raw,
@@ -78,6 +75,12 @@ module Ci
       dast: :raw,
       license_management: :raw,
       license_scanning: :raw,
+
+      # All these file formats use `raw` as we need to store them uncompressed
+      # for Frontend to fetch the files and do analysis
+      # When they will be only used by backend, they can be `gzipped`.
+      accessibility: :raw,
+      codequality: :raw,
       performance: :raw,
       browser_performance: :raw,
       load_performance: :raw,
@@ -166,6 +169,7 @@ module Ci
 
     scope :downloadable, -> { where(file_type: DOWNLOADABLE_TYPES) }
     scope :unlocked, -> { joins(job: :pipeline).merge(::Ci::Pipeline.unlocked).order(expire_at: :desc) }
+    scope :with_destroy_preloads, -> { includes(project: [:route, :statistics]) }
 
     scope :scoped_project, -> { where('ci_job_artifacts.project_id = projects.id') }
 
@@ -285,6 +289,15 @@ module Ci
       )
 
       max_size&.megabytes.to_i
+    end
+
+    def to_deleted_object_attrs
+      {
+        file_store: file_store,
+        store_dir: file.store_dir.to_s,
+        file: file_identifier,
+        pick_up_at: expire_at || Time.current
+      }
     end
 
     private

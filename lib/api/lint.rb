@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class Lint < Grape::API::Instance
+  class Lint < ::API::Base
+    feature_category :pipeline_authoring
+
     namespace :ci do
       desc 'Validation of .gitlab-ci.yml content'
       params do

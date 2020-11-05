@@ -122,6 +122,21 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('my file name').for(:name) }
         it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
       end
+
+      context 'nuget package' do
+        subject { build_stubbed(:nuget_package) }
+
+        it { is_expected.to allow_value('My.Package').for(:name) }
+        it { is_expected.to allow_value('My.Package.Mvc').for(:name) }
+        it { is_expected.to allow_value('MyPackage').for(:name) }
+        it { is_expected.to allow_value('My.23.Package').for(:name) }
+        it { is_expected.to allow_value('My23Package').for(:name) }
+        it { is_expected.to allow_value('runtime.my-test64.runtime.package.Mvc').for(:name) }
+        it { is_expected.to allow_value('my_package').for(:name) }
+        it { is_expected.not_to allow_value('My/package').for(:name) }
+        it { is_expected.not_to allow_value('../../../my_package').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
     end
 
     describe '#version' do
@@ -154,6 +169,13 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.1.2.3').for(:version) }
         it { is_expected.not_to allow_value('+1.2.3').for(:version) }
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'composer package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :composer_package
+
+        it { is_expected.to allow_value('dev-master').for(:version) }
+        it { is_expected.to allow_value('2.x-dev').for(:version) }
       end
 
       context 'maven package' do
@@ -515,6 +537,14 @@ RSpec.describe Packages::Package, type: :model do
       subject { described_class.search_by_name(query) }
 
       it { is_expected.to match_array([package1, package2]) }
+    end
+
+    describe '.with_normalized_pypi_name' do
+      let_it_be(:pypi_package) { create(:pypi_package, name: 'Foo.bAr---BAZ_buz') }
+
+      subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
+
+      it { is_expected.to match_array([pypi_package]) }
     end
   end
 

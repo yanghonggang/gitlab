@@ -47,6 +47,11 @@ module EE
       end
     end
 
+    override :project_feature_attributes
+    def project_feature_attributes
+      super + [:requirements_access_level]
+    end
+
     override :project_params_attributes
     def project_params_attributes
       super + project_params_ee
@@ -91,6 +96,10 @@ module EE
 
       attrs += compliance_framework_params
 
+      if ::Gitlab::Ci::Features.auto_rollback_available?(project)
+        attrs << :auto_rollback_enabled
+      end
+
       if allow_mirror_params?
         attrs + mirror_params
       else
@@ -120,7 +129,7 @@ module EE
         attrs << :merge_requests_disable_committers_approval
       end
 
-      if can?(current_user, :modify_approvers_rules, project)
+      if can?(current_user, :modify_overriding_approvers_per_merge_request_setting, project)
         attrs << :disable_overriding_approvers_per_merge_request
       end
 

@@ -35,9 +35,11 @@ module EE
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
         mount_mutation ::Mutations::DastSiteProfiles::Delete
+        mount_mutation ::Mutations::DastSiteValidations::Create
         mount_mutation ::Mutations::DastScannerProfiles::Create
         mount_mutation ::Mutations::DastScannerProfiles::Update
         mount_mutation ::Mutations::DastScannerProfiles::Delete
+        mount_mutation ::Mutations::DastSiteTokens::Create
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create

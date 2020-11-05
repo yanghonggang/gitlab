@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
+#  $" is $LOADED_FEATURES, but RuboCop didn't like it
+if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
+  warn 'Detected fast_spec_helper is loaded first than spec_helper.'
+  warn 'If running test files using both spec_helper and fast_spec_helper,'
+  warn 'make sure test file with spec_helper is loaded first.'
+  abort 'Aborting...'
+end
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
+
+require './spec/crystalball_env'
+CrystalballEnv.start!
 
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
@@ -212,6 +223,10 @@ RSpec.configure do |config|
       # for now whilst we migrate as much as we can over the GraphQL
       stub_feature_flags(merge_request_widget_graphql: false)
 
+      # Using FortiAuthenticator as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_authenticator: false)
+
       enable_rugged = example.metadata[:enable_rugged].present?
 
       # Disable Rugged features by default
@@ -229,7 +244,7 @@ RSpec.configure do |config|
     end
 
     # Enable Marginalia feature for all specs in the test suite.
-    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
+    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:

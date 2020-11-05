@@ -24,7 +24,6 @@ can run a pipeline for merge requests.
 
 ![Merge request page](img/merge_request.png)
 
-NOTE: **Note:**
 If you use this feature with [merge when pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md),
 pipelines for merge requests take precedence over the other regular pipelines.
 
@@ -57,7 +56,7 @@ below.
 When you use this method, you have to specify `only: - merge_requests` for each job. In this
 example, the pipeline contains a `test` job that is configured to run on merge requests.
 
-The `build` and `deploy` jobs don't have the `only: - merge_requests` parameter,
+The `build` and `deploy` jobs don't have the `only: - merge_requests` keyword,
 so they will not run on merge requests.
 
 ```yaml
@@ -82,8 +81,8 @@ deploy:
 
 #### Excluding certain jobs
 
-The behavior of the `only: [merge_requests]` parameter is such that _only_ jobs with
-that parameter are run in the context of a merge request; no other jobs will be run.
+The behavior of the `only: [merge_requests]` keyword is such that _only_ jobs with
+that keyword are run in the context of a merge request; no other jobs will be run.
 
 However, you can invert this behavior and have all of your jobs run _except_
 for one or two.
@@ -128,6 +127,12 @@ Therefore:
 This helps you avoid having to add the `only:` rule to all of your jobs to make
 them always run. You can use this format to set up a Review App, helping to
 save resources.
+
+### Using SAST, DAST, and other Secure Templates with Pipelines for Merge Requests 
+
+To use [Secure templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Security)
+with pipelines for merge requests, you may need to apply a `rules: if: merge_request_event` for the
+Secure scans to run in the same pipeline as the commit.
 
 #### Excluding certain branches
 
