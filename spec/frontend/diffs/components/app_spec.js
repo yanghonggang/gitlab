@@ -362,7 +362,9 @@ describe('diffs/components/app', () => {
     });
 
     it('sets width of tree list', () => {
-      createComponent();
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+      });
 
       expect(wrapper.find('.js-diff-tree-list').element.style.width).toEqual('320px');
     });
@@ -660,6 +662,7 @@ describe('diffs/components/app', () => {
   describe('diffs', () => {
     it('should render compare versions component', () => {
       createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
         state.diffs.mergeRequestDiffs = diffsMockData;
         state.diffs.targetBranchName = 'target-branch';
         state.diffs.mergeRequestDiff = mergeRequestDiff;
@@ -738,8 +741,16 @@ describe('diffs/components/app', () => {
       expect(wrapper.find(DiffFile).exists()).toBe(true);
     });
 
-    it('should render tree list', () => {
+    it("doesn't render tree list when no changes exist", () => {
       createComponent();
+
+      expect(wrapper.find(TreeList).exists()).toBe(false);
+    });
+
+    it('should render tree list', () => {
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+      });
 
       expect(wrapper.find(TreeList).exists()).toBe(true);
     });

@@ -172,27 +172,6 @@ RSpec.describe 'Merge request > User sees versions', :js do
                    comment: 'Typo, please fix.'
   end
 
-  describe 'compare with same version' do
-    before do
-      page.within '.mr-version-compare-dropdown' do
-        find('.btn-default').click
-        click_link 'version 1'
-      end
-    end
-
-    it 'has 0 chages between versions' do
-      page.within '.mr-version-compare-dropdown' do
-        expect(find('.dropdown-menu-toggle')).to have_content 'version 1'
-      end
-
-      page.within '.mr-version-dropdown' do
-        find('.btn-default').click
-        click_link 'version 1'
-      end
-      expect(page).to have_content '0 files'
-    end
-  end
-
   describe 'compare with newer version' do
     before do
       page.within '.mr-version-compare-dropdown' do
@@ -214,8 +193,6 @@ RSpec.describe 'Merge request > User sees versions', :js do
       page.within '.mr-version-compare-dropdown' do
         expect(page).to have_content 'version 1'
       end
-
-      expect(page).to have_content '0 files'
     end
   end
 

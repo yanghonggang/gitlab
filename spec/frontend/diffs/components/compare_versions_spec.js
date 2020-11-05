@@ -29,7 +29,7 @@ describe('CompareVersions', () => {
       store,
       propsData: {
         mergeRequestDiffs: diffsMockData,
-        diffFilesCountText: null,
+        diffFilesCountText: '1',
         ...props,
       },
     });
@@ -61,16 +61,6 @@ describe('CompareVersions', () => {
       expect(targetDropdown.exists()).toBe(true);
       expect(sourceDropdown.find('a span').html()).toContain('latest version');
       expect(targetDropdown.find('a span').html()).toContain(targetBranchName);
-    });
-
-    it('should not render comparison dropdowns if no mergeRequestDiffs are specified', () => {
-      createWrapper({ mergeRequestDiffs: [] });
-
-      const sourceDropdown = wrapper.find('.mr-version-dropdown');
-      const targetDropdown = wrapper.find('.mr-version-compare-dropdown');
-
-      expect(sourceDropdown.exists()).toBe(false);
-      expect(targetDropdown.exists()).toBe(false);
     });
 
     it('should render view types buttons with correct values', () => {
