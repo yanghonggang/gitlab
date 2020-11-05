@@ -212,8 +212,6 @@ export default {
       return visible;
     },
     hasCommits() {
-      console.log(this.commit);
-      console.log(this.mergeRequestDiffs);
       return this.commit || this.mergeRequestDiffs.length > 0;
     },
     hasChangedFiles() {

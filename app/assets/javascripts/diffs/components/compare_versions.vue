@@ -97,7 +97,7 @@ export default {
         @click="toggleShowTreeList"
       />
       <gl-sprintf
-         v-if="!commit"
+        v-if="!commit"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
