@@ -181,7 +181,7 @@ export default {
       class="pipeline-visualization pipeline-graph"
       :class="{ 'pipeline-tab-content': !isLinkedPipeline }"
     >
-      <div class="page-with-contextual-sidebar gl-w-full">
+      <div class="gl-w-full">
         <div class="container-fluid container-limited">
           <gl-loading-icon v-if="isLoading" class="m-auto" size="lg" />
 
