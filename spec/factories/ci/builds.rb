@@ -384,8 +384,7 @@ FactoryBot.define do
             key: 'cache_key',
             untracked: false,
             paths: ['vendor/*'],
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           }
         }
       end

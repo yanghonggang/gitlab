@@ -1210,9 +1210,7 @@ Returns:
 
 - `201 OK` on success.
 - `404 User Not Found` if user cannot be found.
-- `403 Forbidden` when trying to block:
-  - A user that is blocked through LDAP.
-  - An internal user.
+- `403 Forbidden` when trying to block an already blocked user by LDAP synchronization.
 
 ## Unblock user
 

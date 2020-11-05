@@ -1,6 +1,6 @@
 import { __ } from '~/locale';
 
-export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
+export default IssuableTokenKeys => {
   const draftToken = {
     token: {
       formattedKey: __('Draft'),
@@ -51,20 +51,18 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
   IssuableTokenKeys.tokenKeysWithAlternative.push(draftToken.token);
   IssuableTokenKeys.conditions.push(...draftToken.conditions);
 
-  if (!disableTargetBranchFilter) {
-    const targetBranchToken = {
-      formattedKey: __('Target-Branch'),
-      key: 'target-branch',
-      type: 'string',
-      param: '',
-      symbol: '',
-      icon: 'arrow-right',
-      tag: 'branch',
-    };
+  const targetBranchToken = {
+    formattedKey: __('Target-Branch'),
+    key: 'target-branch',
+    type: 'string',
+    param: '',
+    symbol: '',
+    icon: 'arrow-right',
+    tag: 'branch',
+  };
 
-    IssuableTokenKeys.tokenKeys.push(targetBranchToken);
-    IssuableTokenKeys.tokenKeysWithAlternative.push(targetBranchToken);
-  }
+  IssuableTokenKeys.tokenKeys.push(targetBranchToken);
+  IssuableTokenKeys.tokenKeysWithAlternative.push(targetBranchToken);
 
   const approvedBy = {
     token: {

@@ -1361,8 +1361,7 @@ module Gitlab
             paths: ["logs/", "binaries/"],
             untracked: true,
             key: 'key',
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
 
@@ -1384,8 +1383,7 @@ module Gitlab
             paths: ["logs/", "binaries/"],
             untracked: true,
             key: { files: ['file'] },
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
 
@@ -1404,8 +1402,7 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: 'key',
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
 
@@ -1428,8 +1425,7 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: { files: ['file'] },
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
 
@@ -1452,8 +1448,7 @@ module Gitlab
             paths: ['logs/', 'binaries/'],
             untracked: true,
             key: { files: ['file'], prefix: 'prefix' },
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
 
@@ -1473,8 +1468,7 @@ module Gitlab
             paths: ["test/"],
             untracked: false,
             key: 'local',
-            policy: 'pull-push',
-            when: 'on_success'
+            policy: 'pull-push'
           )
         end
       end

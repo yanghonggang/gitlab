@@ -68,6 +68,7 @@ describe('Vulnerability Footer', () => {
         remediation: properties.remediations[0],
         hasDownload: true,
         hasMr: vulnerability.has_mr,
+        isStandaloneVulnerability: true,
       });
     });
 

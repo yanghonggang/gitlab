@@ -18,10 +18,7 @@ module EE
         return unless epic_issue = original_entity.epic_issue
         return unless can?(current_user, :update_epic, epic_issue.epic.group)
 
-        updated = epic_issue.update(issue_id: new_entity.id)
-
-        ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_changed_epic_action(author: current_user) if updated
-
+        epic_issue.update(issue_id: new_entity.id)
         original_entity.reset
       end
 

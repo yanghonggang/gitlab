@@ -132,13 +132,7 @@ export default {
     >
       <div v-if="icon.name" data-testid="designEvent" class="design-event gl-absolute">
         <span :title="icon.tooltip" :aria-label="icon.tooltip">
-          <gl-icon
-            :name="icon.name"
-            :size="18"
-            :class="icon.classes"
-            data-qa-selector="design_status_icon"
-            :data-qa-status="icon.name"
-          />
+          <gl-icon :name="icon.name" :size="18" :class="icon.classes" />
         </span>
       </div>
       <gl-intersection-observer @appear="onAppear">

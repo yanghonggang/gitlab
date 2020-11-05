@@ -37,7 +37,7 @@ module SystemCheck
           @custom_error_message
         )
         for_more_information(
-          'doc/administration/redis/index.html#redis-replication-and-failover-using-the-non-bundled-redis'
+          'doc/administration/high_availability/redis.md#provide-your-own-redis-instance'
         )
         fix_and_rerun
       end

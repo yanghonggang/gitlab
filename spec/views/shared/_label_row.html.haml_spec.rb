@@ -2,83 +2,43 @@
 require 'spec_helper'
 
 RSpec.describe 'shared/_label_row.html.haml' do
-  let_it_be(:group) { create(:group) }
-  let(:label) { build_stubbed(:group_label, group: group).present(issuable_subject: group) }
+  label_types = {
+    'project label': :label,
+    'group label': :group_label
+  }
 
-  before do
-    allow(view).to receive(:label) { label }
-  end
-
-  context 'with a project context' do
-    let_it_be(:project) { create(:project, group: group) }
-    let(:label) { build_stubbed(:label, project: project).present(issuable_subject: project) }
-
-    before do
-      assign(:project, label.project)
-
-      render
+  label_types.each do |label_type, label_factory|
+    let!(:label) do
+      label_record = create(label_factory) # rubocop: disable Rails/SaveBang
+      label_record.present(issuable_subject: label_record.subject)
     end
 
-    it 'has a non-linked label title' do
-      expect(rendered).not_to have_css('a', text: label.title)
-    end
+    context "for a #{label_type}" do
+      before do
+        if label.project_label?
+          @project = label.project
+        else
+          @group = label.group
+        end
+      end
 
-    it "has Issues link" do
-      expect(rendered).to have_css('a', text: 'Issues')
-    end
+      it 'has a non-linked label title' do
+        render 'shared/label_row', label: label
 
-    it "has Merge request link" do
-      expect(rendered).to have_css('a', text: 'Merge requests')
-    end
+        expect(rendered).not_to have_css('a', text: label.title)
+      end
 
-    it "shows the path from where the label was created" do
-      expect(rendered).to have_css('.label-badge', text: project.full_name)
-    end
-  end
+      it "has Issues link for #{label_type}" do
+        render 'shared/label_row', label: label
 
-  context 'with a group context' do
-    before do
-      assign(:group, label.group)
+        expect(rendered).to have_css('a', text: 'Issues')
+      end
 
-      render
-    end
+      it "has Merge request link for #{label_type}" do
+        render 'shared/label_row', label: label
 
-    it 'has a non-linked label title' do
-      expect(rendered).not_to have_css('a', text: label.title)
-    end
-
-    it "has Issues link" do
-      expect(rendered).to have_css('a', text: 'Issues')
-    end
-
-    it "has Merge request link" do
-      expect(rendered).to have_css('a', text: 'Merge requests')
-    end
-
-    it "does not show a path from where the label was created" do
-      expect(rendered).not_to have_css('.label-badge')
-    end
-  end
-
-  context 'with an admin context' do
-    before do
-      render
-    end
-
-    it 'has a non-linked label title' do
-      expect(rendered).not_to have_css('a', text: label.title)
-    end
-
-    it "does not show Issues link" do
-      expect(rendered).not_to have_css('a', text: 'Issues')
-    end
-
-    it "does not show Merge request link" do
-      expect(rendered).not_to have_css('a', text: 'Merge requests')
-    end
-
-    it "does not show a path from where the label was created" do
-      expect(rendered).not_to have_css('.label-badge')
+        expect(rendered).to have_css('a', text: 'Merge requests')
+      end
     end
   end
 end

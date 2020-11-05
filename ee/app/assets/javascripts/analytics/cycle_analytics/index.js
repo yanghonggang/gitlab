@@ -23,6 +23,7 @@ export default () => {
     cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
     valueStreamAnalyticsCreateMultipleValueStreams: hasCreateMultipleValueStreams = false,
+    analyticsSimilaritySearch: hasAnalyticsSimilaritySearch = false,
   } = gon?.features;
 
   const {
@@ -42,6 +43,7 @@ export default () => {
       hasDurationChart,
       hasPathNavigation,
       hasCreateMultipleValueStreams,
+      hasAnalyticsSimilaritySearch,
     },
   });
 

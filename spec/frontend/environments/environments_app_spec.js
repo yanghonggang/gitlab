@@ -182,7 +182,7 @@ describe('Environment', () => {
     describe('when user can create environment', () => {
       beforeEach(() => {
         mockRequest([environment]);
-        wrapper = shallowMount(EnvironmentsApp, { propsData: mockData });
+        wrapper = mount(EnvironmentsApp, { propsData: mockData });
       });
 
       it('should render', () => {
@@ -193,7 +193,7 @@ describe('Environment', () => {
     describe('when user can not create environment', () => {
       beforeEach(() => {
         mockRequest([environment]);
-        wrapper = shallowMount(EnvironmentsApp, {
+        wrapper = mount(EnvironmentsApp, {
           propsData: { ...mockData, canCreateEnvironment: false },
         });
       });

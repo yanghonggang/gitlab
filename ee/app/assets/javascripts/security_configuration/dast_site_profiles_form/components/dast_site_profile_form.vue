@@ -1,4 +1,5 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import {
   GlAlert,
@@ -10,7 +11,6 @@ import {
   GlModal,
   GlToggle,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
 import { fetchPolicies } from '~/lib/graphql';

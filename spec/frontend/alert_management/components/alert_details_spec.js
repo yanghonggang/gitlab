@@ -1,32 +1,25 @@
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import AlertDetails from '~/alert_management/components/alert_details.vue';
 import AlertSummaryRow from '~/alert_management/components/alert_summary_row.vue';
-import {
-  ALERTS_SEVERITY_LABELS,
-  trackAlertsDetailsViewsOptions,
-} from '~/alert_management/constants';
 import createIssueMutation from '~/alert_management/graphql/mutations/create_issue_from_alert.mutation.graphql';
 import { joinPaths } from '~/lib/utils/url_utility';
+import {
+  trackAlertsDetailsViewsOptions,
+  ALERTS_SEVERITY_LABELS,
+} from '~/alert_management/constants';
 import Tracking from '~/tracking';
-import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from '../mocks/alerts.json';
 
 const mockAlert = mockAlerts[0];
-const environmentName = 'Production';
-const environmentPath = '/fake/path';
 
 describe('AlertDetails', () => {
-  let environmentData = {
-    name: environmentName,
-    path: environmentPath,
-  };
-  let glFeatures = { exposeEnvironmentPathInAlertDetails: false };
-  let mock;
   let wrapper;
+  let mock;
   const projectPath = 'root/alerts';
   const projectIssuesPath = 'root/alerts/-/issues';
   const projectId = '1';
@@ -40,17 +33,9 @@ describe('AlertDetails', () => {
           projectPath,
           projectIssuesPath,
           projectId,
-          glFeatures,
         },
         data() {
-          return {
-            alert: {
-              ...mockAlert,
-              environment: environmentData,
-            },
-            sidebarStatus: false,
-            ...data,
-          };
+          return { alert: { ...mockAlert }, sidebarStatus: false, ...data };
         },
         mocks: {
           $apollo: {
@@ -87,8 +72,7 @@ describe('AlertDetails', () => {
   const findCreateIncidentBtn = () => wrapper.findByTestId('createIncidentBtn');
   const findViewIncidentBtn = () => wrapper.findByTestId('viewIncidentBtn');
   const findIncidentCreationAlert = () => wrapper.findByTestId('incidentCreationError');
-  const findEnvironmentName = () => wrapper.findByTestId('environmentName');
-  const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
+  const findEnvironmentLink = () => wrapper.findByTestId('environmentUrl');
   const findDetailsTable = () => wrapper.find(AlertDetailsTable);
 
   describe('Alert details', () => {
@@ -136,6 +120,8 @@ describe('AlertDetails', () => {
         field               | data            | isShown
         ${'eventCount'}     | ${1}            | ${true}
         ${'eventCount'}     | ${undefined}    | ${false}
+        ${'environment'}    | ${undefined}    | ${false}
+        ${'environment'}    | ${'Production'} | ${true}
         ${'monitoringTool'} | ${'New Relic'}  | ${true}
         ${'monitoringTool'} | ${undefined}    | ${false}
         ${'service'}        | ${'Prometheus'} | ${true}
@@ -158,34 +144,16 @@ describe('AlertDetails', () => {
       });
     });
 
-    describe('environment fields', () => {
-      describe('when exposeEnvironmentPathInAlertDetails is disabled', () => {
-        beforeEach(mountComponent);
-
-        it('should not show the environment', () => {
-          expect(findEnvironmentName().exists()).toBe(false);
-          expect(findEnvironmentPath().exists()).toBe(false);
-        });
-      });
-
-      describe('when exposeEnvironmentPathInAlertDetails is enabled', () => {
-        beforeEach(() => {
-          glFeatures = { exposeEnvironmentPathInAlertDetails: true };
-          mountComponent();
+    describe('environment URL fields', () => {
+      it('should show the environment URL when available', () => {
+        const environment = 'Production';
+        const environmentUrl = 'fake/url';
+        mountComponent({
+          data: { alert: { ...mockAlert, environment, environmentUrl } },
         });
 
-        it('should show the environment name with link to path', () => {
-          expect(findEnvironmentName().exists()).toBe(false);
-          expect(findEnvironmentPath().text()).toBe(environmentName);
-          expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
-        });
-
-        it('should only show the environment name if the path is not provided', () => {
-          environmentData = { name: environmentName, path: null };
-          mountComponent();
-          expect(findEnvironmentPath().exists()).toBe(false);
-          expect(findEnvironmentName().text()).toBe(environmentName);
-        });
+        expect(findEnvironmentLink().text()).toBe(environment);
+        expect(findEnvironmentLink().attributes('href')).toBe(environmentUrl);
       });
     });
 

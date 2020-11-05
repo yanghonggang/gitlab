@@ -2,22 +2,12 @@
 
 module Terraform
   class VersionedStateUploader < StateUploader
-    delegate :terraform_state, to: :model
-
     def filename
-      if terraform_state.versioning_enabled?
-        "#{model.version}.tfstate"
-      else
-        "#{model.uuid}.tfstate"
-      end
+      "#{model.version}.tfstate"
     end
 
     def store_dir
-      if terraform_state.versioning_enabled?
-        Gitlab::HashedPath.new(model.uuid, root_hash: project_id)
-      else
-        project_id.to_s
-      end
+      Gitlab::HashedPath.new(model.uuid, root_hash: project_id)
     end
   end
 end

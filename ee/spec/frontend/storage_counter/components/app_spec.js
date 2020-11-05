@@ -1,8 +1,6 @@
 import { mount } from '@vue/test-utils';
 import StorageApp from 'ee/storage_counter/components/app.vue';
 import Project from 'ee/storage_counter/components/project.vue';
-import UsageGraph from 'ee/storage_counter/components/usage_graph.vue';
-import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import TemporaryStorageIncreaseModal from 'ee/storage_counter/components/temporary_storage_increase_modal.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { namespaceData, withRootStorageStatistics } from '../mock_data';
@@ -17,14 +15,8 @@ describe('Storage counter app', () => {
   const findPurchaseStorageLink = () => wrapper.find("[data-testid='purchase-storage-link']");
   const findTemporaryStorageIncreaseButton = () =>
     wrapper.find("[data-testid='temporary-storage-increase-button']");
-  const findUsageGraph = () => wrapper.find(UsageGraph);
-  const findUsageStatistics = () => wrapper.find(UsageStatistics);
 
-  const createComponent = ({
-    props = {},
-    loading = false,
-    additionalRepoStorageByNamespace = false,
-  } = {}) => {
+  function createComponent(props = {}, loading = false) {
     const $apollo = {
       queries: {
         namespace: {
@@ -39,13 +31,8 @@ describe('Storage counter app', () => {
       directives: {
         GlModalDirective: createMockDirective(),
       },
-      provide: {
-        glFeatures: {
-          additionalRepoStorageByNamespace,
-        },
-      },
     });
-  };
+  }
 
   beforeEach(() => {
     createComponent();
@@ -99,34 +86,6 @@ describe('Storage counter app', () => {
     });
   });
 
-  describe('with additional_repo_storage_by_namespace feature flag', () => {
-    it('usage_graph component hidden is when flag is false', async () => {
-      wrapper.setData({
-        namespace: withRootStorageStatistics,
-      });
-
-      await wrapper.vm.$nextTick();
-
-      expect(findUsageGraph().exists()).toBe(true);
-      expect(findUsageStatistics().exists()).toBe(false);
-    });
-
-    it('usage_statistics component is rendered when flag is true', async () => {
-      createComponent({
-        additionalRepoStorageByNamespace: true,
-      });
-
-      wrapper.setData({
-        namespace: withRootStorageStatistics,
-      });
-
-      await wrapper.vm.$nextTick();
-
-      expect(findUsageStatistics().exists()).toBe(true);
-      expect(findUsageGraph().exists()).toBe(false);
-    });
-  });
-
   describe('without rootStorageStatistics information', () => {
     it('renders N/A', async () => {
       wrapper.setData({
@@ -148,7 +107,7 @@ describe('Storage counter app', () => {
 
     describe('when purchaseStorageUrl is set', () => {
       beforeEach(() => {
-        createComponent({ props: { purchaseStorageUrl: 'customers.gitlab.com' } });
+        createComponent({ purchaseStorageUrl: 'customers.gitlab.com' });
       });
 
       it('does render link', () => {
@@ -168,7 +127,7 @@ describe('Storage counter app', () => {
       ${{ isTemporaryStorageIncreaseVisible: 'true' }}  | ${true}
     `('with $props', ({ props, isVisible }) => {
       beforeEach(() => {
-        createComponent({ props });
+        createComponent(props);
       });
 
       it(`renders button = ${isVisible}`, () => {
@@ -178,7 +137,7 @@ describe('Storage counter app', () => {
 
     describe('when temporary storage increase is visible', () => {
       beforeEach(() => {
-        createComponent({ props: { isTemporaryStorageIncreaseVisible: 'true' } });
+        createComponent({ isTemporaryStorageIncreaseVisible: 'true' });
         wrapper.setData({
           namespace: {
             ...namespaceData,

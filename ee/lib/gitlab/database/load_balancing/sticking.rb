@@ -53,19 +53,7 @@ module Gitlab
           Session.current.use_primary!
         end
 
-        def self.bulk_stick(namespace, ids)
-          return unless LoadBalancing.enable?
-
-          with_primary_write_location do |location|
-            ids.each do |id|
-              set_write_location_for(namespace, id, location)
-            end
-          end
-
-          Session.current.use_primary!
-        end
-
-        def self.with_primary_write_location
+        def self.mark_primary_write_location(namespace, id)
           return unless LoadBalancing.configured?
 
           # Load balancing could be enabled for the Web application server,
@@ -80,13 +68,7 @@ module Gitlab
 
           return if location.blank?
 
-          yield(location)
-        end
-
-        def self.mark_primary_write_location(namespace, id)
-          with_primary_write_location do |location|
-            set_write_location_for(namespace, id, location)
-          end
+          set_write_location_for(namespace, id, location)
         end
 
         # Stops sticking to the primary.

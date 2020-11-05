@@ -262,7 +262,6 @@ export default {
   merge_trains_enabled: true,
   merge_trains_count: 3,
   merge_train_index: 1,
-  security_reports_docs_path: 'security-reports-docs-path',
 };
 
 export const mockStore = {

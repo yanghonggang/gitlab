@@ -22,30 +22,16 @@ module EE
       def assign_epic(issue, epic)
         issue.confidential = true if !issue.persisted? && epic.confidential
 
-        had_epic = issue.epic.present?
-
         link_params = { target_issuable: issue, skip_epic_dates_update: true }
 
-        EpicIssues::CreateService.new(epic, current_user, link_params).execute.tap do |result|
-          next unless result[:status] == :success
-
-          if had_epic
-            ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_changed_epic_action(author: current_user)
-          else
-            ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_added_to_epic_action(author: current_user)
-          end
-        end
+        EpicIssues::CreateService.new(epic, current_user, link_params).execute
       end
 
       def unassign_epic(issue)
         link = EpicIssue.find_by_issue_id(issue.id)
         return success unless link
 
-        EpicIssues::DestroyService.new(link, current_user).execute.tap do |result|
-          next unless result[:status] == :success
-
-          ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_removed_from_epic_action(author: current_user)
-        end
+        EpicIssues::DestroyService.new(link, current_user).execute
       end
 
       def epic_param(issue)

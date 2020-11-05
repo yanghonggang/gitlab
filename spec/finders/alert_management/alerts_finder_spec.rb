@@ -191,78 +191,59 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
           end
         end
       end
+    end
 
-      context 'search query given' do
-        let_it_be(:alert) do
-          create(:alert_management_alert,
-                 :with_fingerprint,
-                 project: project,
-                 title: 'Title',
-                 description: 'Desc',
-                 service: 'Service',
-                 monitoring_tool: 'Monitor'
-                )
-        end
-
-        context 'searching title' do
-          let(:params) { { search: alert.title } }
-
-          it { is_expected.to match_array([alert]) }
-        end
-
-        context 'searching description' do
-          let(:params) { { search: alert.description } }
-
-          it { is_expected.to match_array([alert]) }
-        end
-
-        context 'searching service' do
-          let(:params) { { search: alert.service } }
-
-          it { is_expected.to match_array([alert]) }
-        end
-
-        context 'searching monitoring tool' do
-          let(:params) { { search: alert.monitoring_tool } }
-
-          it { is_expected.to match_array([alert]) }
-        end
-
-        context 'searching something else' do
-          let(:params) { { search: alert.fingerprint } }
-
-          it { is_expected.to be_empty }
-        end
-
-        context 'empty search' do
-          let(:params) { { search: ' ' } }
-
-          it { is_expected.not_to include(alert) }
-        end
+    context 'search query given' do
+      let_it_be(:alert) do
+        create(:alert_management_alert,
+          :with_fingerprint,
+          title: 'Title',
+          description: 'Desc',
+          service: 'Service',
+          monitoring_tool: 'Monitor'
+        )
       end
 
-      context 'assignee username given' do
-        let_it_be(:assignee) { create(:user) }
-        let_it_be(:alert) { create(:alert_management_alert, project: project, assignees: [assignee]) }
-        let(:params) { { assignee_username: username } }
+      before do
+        alert.project.add_developer(current_user)
+      end
 
-        context 'with valid assignee_username' do
-          let(:username) { assignee.username }
+      subject { described_class.new(current_user, alert.project, params).execute }
 
-          it { is_expected.to match_array([alert]) }
-        end
+      context 'searching title' do
+        let(:params) { { search: alert.title } }
 
-        context 'with invalid assignee_username' do
-          let(:username) { 'unknown username' }
+        it { is_expected.to match_array([alert]) }
+      end
 
-          it { is_expected.to be_empty }
-        end
+      context 'searching description' do
+        let(:params) { { search: alert.description } }
 
-        context 'with empty assignee_username' do
-          let(:username) { ' ' }
+        it { is_expected.to match_array([alert]) }
+      end
 
-          it { is_expected.not_to include(alert) }
-        end
+      context 'searching service' do
+        let(:params) { { search: alert.service } }
+
+        it { is_expected.to match_array([alert]) }
+      end
+
+      context 'searching monitoring tool' do
+        let(:params) { { search: alert.monitoring_tool } }
+
+        it { is_expected.to match_array([alert]) }
+      end
+
+      context 'searching something else' do
+        let(:params) { { search: alert.fingerprint } }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'empty search' do
+        let(:params) { { search: ' ' } }
+
+        it { is_expected.to match_array([alert]) }
       end
     end
   end

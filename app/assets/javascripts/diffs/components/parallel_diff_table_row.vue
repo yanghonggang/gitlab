@@ -102,7 +102,11 @@ export default {
       return utils.addCommentTooltip(this.line.right);
     },
     shouldRenderCommentButton() {
-      return utils.shouldRenderCommentButton(this.isLoggedIn, this.isCommentButtonRendered);
+      return utils.shouldRenderCommentButton(
+        this.isLoggedIn,
+        this.isCommentButtonRendered,
+        gon.features?.mergeRefHeadComments,
+      );
     },
     shouldShowCommentButtonLeft() {
       return utils.shouldShowCommentButton(

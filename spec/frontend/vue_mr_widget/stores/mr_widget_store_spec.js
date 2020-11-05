@@ -118,33 +118,27 @@ describe('MergeRequestStore', () => {
 
   describe('setPaths', () => {
     it('should set the add ci config path', () => {
-      store.setPaths({ ...mockData });
+      store.setData({ ...mockData });
 
       expect(store.mergeRequestAddCiConfigPath).toBe('/group2/project2/new/pipeline');
     });
 
     it('should set humanAccess=Maintainer when user has that role', () => {
-      store.setPaths({ ...mockData });
+      store.setData({ ...mockData });
 
       expect(store.humanAccess).toBe('Maintainer');
     });
 
     it('should set pipelinesEmptySvgPath', () => {
-      store.setPaths({ ...mockData });
+      store.setData({ ...mockData });
 
       expect(store.pipelinesEmptySvgPath).toBe('/path/to/svg');
     });
 
     it('should set newPipelinePath', () => {
-      store.setPaths({ ...mockData });
+      store.setData({ ...mockData });
 
       expect(store.newPipelinePath).toBe('/group2/project2/pipelines/new');
-    });
-
-    it('should set securityReportsDocsPath', () => {
-      store.setPaths({ ...mockData });
-
-      expect(store.securityReportsDocsPath).toBe('security-reports-docs-path');
     });
   });
 });

@@ -1,4 +1,5 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlButton,
@@ -11,7 +12,6 @@ import {
   GlInputGroupText,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
 import download from '~/lib/utils/downloader';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import { fetchPolicies } from '~/lib/graphql';

@@ -37,6 +37,46 @@ RSpec.describe RegistrationsController do
         expect(response).to redirect_to(new_user_session_path(anchor: 'register-pane'))
       end
     end
+
+    context 'with sign up flow and terms_opt_in experiment being enabled' do
+      before do
+        stub_experiment(signup_flow: true, terms_opt_in: true)
+      end
+
+      context 'when user is not part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'control_group'
+          )
+
+          subject
+        end
+      end
+
+      context 'when user is part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'experimental_group'
+          )
+
+          subject
+        end
+      end
+    end
   end
 
   describe '#create' do
@@ -313,26 +353,100 @@ RSpec.describe RegistrationsController do
       end
     end
 
-    context 'terms of service' do
-      context 'when terms are enforced' do
-        before do
-          enforce_terms
-        end
-
-        it 'creates the user with accepted terms' do
-          subject
-
-          expect(controller.current_user).to be_present
-          expect(controller.current_user.terms_accepted?).to be(true)
-        end
+    context 'when terms are enforced' do
+      before do
+        enforce_terms
       end
 
-      context 'when terms are not enforced' do
-        it 'creates the user without accepted terms' do
-          subject
+      it 'redirects back with a notice when the checkbox was not checked' do
+        subject
 
-          expect(controller.current_user).to be_present
-          expect(controller.current_user.terms_accepted?).to be(false)
+        expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
+      end
+
+      it 'creates the user with agreement when terms are accepted' do
+        post :create, params: user_params.merge(terms_opt_in: '1')
+
+        expect(controller.current_user).to be_present
+        expect(controller.current_user.terms_accepted?).to be(true)
+      end
+
+      context 'when experiment terms_opt_in is enabled' do
+        before do
+          stub_experiment(terms_opt_in: true)
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: true)
+          end
+
+          it 'creates the user with accepted terms' do
+            subject
+
+            expect(controller.current_user).to be_present
+            expect(controller.current_user.terms_accepted?).to be(true)
+          end
+        end
+
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: false)
+          end
+
+          it 'creates the user without accepted terms' do
+            subject
+
+            expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
+          end
+        end
+      end
+    end
+
+    describe 'tracking data' do
+      context 'with sign up flow and terms_opt_in experiment being enabled' do
+        before do
+          stub_experiment(signup_flow: true, terms_opt_in: true)
+        end
+
+        it 'records user for the terms_opt_in experiment' do
+          expect(controller).to receive(:record_experiment_user).with(:terms_opt_in)
+
+          subject
+        end
+
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'control_group'
+            )
+
+            subject
+          end
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'experimental_group'
+            )
+
+            subject
+          end
         end
       end
     end

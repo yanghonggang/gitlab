@@ -42,7 +42,7 @@ RSpec.describe Projects::AlertManagementController do
       let(:role) { :reporter }
 
       it 'shows 404' do
-        get :details, params: { namespace_id: project.namespace, project_id: project, id: id }
+        get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to have_gitlab_http_status(:not_found)
       end

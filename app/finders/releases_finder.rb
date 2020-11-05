@@ -9,9 +9,6 @@ class ReleasesFinder
     @parent = parent
     @current_user = current_user
     @params = params
-
-    params[:order_by] ||= 'released_at'
-    params[:sort] ||= 'desc'
   end
 
   def execute(preload: true)
@@ -20,8 +17,7 @@ class ReleasesFinder
     releases = get_releases
     releases = by_tag(releases)
     releases = releases.preloaded if preload
-    releases = order_releases(releases)
-    releases
+    releases.sorted
   end
 
   private
@@ -61,8 +57,4 @@ class ReleasesFinder
     releases.where(tag: params[:tag])
   end
   # rubocop: enable CodeReuse/ActiveRecord
-
-  def order_releases(releases)
-    releases.sort_by_attribute("#{params[:order_by]}_#{params[:sort]}")
-  end
 end

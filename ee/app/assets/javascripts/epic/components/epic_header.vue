@@ -1,9 +1,10 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
+import tooltip from '~/vue_shared/directives/tooltip';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -12,7 +13,7 @@ import { statusType } from '../constants';
 
 export default {
   directives: {
-    GlTooltipDirective,
+    tooltip,
   },
   components: {
     GlIcon,

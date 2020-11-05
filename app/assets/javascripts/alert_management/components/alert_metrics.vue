@@ -1,7 +1,7 @@
 <script>
 import Vue from 'vue';
 import Vuex from 'vuex';
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 
 Vue.use(Vuex);
 

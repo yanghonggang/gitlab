@@ -86,7 +86,6 @@ export default {
     TerraformPlan,
     GroupedAccessibilityReportsApp,
     MrWidgetApprovals,
-    SecurityReportsApp: () => import('~/vue_shared/security_reports/security_reports_app.vue'),
   },
   apollo: {
     state: {
@@ -179,9 +178,6 @@ export default {
       return Boolean(
         this.mr.mergePipelinesEnabled && this.mr.sourceProjectId !== this.mr.targetProjectId,
       );
-    },
-    shouldRenderSecurityReport() {
-      return Boolean(window.gon?.features?.coreSecurityMrWidget && this.mr.pipeline.id);
     },
     mergeError() {
       let { mergeError } = this.mr;
@@ -458,13 +454,6 @@ export default {
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
         :codequality-help-path="mr.codequalityHelpPath"
-      />
-
-      <security-reports-app
-        v-if="shouldRenderSecurityReport"
-        :pipeline-id="mr.pipeline.id"
-        :project-id="mr.targetProjectId"
-        :security-reports-docs-path="mr.securityReportsDocsPath"
       />
 
       <grouped-test-reports-app

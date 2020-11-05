@@ -3,14 +3,15 @@
 require "spec_helper"
 
 RSpec.describe RedisTracking do
-  let(:feature) { 'approval_rule' }
+  let(:event_name) { 'g_compliance_dashboard' }
+  let(:feature) { 'g_compliance_dashboard_feature' }
   let(:user) { create(:user) }
 
   controller(ApplicationController) do
     include RedisTracking
 
     skip_before_action :authenticate_user!, only: :show
-    track_redis_hll_event :index, :show, name: 'g_compliance_approval_rules', feature: :approval_rule, feature_default_enabled: true
+    track_redis_hll_event :index, :show, name: 'i_analytics_dev_ops_score', feature: :g_compliance_dashboard_feature, feature_default_enabled: true
 
     def index
       render html: 'index'

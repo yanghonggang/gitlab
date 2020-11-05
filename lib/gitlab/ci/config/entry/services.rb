@@ -7,7 +7,7 @@ module Gitlab
         ##
         # Entry that represents a configuration of Docker services.
         #
-        class Services < ::Gitlab::Config::Entry::ComposableArray
+        class Services < ::Gitlab::Config::Entry::Node
           include ::Gitlab::Config::Entry::Validatable
 
           validations do
@@ -15,8 +15,28 @@ module Gitlab
             validates :config, services_with_ports_alias_unique: true, if: ->(record) { record.opt(:with_image_ports) }
           end
 
-          def composable_class
-            Entry::Service
+          def compose!(deps = nil)
+            super do
+              @entries = []
+              @config.each do |config|
+                @entries << ::Gitlab::Config::Entry::Factory.new(Entry::Service)
+                  .value(config || {})
+                  .with(key: "service", parent: self, description: "service definition.") # rubocop:disable CodeReuse/ActiveRecord
+                  .create!
+              end
+
+              @entries.each do |entry|
+                entry.compose!(deps)
+              end
+            end
+          end
+
+          def value
+            @entries.map(&:value)
+          end
+
+          def descendants
+            @entries
           end
         end
       end

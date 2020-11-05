@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { TEST_HOST } from 'helpers/test_constants';
 import { createStore } from '~/mr_notes/stores';
 import ParallelDiffTableRow from '~/diffs/components/parallel_diff_table_row.vue';
 import diffFileMockData from '../mock_data/diff_file';
@@ -185,6 +186,13 @@ describe('ParallelDiffTableRow', () => {
       });
     };
 
+    const setWindowLocation = value => {
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value,
+      });
+    };
+
     beforeEach(() => {
       // eslint-disable-next-line prefer-destructuring
       thisLine = diffFileMockData.parallel_diff_lines[2];
@@ -220,15 +228,19 @@ describe('ParallelDiffTableRow', () => {
       const findNoteButton = () => wrapper.find({ ref: 'addDiffNoteButtonLeft' });
 
       it.each`
-        hover    | line                        | userData     | expectation
-        ${true}  | ${{}}                       | ${TEST_USER} | ${true}
-        ${true}  | ${{ line: { left: null } }} | ${TEST_USER} | ${false}
-        ${true}  | ${{}}                       | ${null}      | ${false}
-        ${false} | ${{}}                       | ${TEST_USER} | ${false}
+        hover    | line                        | userData     | query                | mergeRefHeadComments | expectation
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${true}
+        ${true}  | ${{ line: { left: null } }} | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${false}
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${true}              | ${true}
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${false}             | ${false}
+        ${true}  | ${{}}                       | ${null}      | ${''}                | ${true}              | ${false}
+        ${false} | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${false}
       `(
-        'exists is $expectation - with userData ($userData)',
-        async ({ hover, line, userData, expectation }) => {
+        'exists is $expectation - with userData ($userData) query ($query)',
+        async ({ hover, line, userData, query, mergeRefHeadComments, expectation }) => {
           store.state.notes.userData = userData;
+          gon.features = { mergeRefHeadComments };
+          setWindowLocation({ href: `${TEST_HOST}?${query}` });
           createComponent(line, store);
           if (hover) await wrapper.find('.line_holder').trigger('mouseover');
 

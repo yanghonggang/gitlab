@@ -50,11 +50,11 @@ export default {
       'addedLines',
       'removedLines',
     ]),
+    showDropdowns() {
+      return !this.commit && this.mergeRequestDiffs.length;
+    },
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
-    },
-    hasChanges() {
-      return parseInt(this.diffFilesCountText, 10) > 0;
     },
   },
   created() {
@@ -83,7 +83,6 @@ export default {
       }"
     >
       <gl-button
-        v-if="hasChanges"
         v-gl-tooltip.hover
         variant="default"
         icon="file-tree"
@@ -93,6 +92,7 @@ export default {
         @click="toggleShowTreeList"
       />
       <gl-sprintf
+        v-if="showDropdowns"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
@@ -110,11 +110,11 @@ export default {
           />
         </template>
       </gl-sprintf>
-      <div v-if="commit">
+      <div v-else-if="commit">
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
       </div>
-      <div v-if="hasChanges" class="inline-parallel-buttons d-none d-md-flex ml-auto">
+      <div class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"

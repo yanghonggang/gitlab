@@ -4,7 +4,6 @@ class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers
-  include Presentable
 
   self.reactive_cache_refresh_interval = 1.minute
   self.reactive_cache_lifetime = 55.seconds

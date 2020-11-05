@@ -9,7 +9,6 @@ import axios from '../../lib/utils/axios_utils';
 import { refreshCurrentPage, visitUrl } from '../../lib/utils/url_utility';
 import findAndFollowLink from '../../lib/utils/navigation_utility';
 import { parseBoolean, getCspNonceValue } from '~/lib/utils/common_utils';
-import { keysFor, TOGGLE_PERFORMANCE_BAR } from './keybindings';
 
 const defaultStopCallback = Mousetrap.prototype.stopCallback;
 Mousetrap.prototype.stopCallback = function customStopCallback(e, element, combo) {
@@ -71,7 +70,7 @@ export default class Shortcuts {
     Mousetrap.bind('s', Shortcuts.focusSearch);
     Mousetrap.bind('/', Shortcuts.focusSearch);
     Mousetrap.bind('f', this.focusFilter.bind(this));
-    Mousetrap.bind(keysFor(TOGGLE_PERFORMANCE_BAR), Shortcuts.onTogglePerfBar);
+    Mousetrap.bind('p b', Shortcuts.onTogglePerfBar);
 
     const findFileURL = document.body.dataset.findFile;
 

@@ -124,10 +124,6 @@ class MergeRequestWidgetEntity < Grape::Entity
     end
   end
 
-  expose :security_reports_docs_path do |merge_request|
-    help_page_path('user/application_security/sast/index.md', anchor: 'reports-json-format')
-  end
-
   private
 
   delegate :current_user, to: :request

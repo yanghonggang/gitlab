@@ -2,7 +2,6 @@
 
 class LabelPresenter < Gitlab::View::Presenter::Delegated
   presents :label
-  delegate :name, :full_name, to: :label_subject, prefix: :subject
 
   def edit_path
     case label
@@ -40,8 +39,8 @@ class LabelPresenter < Gitlab::View::Presenter::Delegated
     label.is_a?(ProjectLabel)
   end
 
-  def label_subject
-    @label_subject ||= label.subject
+  def subject_name
+    label.subject.name
   end
 
   private

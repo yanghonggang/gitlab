@@ -4,7 +4,7 @@ module Gitlab
   module Ci
     class Config
       module Entry
-        class Rules < ::Gitlab::Config::Entry::ComposableArray
+        class Rules < ::Gitlab::Config::Entry::Node
           include ::Gitlab::Config::Entry::Validatable
 
           validations do
@@ -12,12 +12,23 @@ module Gitlab
             validates :config, type: Array
           end
 
-          def value
-            @config
+          def compose!(deps = nil)
+            super(deps) do
+              @config.each_with_index do |rule, index|
+                @entries[index] = ::Gitlab::Config::Entry::Factory.new(Entry::Rules::Rule)
+                  .value(rule)
+                  .with(key: "rule", parent: self, description: "rule definition.") # rubocop:disable CodeReuse/ActiveRecord
+                  .create!
+              end
+
+              @entries.each_value do |entry|
+                entry.compose!(deps)
+              end
+            end
           end
 
-          def composable_class
-            Entry::Rules::Rule
+          def value
+            @config
           end
         end
       end
