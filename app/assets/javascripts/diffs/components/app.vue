@@ -152,7 +152,7 @@ export default {
       'canMerge',
       'hasConflicts',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex', 'diffCompareDropdownSourceVersions']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -207,8 +207,11 @@ export default {
 
       return visible;
     },
-    hasCommits() {
-      return this.commit || this.mergeRequestDiffs.length > 0;
+    hasSourceVersions() {
+      return this.diffCompareDropdownSourceVersions.length > 0;
+    },
+    isIndividualCommit() {
+      return this.commit;
     },
     hasChangedFiles() {
       return this.diffFiles.length > 0;
@@ -437,7 +440,7 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        v-if="hasCommits"
+        v-if="hasSourceVersions || isIndividualCommit"
         :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
