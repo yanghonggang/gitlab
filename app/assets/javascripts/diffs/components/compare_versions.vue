@@ -60,7 +60,7 @@ export default {
     },
     hasSourceVersions() {
       return this.diffCompareDropdownSourceVersions.length > 0;
-    }
+    },
   },
   created() {
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
