@@ -464,7 +464,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList && hasChangedFiles"
+          v-if="showTreeList"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
