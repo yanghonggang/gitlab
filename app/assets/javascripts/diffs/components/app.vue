@@ -212,15 +212,6 @@ export default {
 
       return visible;
     },
-    hasSourceVersions() {
-      return this.diffCompareDropdownSourceVersions.length > 0;
-    },
-    isIndividualCommit() {
-      return this.commit;
-    },
-    hasChangedFiles() {
-      return this.diffFiles.length > 0;
-    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -445,7 +436,6 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        v-if="hasSourceVersions || isIndividualCommit"
         :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"

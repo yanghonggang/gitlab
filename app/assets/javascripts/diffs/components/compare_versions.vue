@@ -58,6 +58,9 @@ export default {
     hasChanges() {
       return Boolean(this.tree.length);
     },
+    hasSourceVersions() {
+      return this.diffCompareDropdownSourceVersions.length > 0;
+    }
   },
   created() {
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
@@ -97,7 +100,7 @@ export default {
         @click="toggleShowTreeList"
       />
       <gl-sprintf
-        v-if="!commit"
+        v-if="!commit && hasSourceVersions"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
