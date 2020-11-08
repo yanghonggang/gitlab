@@ -207,9 +207,6 @@ export default {
 
       return visible;
     },
-    hasChanges() {
-      return this.diffFiles.length > 0;
-    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -462,7 +459,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList && hasChanges"
+          v-if="showTreeList && renderDiffFiles"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >

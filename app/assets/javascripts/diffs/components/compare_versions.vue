@@ -38,13 +38,15 @@ export default {
     },
   },
   computed: {
+    ...mapState({
+      diffFiles: state => state.diffs.diffFiles,
+    }),
     ...mapGetters('diffs', [
       'whichCollapsedTypes',
       'diffCompareDropdownTargetVersions',
       'diffCompareDropdownSourceVersions',
     ]),
     ...mapState('diffs', [
-      'tree',
       'commit',
       'showTreeList',
       'startVersion',
@@ -56,7 +58,7 @@ export default {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
     },
     hasChanges() {
-      return Boolean(this.tree.length);
+      return this.diffFiles.length > 0;
     },
     hasSourceVersions() {
       return this.diffCompareDropdownSourceVersions.length > 0;

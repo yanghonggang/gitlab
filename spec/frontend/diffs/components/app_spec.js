@@ -738,7 +738,7 @@ describe('diffs/components/app', () => {
 
     it('should render tree list', () => {
       createComponent({}, ({ state }) => {
-        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }, { file_hash: '222', file_path: '222.js' }];
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
       });
 
       expect(wrapper.find(TreeList).exists()).toBe(true);
