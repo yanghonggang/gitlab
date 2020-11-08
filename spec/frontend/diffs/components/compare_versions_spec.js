@@ -11,10 +11,11 @@ localVue.use(Vuex);
 
 describe('CompareVersions', () => {
   let wrapper;
+  let store;
   const targetBranchName = 'tmp-wine-dev';
 
   const createWrapper = props => {
-    const store = createStore();
+    store = createStore();
     const mergeRequestDiff = diffsMockData[0];
 
     store.state.diffs.addedLines = 10;
@@ -89,6 +90,18 @@ describe('CompareVersions', () => {
       const limitedContainer = wrapper.find('.container-limited.limit-container-width');
 
       expect(limitedContainer.exists()).toBe(false);
+    });
+  });
+
+  describe('noChangedFiles', () => {
+    beforeEach(() => {
+      store.state.diffs.diffFiles = [];
+    });
+
+    it('should not render Tree List toggle button when there are no changes', () => {
+      const treeListBtn = wrapper.find('.js-toggle-tree-list');
+
+      expect(treeListBtn.exists()).toBe(false);
     });
   });
 
