@@ -143,6 +143,7 @@ export default {
       retrievingBatches: state => state.diffs.retrievingBatches,
     }),
     ...mapState('diffs', [
+      'tree',
       'showTreeList',
       'isLoading',
       'startVersion',
@@ -211,6 +212,9 @@ export default {
       }
 
       return visible;
+    },
+    hasChanges() {
+      return Boolean(this.tree.length);
     },
   },
   watch: {
@@ -464,7 +468,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList"
+          v-if="showTreeList && hasChanges"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
