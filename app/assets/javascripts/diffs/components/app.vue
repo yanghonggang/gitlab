@@ -143,7 +143,6 @@ export default {
       retrievingBatches: state => state.diffs.retrievingBatches,
     }),
     ...mapState('diffs', [
-      'tree',
       'showTreeList',
       'isLoading',
       'startVersion',
@@ -153,12 +152,7 @@ export default {
       'canMerge',
       'hasConflicts',
     ]),
-    ...mapGetters('diffs', [
-      'whichCollapsedTypes',
-      'isParallelView',
-      'currentDiffIndex',
-      'diffCompareDropdownSourceVersions',
-    ]),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -214,7 +208,7 @@ export default {
       return visible;
     },
     hasChanges() {
-      return Boolean(this.tree.length);
+      return this.diffFiles.length > 0;
     },
   },
   watch: {
