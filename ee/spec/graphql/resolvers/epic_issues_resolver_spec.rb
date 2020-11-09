@@ -21,16 +21,16 @@ RSpec.describe Resolvers::EpicIssuesResolver do
   let_it_be(:epic_issue3) { create(:epic_issue, epic: epic2, issue: issue3, relative_position: 1) }
   let_it_be(:epic_issue4) { create(:epic_issue, epic: epic2, issue: issue4, relative_position: nil) }
 
-  specify do
-    expect(described_class).to have_nullable_graphql_type(Types::EpicIssueType.connection_type)
-  end
+  let(:epics) { [epic1, epic2] }
 
   before do
     group.add_developer(current_user)
     stub_licensed_features(epics: true)
   end
 
-  let(:epics) { [epic1, epic2] }
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::EpicIssueType.connection_type)
+  end
 
   describe '#resolve' do
     it 'finds all epic issues' do
