@@ -137,7 +137,7 @@ class GitlabSchema < GraphQL::Schema
     end
 
     def unauthorized_object(unauthorized_error)
-      if unauthorized_error.context.query.mutation?
+      if unauthorized_error.context.query.mutation? && unauthorized_error.type < ::Mutations::BaseMutation
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, RESOURCE_ACCESS_ERROR
       else
         nil

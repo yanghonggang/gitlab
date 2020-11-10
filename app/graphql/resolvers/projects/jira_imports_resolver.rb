@@ -3,8 +3,6 @@
 module Resolvers
   module Projects
     class JiraImportsResolver < BaseResolver
-      type Types::JiraImportType.connection_type, null: true
-
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
       type Types::JiraImportType.connection_type, null: true

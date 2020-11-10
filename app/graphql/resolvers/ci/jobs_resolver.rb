@@ -3,6 +3,8 @@
 module Resolvers
   module Ci
     class JobsResolver < BaseResolver
+      type ::Types::Ci::JobType.connection_type, null: true
+
       alias_method :pipeline, :object
 
       argument :security_report_types, [Types::Security::ReportTypeEnum],

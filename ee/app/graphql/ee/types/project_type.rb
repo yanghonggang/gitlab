@@ -143,7 +143,7 @@ module EE
       def dast_site_profile(id:)
         # TODO: remove this coercion when the compatibility layer is removed
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
-        gid = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(args[:id])
+        gid = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id)
         DastSiteProfilesFinder.new(project_id: object.id, id: gid.model_id).execute.first
       end
 

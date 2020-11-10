@@ -62,7 +62,7 @@ RSpec.describe Resolvers::Projects::SnippetsResolver do
       it 'returns an error if the gid is invalid' do
         expect do
           resolve_snippets(args: { ids: ['foo'] })
-        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+        end.to raise_error(GraphQL::CoercionError)
       end
     end
 
