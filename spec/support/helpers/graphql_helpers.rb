@@ -325,6 +325,10 @@ module GraphqlHelpers
   def post_graphql(query, current_user: nil, variables: nil, headers: {})
     params = { query: query, variables: variables&.to_json }
     post api('/', current_user, version: 'graphql'), params: params, headers: headers
+
+    if graphql_errors # Errors are acceptable, but not this one:
+      expect(graphql_errors).not_to include(a_hash_including('message' => 'Internal server error'))
+    end
   end
 
   def post_graphql_mutation(mutation, current_user: nil)
