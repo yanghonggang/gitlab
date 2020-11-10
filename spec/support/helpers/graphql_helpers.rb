@@ -395,10 +395,10 @@ module GraphqlHelpers
 
   # Raises an error if no data is found
   def graphql_data
-    # Note that `json_response` is defined as `let(:json_response)` and
-    # therefore, in a spec with multiple queries, will only contain data
-    # from the _first_ query, not subsequent ones
-    json_response['data'] || (raise NoData, graphql_errors)
+    body = response.body
+    resp = ::Gitlab::Json.parse(response.body) if body
+
+    resp['data'] || (raise NoData, graphql_errors(resp))
   end
 
   def graphql_data_at(*path)
@@ -415,14 +415,18 @@ module GraphqlHelpers
     end
   end
 
-  def graphql_errors
-    case json_response
+  # method rather than let so that we can get the errors after each request, if
+  # we make more than one in an example.
+  def graphql_errors(data = nil)
+    data ||= ::Gitlab::Json.parse(response.body)
+
+    case data
     when Hash # regular query
       json_response['errors']
     when Array # multiplexed queries
       json_response.map { |response| response['errors'] }
     else
-      raise "Unknown GraphQL response type #{json_response.class}"
+      raise "Unknown GraphQL response type #{data.class}"
     end
   end
 
