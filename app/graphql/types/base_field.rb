@@ -76,7 +76,7 @@ module Types
       return false if rc.nil? # no resolver => no way to know!
 
       # Resolvers must opt-in to have their objects checked
-      return false if rc.respond_to?(:authorizes_object) && authorizes_object?
+      return false if rc.respond_to?(:authorizes_object?) && rc.authorizes_object?
 
       true # by default, permissions on resolvers apply to field values, not objects
     end
