@@ -40,9 +40,9 @@ module Mutations
 
       def resolve(project_path: nil, **args)
         if project_path.present?
-          project = authorized_find!(full_path: project_path)
-        elsif !can_create_personal_snippet?
-          raise_resource_not_available_error!
+          project = authorized_find!(project_path)
+        else
+          authorize!(:global)
         end
 
         service_response = ::Snippets::CreateService.new(project,
@@ -66,12 +66,8 @@ module Mutations
 
       private
 
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
-      end
-
-      def can_create_personal_snippet?
-        Ability.allowed?(current_user, :create_snippet)
+      def find_object(full_path)
+        Project.find_by_full_path(full_path)
       end
 
       def create_params(args)
