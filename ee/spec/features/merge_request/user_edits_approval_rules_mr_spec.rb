@@ -24,6 +24,21 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
     close_select2 members_selector
   end
 
+  def submit_approval_rule_member(approver)
+    rule_name = "Custom Approval Rule"
+
+    click_button "Add approval rule"
+
+    fill_in "Rule name", with: rule_name
+
+    add_approval_rule_member('user', approver.name)
+
+    find("#{modal_id} button", text: 'Add approval rule').click
+    wait_for_requests
+
+    rule_name
+  end
+
   before do
     project.update_attribute(:disable_overriding_approvers_per_merge_request, false)
     stub_licensed_features(multiple_approval_rules: true)
@@ -40,6 +55,29 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
     wait_for_requests
   end
 
+  context 'dropdown users' do
+    it 'is not shown in assignee dropdown' do
+      rule_name = submit_approval_rule_member(approver)
+
+      find('.js-assignee-search').click
+
+      page.within '.dropdown-menu-assignee' do
+        expect(page).not_to have_content(rule_name)
+      end
+    end
+
+    # it 'is shown in reviewer dropdown' do
+    #   rule_name = submit_approval_rule_member(approver)
+
+    #   find('.js-reviewer-search').click
+
+    #   page.within '.dropdown-menu-reviewer' do
+    #     binding.pry
+    #     expect(page).to have_content(rule_name)
+    #   end
+    # end
+  end
+
   it "shows approval rules" do
     names = page_rule_names.map(&:text)
 
@@ -47,16 +85,7 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   end
 
   it "allows user to create approval rule" do
-    rule_name = "Custom Approval Rule"
-
-    click_button "Add approval rule"
-
-    fill_in "Rule name", with: rule_name
-
-    add_approval_rule_member('user', approver.name)
-
-    find("#{modal_id} button", text: 'Add approval rule').click
-    wait_for_requests
+    rule_name = submit_approval_rule_member(approver)
 
     expect(page_rule_names.last).to have_text(rule_name)
   end
