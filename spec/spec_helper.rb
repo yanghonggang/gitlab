@@ -188,6 +188,12 @@ RSpec.configure do |config|
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
+
+    ActiveRecord::Base.connection.execute(<<~SQL)
+      CREATE TABLE gitlab_partitions_dynamic.audit_events_default_partition
+      PARTITION OF audit_events
+      FOR VALUES FROM (MINVALUE) TO (MAXVALUE);
+    SQL
   end
 
   config.after(:all) do
