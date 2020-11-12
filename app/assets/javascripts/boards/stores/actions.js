@@ -16,11 +16,12 @@ import boardStore from '~/boards/stores/boards_store';
 
 import listsIssuesQuery from '../graphql/queries/lists_issues.query.graphql';
 import boardLabelsQuery from '../graphql/queries/board_labels.query.graphql';
+import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import createBoardListMutation from '../graphql/mutations/board_list_create.mutation.graphql';
 import updateBoardListMutation from '../graphql/mutations/board_list_update.mutation.graphql';
 import issueMoveListMutation from '../graphql/mutations/issue_move_list.mutation.graphql';
 import destroyBoardListMutation from '../graphql/mutations/board_list_destroy.mutation.graphql';
-import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import issueCreateMutation from '../graphql/mutations/issue_create.mutation.graphql';
 import issueSetLabelsMutation from '../graphql/mutations/issue_set_labels.mutation.graphql';
 import issueSetDueDateMutation from '../graphql/mutations/issue_set_due_date.mutation.graphql';
 
