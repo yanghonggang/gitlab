@@ -215,6 +215,7 @@ possible selectors include:
 
 - A semantic attribute like `name` (also verifies that `name` was setup properly)
 - A `data-testid` attribute ([recommended by maintainers of `@vue/test-utils`](https://github.com/vuejs/vue-test-utils/issues/1498#issuecomment-610133465))
+  to optionally combine with [`findByTestId`](#extendedwrapper-and-findbytestid)
 - a Vue `ref` (if using `@vue/test-utils`)
 
 ```javascript
@@ -232,8 +233,9 @@ it('exists', () => {
   wrapper.find(FooComponent);
   wrapper.find('input[name=foo]');
   wrapper.find('[data-testid="foo"]');
+  wrapper.findByTestId('[data-testid="foo"]'); // with the extendedWrapper utility – check below
   wrapper.find({ ref: 'foo'});
-
+  
   // Bad
   wrapper.find('.js-foo');
   wrapper.find('.btn-primary');
@@ -242,9 +244,10 @@ it('exists', () => {
 });
 ```
 
-It is not recommended that you add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
+It is also recommended:
 
-Do not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
+- not add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
+- not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
 
 ### Querying for child components
 
@@ -1014,7 +1017,7 @@ testAction(
 );
 ```
 
-Check an example in [`spec/javascripts/ide/stores/actions_spec.jsspec/javascripts/ide/stores/actions_spec.js`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/javascripts/ide/stores/actions_spec.js).
+Check an example in [`spec/frontend/ide/stores/actions_spec.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/ide/stores/actions_spec.js).
 
 ### Wait until Axios requests finish
 
@@ -1025,6 +1028,29 @@ These are very useful if you don't have a handle to the request's Promise, for e
 - `waitForAll(callback)`: Runs `callback` once all pending requests have finished. If no requests are pending, runs `callback` on the next tick.
 
 Both functions run `callback` on the next tick after the requests finish (using `setImmediate()`), to allow any `.then()` or `.catch()` handlers to run.
+
+### extendedWrapper and findByTestId
+
+Using `data-testid` is one of the [recommended ways to query DOM elements](#how-to-query-dom-elements).
+In the aim to standardise the way we use the attribute and make its usage easier and less verbose,
+you can use the `extendedWrapper` utility to extend the `Wrapper` returned by `shalowMount` or `mount`.
+Doing so will provide you the following capability: `findByTestId`.
+
+```javascript
+import { extendedWrapper } from './vue_test_utils_helper';
+
+describe('FooComponent', () => {
+    const wrapper = extendedWrapper(shallowMount({
+        template: `<div data-testid="my-test-id"></div>`,
+    ));
+    
+    it('exists', () => {
+        expect(wrapper.findByTestId('my-test-id').exists()).toBe(true);
+    });
+});
+```
+
+Check an example in [`spec/frontend/alert_management/components/alert_details_spec.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/frontend/alert_management/components/alert_details_spec.js#L32).
 
 ## Testing with older browsers
 
