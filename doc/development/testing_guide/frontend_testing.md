@@ -244,10 +244,9 @@ it('exists', () => {
 });
 ```
 
-It is also recommended:
+It is not recommended that you add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
 
-- not add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
-- not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
+Do not use a `.qa-*` class or `data-qa-selector` attribute for any tests other than QA end-to-end testing.
 
 ### Querying for child components
 
@@ -1040,13 +1039,13 @@ Doing so will provide you the following capability: `findByTestId`.
 import { extendedWrapper } from './vue_test_utils_helper';
 
 describe('FooComponent', () => {
-    const wrapper = extendedWrapper(shallowMount({
-        template: `<div data-testid="my-test-id"></div>`,
-    ));
-    
-    it('exists', () => {
-        expect(wrapper.findByTestId('my-test-id').exists()).toBe(true);
-    });
+  const wrapper = extendedWrapper(shallowMount({
+    template: `<div data-testid="my-test-id"></div>`,
+  }));
+  
+  it('exists', () => {
+    expect(wrapper.findByTestId('my-test-id').exists()).toBe(true);
+  });
 });
 ```
 

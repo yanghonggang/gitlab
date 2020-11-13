@@ -38,11 +38,10 @@ export const waitForMutation = (store, expectedMutationType) =>
 
 export const extendedWrapper = wrapper => {
   if (isArray(wrapper) || !wrapper?.find) {
-    /* eslint-disable no-console */
+    // eslint-disable-next-line no-console
     console.warn(
       '[vue-test-utils-helper]: you are trying to extend an object that is not a VueWrapper.',
     );
-    /* eslint-enable no-console */
     return wrapper;
   }
 

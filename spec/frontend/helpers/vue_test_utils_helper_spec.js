@@ -48,16 +48,9 @@ describe('Vue test utils helpers', () => {
 
   describe('extendedWrapper', () => {
     describe('when an invalid wrapper is provided', () => {
-      /* eslint-disable no-console */
-      let originalWarn;
-
       beforeEach(() => {
-        originalWarn = console.warn.bind(console);
+        // eslint-disable-next-line no-console
         console.warn = jest.fn();
-      });
-
-      afterEach(() => {
-        console.warn = originalWarn;
       });
 
       it.each`
@@ -70,12 +63,13 @@ describe('Vue test utils helpers', () => {
         ${''}
       `('should warn with an error when the wrapper is $wrapper', ({ wrapper }) => {
         extendedWrapper(wrapper);
+        /* eslint-disable no-console */
         expect(console.warn).toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith(
           '[vue-test-utils-helper]: you are trying to extend an object that is not a VueWrapper.',
         );
+        /* eslint-enable no-console */
       });
-      /* eslint-enable no-console */
     });
 
     describe('findByTestId', () => {
