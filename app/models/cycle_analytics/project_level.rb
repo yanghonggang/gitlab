@@ -20,5 +20,14 @@ module CycleAnalytics
     def permissions(user:)
       Gitlab::CycleAnalytics::Permissions.get(user: user, project: project)
     end
+
+    def build_stage(stage_name)
+      stage_params = stage_params_by_name(stage_name).merge(project: project)
+      Analytics::CycleAnalytics::ProjectStage.new(stage_params)
+    end
+
+    def subject_class
+      project
+    end
   end
 end
