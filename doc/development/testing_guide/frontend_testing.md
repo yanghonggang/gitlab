@@ -1032,7 +1032,7 @@ Both functions run `callback` on the next tick after the requests finish (using 
 ### extendedWrapper and findByTestId
 
 Using `data-testid` is one of the [recommended ways to query DOM elements](#how-to-query-dom-elements).
-In the aim to standardise the way we use the attribute and make its usage easier and less verbose,
+In the aim to standardize the way we use the attribute and make its usage easier and less verbose,
 you can use the `extendedWrapper` utility to extend the `Wrapper` returned by `shalowMount` or `mount`.
 Doing so will provide you the following capability: `findByTestId`.
 
