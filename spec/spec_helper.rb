@@ -188,10 +188,6 @@ RSpec.configure do |config|
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
-
-    # Create database partitions - we can't use dynamically partitioned
-    # tables without partitions created
-    Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
   end
 
   config.after(:all) do

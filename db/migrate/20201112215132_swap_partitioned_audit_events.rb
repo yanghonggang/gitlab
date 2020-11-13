@@ -5,8 +5,6 @@ class SwapPartitionedAuditEvents < ActiveRecord::Migration[6.0]
 
   DOWNTIME = false
 
-  disable_ddl_transaction!
-
   def up
     replace_with_partitioned_table :audit_events
   end
