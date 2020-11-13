@@ -66,16 +66,15 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
       end
     end
 
-    # it 'is shown in reviewer dropdown' do
-    #   rule_name = submit_approval_rule_member(approver)
+    it 'is shown in reviewer dropdown' do
+      rule_name = submit_approval_rule_member(approver)
 
-    #   find('.js-reviewer-search').click
+      find('.js-reviewer-search').click
 
-    #   page.within '.dropdown-menu-reviewer' do
-    #     binding.pry
-    #     expect(page).to have_content(rule_name)
-    #   end
-    # end
+      page.within '.dropdown-menu-reviewer' do
+        expect(page).to have_content(rule_name)
+      end
+    end
   end
 
   it "shows approval rules" do

@@ -756,7 +756,7 @@ UsersSelect.prototype.users = function(query, options, callback) {
     ...getAjaxUsersSelectParams(options, AJAX_USERS_SELECT_PARAMS_MAP),
   };
 
-  if (options.issuableType === 'merge_request') {
+  if (options.issuableType === 'merge_request' || (!options.issuableType && options.iid)) {
     params.merge_request_iid = options.iid || null;
   }
 

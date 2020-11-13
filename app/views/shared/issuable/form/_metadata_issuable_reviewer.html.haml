@@ -7,4 +7,4 @@
     - if issuable.reviewers.empty?
       = hidden_field_tag "#{issuable.to_ability_name}[reviewer_ids][]", 0, id: nil, data: { meta: '' }
 
-    = dropdown_tag(users_dropdown_label(issuable.reviewers), options: reviewers_dropdown_options(issuable.to_ability_name))
+    = dropdown_tag(users_dropdown_label(issuable.reviewers), options: reviewers_dropdown_options(issuable.to_ability_name, issuable.iid))
