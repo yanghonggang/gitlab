@@ -189,11 +189,9 @@ RSpec.configure do |config|
     # Reset any changes in after hook.
     stub_all_feature_flags
 
-    ActiveRecord::Base.connection.execute(<<~SQL)
-      CREATE TABLE gitlab_partitions_dynamic.audit_events_default_partition
-      PARTITION OF audit_events
-      FOR VALUES FROM (MINVALUE) TO (MAXVALUE);
-    SQL
+    # Create database partitions - we can't use dynamically partitioned
+    # tables without partitions created
+    Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
   end
 
   config.after(:all) do
