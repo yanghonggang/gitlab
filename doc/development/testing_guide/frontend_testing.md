@@ -215,7 +215,7 @@ possible selectors include:
 
 - A semantic attribute like `name` (also verifies that `name` was setup properly)
 - A `data-testid` attribute ([recommended by maintainers of `@vue/test-utils`](https://github.com/vuejs/vue-test-utils/issues/1498#issuecomment-610133465))
-  to optionally combine with [`findByTestId`](#extendedwrapper-and-findbytestid)
+  optionally combined with [`findByTestId`](#extendedwrapper-and-findbytestid)
 - a Vue `ref` (if using `@vue/test-utils`)
 
 ```javascript
@@ -1032,7 +1032,7 @@ Both functions run `callback` on the next tick after the requests finish (using 
 ### extendedWrapper and findByTestId
 
 Using `data-testid` is one of the [recommended ways to query DOM elements](#how-to-query-dom-elements).
-In the aim to standardize the way we use the attribute and make its usage easier and less verbose,
+With the aim to standardize the way we find elements in specs,
 you can use the `extendedWrapper` utility to extend the `Wrapper` returned by `shalowMount` or `mount`.
 Doing so will provide you the following capability: `findByTestId`.
 
