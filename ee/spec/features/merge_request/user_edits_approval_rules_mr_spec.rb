@@ -55,28 +55,6 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
     wait_for_requests
   end
 
-  context 'dropdown users' do
-    it 'is not shown in assignee dropdown' do
-      rule_name = submit_approval_rule_member(approver)
-
-      find('.js-assignee-search').click
-
-      page.within '.dropdown-menu-assignee' do
-        expect(page).not_to have_content(rule_name)
-      end
-    end
-
-    it 'is shown in reviewer dropdown' do
-      rule_name = submit_approval_rule_member(approver)
-
-      find('.js-reviewer-search').click
-
-      page.within '.dropdown-menu-reviewer' do
-        expect(page).to have_content(rule_name)
-      end
-    end
-  end
-
   it "shows approval rules" do
     names = page_rule_names.map(&:text)
 
