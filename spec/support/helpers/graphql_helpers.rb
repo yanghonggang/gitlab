@@ -23,7 +23,7 @@ module GraphqlHelpers
   # wrapping.
   def resolve(
     resolver_class, # The resolver at test. Should be a BaseResolver
-    obj: nil, args: {}, ctx: {},
+    obj: nil, args: {}, ctx: {}, schema: GitlabSchema,
     parent: :not_given,
     lookahead: :not_given)
     # All resolution goes through fields, so we need to create one here that
@@ -32,7 +32,7 @@ module GraphqlHelpers
     field_options = resolver_class.field_options.merge(name: 'value')
     field = ::Types::BaseField.new(**field_options)
 
-    resolve_field(field, obj, args: args, ctx: ctx,
+    resolve_field(field, obj, args: args, ctx: ctx, schema: schema,
                   parent_class: resolver_parent,
                   extras: { parent: parent, lookahead: lookahead })
   end
@@ -44,10 +44,11 @@ module GraphqlHelpers
     current_user: :not_given, # The current user (specified explicitly)
     args: {}, # Field arguments (keys will be fieldnamerized)
     extras: {}, # Stub values for field extras (parent and lookahead)
+    schema: GitlabSchema, # A specific schema instance
     parent_class: described_class)
     field = to_base_field(field)
     ctx[:current_user] = current_user unless current_user == :not_given
-    query = GraphQL::Query.new(GitlabSchema, context: ctx)
+    query = GraphQL::Query.new(schema, context: ctx)
     extras[:lookahead] = negative_lookahead if extras[:lookahead] == :not_given && field.extras.include?(:lookahead)
 
     query_ctx = query.context

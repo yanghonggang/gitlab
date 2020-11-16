@@ -236,7 +236,7 @@ RSpec.describe Resolvers::MergeRequestsResolver do
   end
 
   def resolve_mr_single(project, iid)
-    resolve_mr(project, { iid: iid.to_s }, resolver: described_class.single)
+    resolve_mr(project, resolver: described_class.single, iid: iid.to_s)
   end
 
   def resolve_mr(project, resolver: described_class, user: current_user, **args)
