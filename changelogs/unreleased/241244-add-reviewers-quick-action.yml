@@ -1,0 +1,5 @@
+---
+title: Add /assign_reviewer and /unassign_reviewer to quick actions
+merge_request: 46358
+author:
+type: added

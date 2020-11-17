@@ -95,6 +95,26 @@ RSpec.shared_examples 'issuable quick actions' do
         }
       ),
       QuickAction.new(
+        action_text: "/assign_reviewer @#{user.username}",
+        expectation: ->(noteable, can_use_quick_action) {
+          if noteable.allows_multiple_reviewers?
+            expect(noteable.reviewers == [old_reviewer, user]).to eq(can_use_quick_action)
+          else
+            expect(noteable.reviewers == [user]).to eq(can_use_quick_action)
+          end
+        }
+      ),
+      QuickAction.new(
+        action_text: "/unassign_reviewer",
+        expectation: ->(noteable, can_use_quick_action) {
+          if can_use_quick_action
+            expect(noteable.reviewers).to be_empty
+          else
+            expect(noteable.reviewers).not_to be_empty
+          end
+        }
+      ),
+      QuickAction.new(
         action_text: "/title new title",
         expectation: ->(noteable, can_use_quick_action) {
           expect(noteable.title == "new title").to eq(can_use_quick_action)
@@ -225,6 +245,7 @@ RSpec.shared_examples 'issuable quick actions' do
   end
 
   let(:old_assignee) { create(:user) }
+  let(:old_reviewer) { create(:user) }
 
   before do
     project.add_developer(old_assignee)
