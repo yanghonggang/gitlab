@@ -32,18 +32,22 @@ module Ci
       destroy_job_artifacts_batch || destroy_pipeline_artifacts_batch
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def destroy_job_artifacts_batch
       artifacts = Ci::JobArtifact
         .expired(BATCH_SIZE)
         .unlocked
         .with_destroy_preloads
-        .to_a
+
+      artifacts = artifacts.reorder('') if ::Feature.enabled?(:ci_unordered_artifacts_removal)
+      artifacts = artifacts.to_a
 
       return false if artifacts.empty?
 
       parallel_destroy_batch(artifacts)
       true
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     # TODO: Make sure this can also be parallelized
     # https://gitlab.com/gitlab-org/gitlab/-/issues/270973
