@@ -92,6 +92,44 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
+    context 'assign_reviewer command' do
+      context 'Merge Request' do
+        let(:merge_request) { create(:merge_request, source_project: project) }
+
+        it 'fetches reviewer and populates them if content contains /assign_reviewer' do
+          merge_request.update(reviewer_ids: [user.id])
+
+          _, updates = service.execute("/assign_reviewer @#{user2.username}", merge_request)
+
+          expect(updates[:reviewer_ids]).to match_array([user.id, user2.id])
+        end
+
+        context 'assign command with multiple reviewer' do
+          it 'fetches reviewer and populates reviewer_ids if content contains /assign_reviewer' do
+            merge_request.update(reviewer_ids: [user.id])
+
+            _, updates = service.execute("/assign_reviewer @#{user.username}\n/assign_reviewer @#{user2.username} @#{user3.username}", merge_request)
+
+            expect(updates[:reviewer_ids]).to match_array([user.id, user2.id, user3.id])
+          end
+
+          context 'unlicensed' do
+            before do
+              stub_licensed_features(multiple_merge_request_reviewers: false)
+            end
+
+            it 'does not recognize /assign_reviewer with multiple user references' do
+              merge_request.update(reviewer_ids: [user.id])
+
+              _, updates = service.execute("/assign_reviewer @#{user2.username} @#{user3.username}", merge_request)
+
+              expect(updates[:reviewer_ids]).to match_array([user2.id])
+            end
+          end
+        end
+      end
+    end
+
     context 'unassign command' do
       let(:content) { '/unassign' }
 
