@@ -244,7 +244,7 @@ it('exists', () => {
 });
 ```
 
-It is recommended to use `kebab-case` for `data-test-id` attribute.
+It is recommended to use `kebab-case` for `data-testid` attribute.
 
 It is not recommended that you add `.js-*` classes just for testing purposes. Only do this if there are no other feasible options available.
 
