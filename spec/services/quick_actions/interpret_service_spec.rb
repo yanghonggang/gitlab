@@ -850,11 +850,6 @@ RSpec.describe QuickActions::InterpretService do
     end
 
     context 'when the merge_request_reviewers flag is enabled' do
-      before do
-        stub_feature_flags(merge_request_reviewers: true)
-        stub_licensed_features(multiple_merge_request_reviewers: true)
-      end
-
       context 'assign_reviewer command with one user' do
         it_behaves_like 'assign_reviewer command' do
           let(:content) { "/assign_reviewer @#{developer.username}" }
@@ -870,7 +865,6 @@ RSpec.describe QuickActions::InterpretService do
       # CE does not have multiple reviewers
       context 'assign_reviewer command with multiple assignees' do
         before_all do
-          stub_licensed_features(multiple_merge_request_reviewers: false)
           project.add_developer(developer2)
         end
 
