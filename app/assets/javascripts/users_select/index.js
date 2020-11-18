@@ -790,7 +790,7 @@ UsersSelect.prototype.renderRow = function(
 
   return `
     <li data-user-id=${user.id}>
-      <a href="#" class="dropdown-menu-user-link d-flex align-items-center samantha ${linkClasses}" ${tooltipAttributes}>
+      <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
           <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
@@ -835,8 +835,8 @@ UsersSelect.prototype.renderApprovalRules = function(elsClassName, approvalRules
     count > 1 ? `<span class="ml-1">(+${count}&nbsp;rules)</span>` : '';
 
   return count
-    ? `<div class="gl-display-flex">
-        <span class="gl-text-truncate">${rule.name}</span>
+    ? `<div class="gl-display-flex gl-font-sm">
+        <span class="gl-text-truncate" title="${rule.name}">${rule.name}</span>
         ${renderApprovalRulesCount}
       </div>`
     : '';
