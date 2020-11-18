@@ -19,6 +19,11 @@ export default {
       required: false,
       default: false,
     },
+    handleOffClick: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   inject: ['canUpdate'],
   data() {
@@ -41,7 +46,10 @@ export default {
   methods: {
     collapseWhenOffClick({ target }) {
       if (!this.$el.contains(target)) {
-        this.collapse();
+        this.$emit('off-click');
+        if (this.handleOffClick) {
+          this.collapse();
+        }
       }
     },
     expand() {
