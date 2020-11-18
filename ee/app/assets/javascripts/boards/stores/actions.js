@@ -227,22 +227,6 @@ export default {
     });
   },
 
-  showPromotionList: ({ state, dispatch }) => {
-    if (
-      !state.showPromotion ||
-      parseBoolean(Cookies.get('promotion_issue_board_hidden')) ||
-      state.disabled
-    ) {
-      return;
-    }
-    dispatch('addList', {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: __('Improve Issue Boards'),
-      position: 0,
-    });
-  },
-
   fetchAllBoards: () => {
     notImplemented();
   },

@@ -345,34 +345,6 @@ describe('updateListWipLimit', () => {
   });
 });
 
-describe('showPromotionList', () => {
-  it('should dispatch addList action when conditions showPromotion is true', done => {
-    const state = {
-      endpoints: { fullPath: 'gitlab-org', boardId: '1' },
-      boardType: 'group',
-      disabled: false,
-      boardLists: [{ type: 'backlog' }, { type: 'closed' }],
-      showPromotion: true,
-    };
-
-    const promotionList = {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: 'Improve Issue Boards',
-      position: 0,
-    };
-
-    testAction(
-      actions.showPromotionList,
-      {},
-      state,
-      [],
-      [{ type: 'addList', payload: promotionList }],
-      done,
-    );
-  });
-});
-
 describe('fetchAllBoards', () => {
   expectNotImplemented(actions.fetchAllBoards);
 });

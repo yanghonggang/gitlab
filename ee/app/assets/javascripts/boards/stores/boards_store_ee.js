@@ -145,10 +145,6 @@ class BoardsStoreEE {
     this.store.updateFiltersUrl(true);
   }
 
-  promotionIsHidden() {
-    return parseBoolean(Cookies.get('promotion_issue_board_hidden'));
-  }
-
   setMaxIssueCountOnList(id, maxIssueCount) {
     this.store.findList('id', id).maxIssueCount = maxIssueCount;
   }

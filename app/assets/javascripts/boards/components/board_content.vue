@@ -37,14 +37,6 @@ export default {
       return sortBy([...Object.values(lists)], 'position');
     },
   },
-  mounted() {
-    if (this.glFeatures.graphqlBoardLists) {
-      this.showPromotionList();
-    }
-  },
-  methods: {
-    ...mapActions(['showPromotionList']),
-  },
 };
 </script>
 
