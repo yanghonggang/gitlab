@@ -3290,6 +3290,9 @@ msgstr ""
 msgid "An issue can be a bug, a todo or a feature request that needs to be discussed in a project. Besides, issues are searchable and filterable."
 msgstr ""
 
+msgid "An issue title is required"
+msgstr ""
+
 msgid "An unauthenticated user"
 msgstr ""
 
@@ -20320,6 +20323,9 @@ msgid "Please reach out if you have any questions and we'll be happy to assist."
 msgstr ""
 
 msgid "Please refer to %{docs_url}"
+msgstr ""
+
+msgid "Please review your changes to the issue title in order to proceed"
 msgstr ""
 
 msgid "Please select"
