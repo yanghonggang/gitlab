@@ -33,6 +33,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:deploy_keys) }
     it { is_expected.to have_many(:hooks) }
     it { is_expected.to have_many(:protected_branches) }
+    it { is_expected.to have_many(:exported_protected_branches) }
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
@@ -3996,8 +3997,16 @@ RSpec.describe Project, factory_default: :keep do
       context 'when feature is private' do
         let(:project) { create(:project, :public, :merge_requests_private) }
 
-        it 'returns projects with the project feature private' do
-          is_expected.to include(project)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns projects with the project feature private' do
+            is_expected.to include(project)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'does not return projects with the project feature private' do
+            is_expected.not_to include(project)
+          end
         end
       end
     end
@@ -4020,7 +4029,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.filter_by_feature_visibility', :enable_admin_mode do
+  describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
     using RSpec::Parameterized::TableSyntax
@@ -4032,12 +4041,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'reporter level access' do
       let(:feature) { MergeRequest }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_reporter_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4052,12 +4062,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'issues' do
       let(:feature) { Issue }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4072,12 +4083,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'wiki' do
       let(:feature) { :wiki }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -4092,12 +4104,13 @@ RSpec.describe Project, factory_default: :keep do
     context 'code' do
       let(:feature) { :repository }
 
-      where(:project_level, :feature_access_level, :membership, :expected_count) do
+      where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access_and_non_private_project_only
       end
 
       with_them do
         it "respects visibility" do
+          enable_admin_mode!(user) if admin_mode
           update_feature_access_level(project, feature_access_level)
 
           expected_objects = expected_count == 1 ? [project] : []
@@ -5539,15 +5552,16 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#find_or_initialize_services' do
-    it 'returns only enabled services' do
+    before do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
-      allow(Service).to receive(:project_specific_services_names).and_return(%w[asana])
       allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
+    end
 
+    it 'returns only enabled services' do
       services = subject.find_or_initialize_services
 
-      expect(services.count).to eq(3)
-      expect(services.map(&:title)).to eq(['Asana', 'JetBrains TeamCity CI', 'Pushover'])
+      expect(services.count).to eq(2)
+      expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
     end
   end
 
@@ -5924,6 +5938,26 @@ RSpec.describe Project, factory_default: :keep do
         project.mark_pages_as_not_deployed
       end.to change { pages_metadatum.reload.deployed }.from(true).to(false)
                .and change { pages_metadatum.reload.artifacts_archive }.from(artifacts_archive).to(nil)
+    end
+  end
+
+  describe '#update_pages_deployment!' do
+    let(:project) { create(:project) }
+    let(:deployment) { create(:pages_deployment, project: project) }
+
+    it "creates new metadata record if none exists yet and sets deployment" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.update_pages_deployment!(deployment)
+
+      expect(project.pages_metadatum.pages_deployment).to eq(deployment)
+    end
+
+    it "updates the existing metadara record with deployment" do
+      expect do
+        project.update_pages_deployment!(deployment)
+      end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
     end
   end
 

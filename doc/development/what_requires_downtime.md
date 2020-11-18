@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -93,6 +93,8 @@ renaming. For example
 # A regular migration in db/migrate
 class RenameUsersUpdatedAtToUpdatedAtTimestamp < ActiveRecord::Migration[4.2]
   include Gitlab::Database::MigrationHelpers
+
+  DOWNTIME = false
 
   disable_ddl_transaction!
 

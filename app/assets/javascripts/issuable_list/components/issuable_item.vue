@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlIcon, GlLabel, GlTooltipDirective } from '@gitlab/ui';
+import { GlLink, GlIcon, GlLabel, GlFormCheckbox, GlTooltipDirective } from '@gitlab/ui';
 
 import { __, sprintf } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -14,6 +14,7 @@ export default {
     GlLink,
     GlIcon,
     GlLabel,
+    GlFormCheckbox,
     IssuableAssignees,
   },
   directives: {
@@ -32,6 +33,15 @@ export default {
     enableLabelPermalinks: {
       type: Boolean,
       required: true,
+    },
+    showCheckbox: {
+      type: Boolean,
+      required: true,
+    },
+    checked: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -74,6 +84,14 @@ export default {
       }
       return {};
     },
+    showDiscussions() {
+      return typeof this.issuable.userDiscussionsCount === 'number';
+    },
+    showIssuableMeta() {
+      return Boolean(
+        this.hasSlotContents('status') || this.showDiscussions || this.issuable.assignees,
+      );
+    },
   },
   methods: {
     hasSlotContents(slotName) {
@@ -109,8 +127,15 @@ export default {
 </script>
 
 <template>
-  <li class="issue px-3">
+  <li class="issue gl-px-5!">
     <div class="issue-box">
+      <div v-if="showCheckbox" class="issue-check">
+        <gl-form-checkbox
+          class="gl-mr-0"
+          :checked="checked"
+          @input="$emit('checked-input', $event)"
+        />
+      </div>
       <div class="issuable-info-container">
         <div class="issuable-main-info">
           <div data-testid="issuable-title" class="issue-title title">
@@ -149,6 +174,7 @@ export default {
                 <span class="author">{{ author.name }}</span>
               </gl-link>
             </span>
+            <slot name="timeframe"></slot>
             &nbsp;
             <gl-label
               v-for="(label, index) in labels"
@@ -164,9 +190,25 @@ export default {
           </div>
         </div>
         <div class="issuable-meta">
-          <ul v-if="hasSlotContents('status') || issuable.assignees" class="controls">
+          <ul v-if="showIssuableMeta" class="controls">
             <li v-if="hasSlotContents('status')" class="issuable-status">
               <slot name="status"></slot>
+            </li>
+            <li
+              v-if="showDiscussions"
+              data-testid="issuable-discussions"
+              class="issuable-comments gl-display-none gl-display-sm-block"
+            >
+              <gl-link
+                v-gl-tooltip:tooltipcontainer.top
+                :title="__('Comments')"
+                :href="`${issuable.webUrl}#notes`"
+                :class="{ 'no-comments': !issuable.userDiscussionsCount }"
+                class="gl-reset-color!"
+              >
+                <gl-icon name="comments" />
+                {{ issuable.userDiscussionsCount }}
+              </gl-link>
             </li>
             <li v-if="assignees.length" class="gl-display-flex">
               <issuable-assignees

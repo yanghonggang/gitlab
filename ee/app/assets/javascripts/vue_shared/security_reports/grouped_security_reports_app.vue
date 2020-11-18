@@ -3,7 +3,6 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
@@ -18,6 +17,15 @@ import { mrStates } from '~/mr_popover/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import SecuritySummary from './components/security_summary.vue';
+import {
+  MODULE_CONTAINER_SCANNING,
+  MODULE_COVERAGE_FUZZING,
+  MODULE_DAST,
+  MODULE_DEPENDENCY_SCANNING,
+  MODULE_SAST,
+  MODULE_SECRET_DETECTION,
+  trackMrSecurityReportDetails,
+} from './store/constants';
 
 export default {
   store: createStore(),
@@ -186,12 +194,12 @@ export default {
   componentNames,
   computed: {
     ...mapState([
-      'sast',
-      'containerScanning',
-      'dast',
-      'coverageFuzzing',
-      'dependencyScanning',
-      'secretScanning',
+      MODULE_SAST,
+      MODULE_CONTAINER_SCANNING,
+      MODULE_DAST,
+      MODULE_COVERAGE_FUZZING,
+      MODULE_DEPENDENCY_SCANNING,
+      MODULE_SECRET_DETECTION,
       'summaryCounts',
       'modal',
       'isCreatingIssue',
@@ -204,19 +212,21 @@ export default {
       'groupedContainerScanningText',
       'groupedDastText',
       'groupedDependencyText',
-      'groupedSecretScanningText',
       'groupedCoverageFuzzingText',
       'containerScanningStatusIcon',
       'dastStatusIcon',
       'dependencyScanningStatusIcon',
-      'secretScanningStatusIcon',
       'coverageFuzzingStatusIcon',
       'isBaseSecurityReportOutOfDate',
       'canCreateIssue',
       'canCreateMergeRequest',
       'canDismissVulnerability',
     ]),
-    ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters(MODULE_SAST, ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters(MODULE_SECRET_DETECTION, [
+      'groupedSecretDetectionText',
+      'secretDetectionStatusIcon',
+    ]),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
@@ -237,7 +247,7 @@ export default {
     hasSastReports() {
       return this.enabledReports.sast;
     },
-    hasSecretScanningReports() {
+    hasSecretDetectionReports() {
       return this.enabledReports.secretDetection;
     },
     isMRActive() {
@@ -258,8 +268,23 @@ export default {
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
     },
-    coverageFuzzingShowIssues() {
-      return this.coverageFuzzing.newIssues || this.coverageFuzzing.resolvedIssues;
+    hasCoverageFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
+    },
+    hasSastIssues() {
+      return this.hasIssuesForReportType(MODULE_SAST);
+    },
+    hasDependencyScanningIssues() {
+      return this.hasIssuesForReportType(MODULE_DEPENDENCY_SCANNING);
+    },
+    hasContainerScanningIssues() {
+      return this.hasIssuesForReportType(MODULE_CONTAINER_SCANNING);
+    },
+    hasDastIssues() {
+      return this.hasIssuesForReportType(MODULE_DAST);
+    },
+    hasSecretDetectionIssues() {
+      return this.hasIssuesForReportType(MODULE_SECRET_DETECTION);
     },
   },
 
@@ -308,10 +333,10 @@ export default {
       this.fetchDependencyScanningDiff();
     }
 
-    const secretScanningDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretScanningDiffEndpoint && this.hasSecretScanningReports) {
-      this.setSecretScanningDiffEndpoint(secretScanningDiffEndpoint);
-      this.fetchSecretScanningDiff();
+    const secretDetectionDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
+    if (secretDetectionDiffEndpoint && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(secretDetectionDiffEndpoint);
+      this.fetchSecretDetectionDiff();
     }
 
     const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
@@ -352,19 +377,24 @@ export default {
       'setDependencyScanningDiffEndpoint',
       'fetchDastDiff',
       'setDastDiffEndpoint',
-      'fetchSecretScanningDiff',
-      'setSecretScanningDiffEndpoint',
       'fetchCoverageFuzzingDiff',
       'setCoverageFuzzingDiffEndpoint',
     ]),
-    ...mapActions('sast', {
+    ...mapActions(MODULE_SAST, {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
+    }),
+    ...mapActions(MODULE_SECRET_DETECTION, {
+      setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
+      fetchSecretDetectionDiff: 'fetchDiff',
     }),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
     ...mapActions('pipelineJobs', {
       setPipelineJobsId: 'setPipelineId',
     }),
+    hasIssuesForReportType(reportType) {
+      return Boolean(this[reportType]?.newIssues.length || this[reportType]?.resolvedIssues.length);
+    },
   },
   summarySlots: ['success', 'error', 'loading'],
 };
@@ -382,7 +412,7 @@ export default {
       <security-summary :key="slot" :message="groupedSummaryText" />
     </template>
 
-    <template v-if="pipelinePath" #actionButtons>
+    <template v-if="pipelinePath" #action-buttons>
       <gl-button
         :href="securityTab"
         target="_blank"
@@ -393,7 +423,7 @@ export default {
       </gl-button>
     </template>
 
-    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #subHeading>
+    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #sub-heading>
       <div class="text-secondary-700 text-1">
         <gl-sprintf
           v-if="isMRBranchOutdated"
@@ -443,11 +473,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="sast.newIssues.length || sast.resolvedIssues.length"
+            v-if="hasSastIssues"
             :unresolved-issues="sast.newIssues"
             :resolved-issues="sast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="sast-issues-list"
           />
         </template>
@@ -465,11 +494,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="dependencyScanning.newIssues.length || dependencyScanning.resolvedIssues.length"
+            v-if="hasDependencyScanningIssues"
             :unresolved-issues="dependencyScanning.newIssues"
             :resolved-issues="dependencyScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dependency-scanning-issues-list"
           />
         </template>
@@ -487,11 +515,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="containerScanning.newIssues.length || containerScanning.resolvedIssues.length"
+            v-if="hasContainerScanningIssues"
             :unresolved-issues="containerScanning.newIssues"
             :resolved-issues="containerScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="container-scanning-issues-list"
           />
         </template>
@@ -522,40 +549,37 @@ export default {
             </template>
           </summary-row>
           <grouped-issues-list
-            v-if="dast.newIssues.length || dast.resolvedIssues.length"
+            v-if="hasDastIssues"
             :unresolved-issues="dast.newIssues"
             :resolved-issues="dast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dast-issues-list"
           />
         </template>
 
-        <template v-if="hasSecretScanningReports">
+        <template v-if="hasSecretDetectionReports">
           <summary-row
-            :status-icon="secretScanningStatusIcon"
+            :status-icon="secretDetectionStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
             data-qa-selector="secret_scan_report"
           >
             <template #summary>
-              <security-summary :message="groupedSecretScanningText" />
+              <security-summary :message="groupedSecretDetectionText" />
             </template>
           </summary-row>
 
           <grouped-issues-list
-            v-if="secretScanning.newIssues.length || secretScanning.resolvedIssues.length"
-            :unresolved-issues="secretScanning.newIssues"
-            :resolved-issues="secretScanning.resolvedIssues"
+            v-if="hasSecretDetectionIssues"
+            :unresolved-issues="secretDetection.newIssues"
+            :resolved-issues="secretDetection.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="secret-scanning-issues-list"
           />
         </template>
 
         <template v-if="hasCoverageFuzzingReports">
           <summary-row
-            :summary="groupedCoverageFuzzingText"
             :status-icon="coverageFuzzingStatusIcon"
             :popover-options="coverageFuzzingPopover"
             class="js-coverage-fuzzing-widget"
@@ -572,11 +596,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="coverageFuzzingShowIssues"
+            v-if="hasCoverageFuzzingIssues"
             :unresolved-issues="coverageFuzzing.newIssues"
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="coverage-fuzzing-issues-list"
           />
         </template>

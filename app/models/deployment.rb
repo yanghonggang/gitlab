@@ -21,9 +21,7 @@ class Deployment < ApplicationRecord
 
   has_one :deployment_cluster
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) do
-    Deployment.where(project: s.project).maximum(:iid) if s&.project
-  end
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
   validates :sha, presence: true
   validates :ref, presence: true
@@ -63,6 +61,10 @@ class Deployment < ApplicationRecord
 
     event :cancel do
       transition any - [:canceled] => :canceled
+    end
+
+    event :skip do
+      transition any - [:skipped] => :skipped
     end
 
     before_transition any => FINISHED_STATUSES do |deployment|
@@ -107,7 +109,8 @@ class Deployment < ApplicationRecord
     running: 1,
     success: 2,
     failed: 3,
-    canceled: 4
+    canceled: 4,
+    skipped: 5
   }
 
   def self.last_for_environment(environment)
@@ -299,6 +302,8 @@ class Deployment < ApplicationRecord
       drop
     when 'canceled'
       cancel
+    when 'skipped'
+      skip
     else
       raise ArgumentError, "The status #{status.inspect} is invalid"
     end

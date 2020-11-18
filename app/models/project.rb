@@ -222,6 +222,7 @@ class Project < ApplicationRecord
   has_many :snippets, class_name: 'ProjectSnippet'
   has_many :hooks, class_name: 'ProjectHook'
   has_many :protected_branches
+  has_many :exported_protected_branches
   has_many :protected_tags
   has_many :repository_languages, -> { order "share DESC" }
   has_many :designs, inverse_of: :project, class_name: 'DesignManagement::Design'
@@ -602,7 +603,7 @@ class Project < ApplicationRecord
   # Returns a collection of projects that is either public or visible to the
   # logged in user.
   def self.public_or_visible_to_user(user = nil, min_access_level = nil)
-    min_access_level = nil if user&.admin?
+    min_access_level = nil if user&.can_read_all_resources?
 
     return public_to_user unless user
 
@@ -628,7 +629,7 @@ class Project < ApplicationRecord
   def self.with_feature_available_for_user(feature, user)
     visible = [ProjectFeature::ENABLED, ProjectFeature::PUBLIC]
 
-    if user&.admin?
+    if user&.can_read_all_resources?
       with_feature_enabled(feature)
     elsif user
       min_access_level = ProjectFeature.required_minimum_access_level(feature)
@@ -1341,8 +1342,7 @@ class Project < ApplicationRecord
   end
 
   def find_or_initialize_services
-    available_services_names =
-      Service.available_services_names + Service.project_specific_services_names - disabled_services
+    available_services_names = Service.available_services_names - disabled_services
 
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
@@ -1467,11 +1467,6 @@ class Project < ApplicationRecord
 
   def has_active_services?(hooks_scope = :push_hooks)
     services.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
-  end
-
-  # Is overridden in EE
-  def lfs_http_url_to_repo(_)
-    http_url_to_repo
   end
 
   def feature_usage
@@ -1821,6 +1816,10 @@ class Project < ApplicationRecord
 
   def mark_pages_as_not_deployed
     ensure_pages_metadatum.update!(deployed: false, artifacts_archive: nil, pages_deployment: nil)
+  end
+
+  def update_pages_deployment!(deployment)
+    ensure_pages_metadatum.update!(pages_deployment: deployment)
   end
 
   def write_repository_config(gl_full_path: full_path)

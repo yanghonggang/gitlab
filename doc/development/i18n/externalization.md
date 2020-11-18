@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Import
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
@@ -479,6 +479,21 @@ This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/do
      specifications we need, and if there is no need to add it as a new format because is very particular (i.e. it's only used in a single view).
 
 ## Best practices
+
+### Minimize translation updates
+
+Updates can result in the loss of the translations for this string. To minimize risks,
+avoid changes to strings, unless they:
+
+- Add value to the user.
+- Include extra context for translators.
+
+For example, we should avoid changes like this:
+
+```diff
+- _('Number of things: %{count}') % { count: 10 }
++ n_('Number of things: %d', 10)
+```
 
 ### Keep translations dynamic
 

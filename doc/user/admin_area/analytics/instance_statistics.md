@@ -4,9 +4,12 @@ group: Value Stream Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Instance Statistics
+# Instance Statistics **(CORE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235754) in GitLab 13.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235754) in GitLab 13.5 behind a feature flag, disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46962) in GitLab 13.6.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
@@ -39,10 +42,10 @@ These charts help you visualize how rapidly these records are being created on y
 
 ### Enable or disable Instance Statistics
 
-Instance Statistics is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+In GitLab version 13.5 only, Instance Statistics was under development and not ready for production use.
+It was deployed behind a feature flag that was **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
+can opt to enable it.
 
 To enable it:
 

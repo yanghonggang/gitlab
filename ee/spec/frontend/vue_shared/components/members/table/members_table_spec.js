@@ -1,6 +1,6 @@
+import { within } from '@testing-library/dom';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { within } from '@testing-library/dom';
 import { member as memberMock, members } from 'jest/vue_shared/components/members/mock_data';
 import MembersTable from '~/vue_shared/components/members/table/members_table.vue';
 
@@ -15,6 +15,10 @@ describe('MemberList', () => {
       state: {
         members: [],
         tableFields: [],
+        tableAttrs: {
+          table: { 'data-qa-selector': 'members_list' },
+          tr: { 'data-qa-selector': 'member_row' },
+        },
         sourceId: 1,
         currentUserId: 1,
         ...state,

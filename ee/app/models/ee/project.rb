@@ -149,7 +149,7 @@ module EE
       scope :with_designs, -> { where(id: ::DesignManagement::Design.select(:project_id).distinct) }
       scope :with_deleting_user, -> { includes(:deleting_user) }
       scope :with_compliance_framework_settings, -> { preload(:compliance_framework_setting) }
-      scope :has_vulnerabilities, -> { joins(:vulnerabilities).group(:id) }
+      scope :has_vulnerabilities, -> { joins(:project_setting).merge(::ProjectSetting.has_vulnerabilities) }
       scope :has_vulnerability_statistics, -> { joins(:vulnerability_statistic) }
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
 
@@ -178,7 +178,6 @@ module EE
         to: :statistics, allow_nil: true
 
       delegate :actual_shared_runners_minutes_limit,
-               :shared_runners_minutes_used?,
                :shared_runners_remaining_minutes_below_threshold?, to: :shared_runners_limit_namespace
 
       delegate :last_update_succeeded?, :last_update_failed?,
@@ -186,9 +185,11 @@ module EE
         to: :import_state, prefix: :mirror, allow_nil: true
 
       delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
-      delegate :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
+
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
+      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
 
@@ -256,12 +257,6 @@ module EE
       end
     end
 
-    def has_regulated_settings?
-      strong_memoize(:has_regulated_settings) do
-        compliance_framework_setting&.compliance_management_framework&.merge_request_approval_rules_enforced?
-      end
-    end
-
     def can_store_security_reports?
       namespace.store_security_reports_available? || public?
     end
@@ -316,7 +311,7 @@ module EE
     end
 
     def shared_runners_available?
-      super && !shared_runners_limit_namespace.shared_runners_minutes_used?
+      super && !::Ci::Minutes::Quota.new(shared_runners_limit_namespace).minutes_used_up?
     end
 
     def link_pool_repository
@@ -347,6 +342,10 @@ module EE
 
     def jira_issues_integration_available?
       feature_available?(:jira_issues_integration)
+    end
+
+    def jira_vulnerabilities_integration_available?
+      ::Feature.enabled?(:jira_for_vulnerabilities, self, default_enabled: false) && feature_available?(:jira_vulnerabilities_integration)
     end
 
     def multiple_approval_rules_available?
@@ -657,7 +656,7 @@ module EE
     end
 
     override :lfs_http_url_to_repo
-    def lfs_http_url_to_repo(operation)
+    def lfs_http_url_to_repo(operation = nil)
       return super unless ::Gitlab::Geo.secondary_with_primary?
       return super if operation == GIT_LFS_DOWNLOAD_OPERATION # download always comes from secondary
 
@@ -685,9 +684,8 @@ module EE
     def disable_overriding_approvers_per_merge_request
       strong_memoize(:disable_overriding_approvers_per_merge_request) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
-        ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request?
+        ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request? || super
       end
     end
     alias_method :disable_overriding_approvers_per_merge_request?, :disable_overriding_approvers_per_merge_request
@@ -695,9 +693,9 @@ module EE
     def merge_requests_author_approval
       strong_memoize(:merge_requests_author_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
+        next false if ::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
 
-        !::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
+        super
       end
     end
     alias_method :merge_requests_author_approval?, :merge_requests_author_approval
@@ -705,9 +703,8 @@ module EE
     def merge_requests_disable_committers_approval
       strong_memoize(:merge_requests_disable_committers_approval) do
         next super unless License.feature_available?(:admin_merge_request_approvers_rules)
-        next super unless has_regulated_settings?
 
-        ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval?
+        ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval? || super
       end
     end
     alias_method :merge_requests_disable_committers_approval?, :merge_requests_disable_committers_approval

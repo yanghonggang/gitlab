@@ -50,7 +50,7 @@ with the [GitLab Container Registry](../../user/packages/container_registry/inde
 
 This way of triggering can only be used when invoked inside `.gitlab-ci.yml`,
 and it creates a dependent pipeline relation visible on the
-[pipeline graph](../multi_project_pipelines.md#overview). For example:
+[pipeline graph](../multi_project_pipelines.md). For example:
 
 ```yaml
 build_docs:
@@ -268,5 +268,5 @@ This behavior can also be achieved through GitLab's UI with
 Old triggers, created before GitLab 9.0 are marked as legacy.
 
 Triggers with the legacy label do not have an associated user and only have
-access to the current project. They are considered deprecated and will be
+access to the current project. They are considered deprecated and might be
 removed with one of the future versions of GitLab.

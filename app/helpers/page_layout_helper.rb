@@ -150,13 +150,31 @@ module PageLayoutHelper
     css_class.join(' ')
   end
 
+  def page_itemtype(itemtype = nil)
+    if itemtype
+      @page_itemtype = { itemscope: true, itemtype: itemtype }
+    else
+      @page_itemtype || {}
+    end
+  end
+
+  def user_status_properties(user)
+    default_properties = { current_emoji: '', current_message: '', can_set_user_availability: Feature.enabled?(:set_user_availability_status, user), default_emoji: UserStatus::DEFAULT_EMOJI }
+    return default_properties unless user&.status
+
+    default_properties.merge({
+      current_emoji: user.status.emoji.to_s,
+      current_message: user.status.message.to_s,
+      current_availability: user.status.availability.to_s
+    })
+  end
+
   private
 
   def generic_canonical_url
     strong_memoize(:generic_canonical_url) do
       next unless request.get? || request.head?
       next unless generate_generic_canonical_url?
-      next unless Feature.enabled?(:generic_canonical, current_user)
 
       # Request#url builds the url without the trailing slash
       request.url

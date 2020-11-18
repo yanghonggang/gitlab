@@ -37,10 +37,12 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:hide_jump_to_next_unresolved_in_threads, default_enabled: true)
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
     push_frontend_feature_flag(:unified_diff_lines, @project, default_enabled: true)
+    push_frontend_feature_flag(:unified_diff_components, @project)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
     push_frontend_feature_flag(:core_security_mr_widget, @project, default_enabled: true)
     push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
+    push_frontend_feature_flag(:test_failure_history, @project)
 
     record_experiment_user(:invite_members_version_a)
     record_experiment_user(:invite_members_version_b)
@@ -318,8 +320,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   def export_csv
-    return render_404 unless Feature.enabled?(:export_merge_requests_as_csv, project, default_enabled: true)
-
     IssuableExportCsvWorker.perform_async(:merge_request, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
 
     index_path = project_merge_requests_path(project)
@@ -481,7 +481,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
-    params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+    params[:view] = unified_diff_lines_view_type(project)
 
     if Feature.enabled?(:default_merge_ref_for_diffs, project)
       params = params.merge(diff_head: true)
