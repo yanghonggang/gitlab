@@ -47,6 +47,11 @@ module Elastic
       else
         logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
         migration.migrate
+
+        if migration.migration_options[:batched] && !migration.completed?
+          logger.info "MigrationWorker: migration[#{migration.name}] kicking off next migration batch"
+          Elastic::MigrationWorker.perform_in(migration.migration_options[:throttle_delay], migration.version, migration.name, migration.filename)
+        end
       end
     end
 
