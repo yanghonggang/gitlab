@@ -20,17 +20,19 @@ module Types
       GitlabSchema.id_from_object(object)
     end
 
-    def self.authorized?(object, context)
-      abilities = Array.wrap(authorize)
-      return true if abilities.empty?
+    def self.authorization
+      @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(authorize)
+    end
 
-      abilities.all? do |ability|
-        Ability.allowed?(context[:current_user], ability, object)
-      end
+    def self.authorized?(object, context)
+      return true unless Feature.enabled?(:graphql_framework_authorization)
+
+      authorization.ok?(object, context[:current_user])
     end
 
     # Mutates the input array
     def self.remove_unauthorized(array, context)
+      return unless Feature.enabled?(:graphql_framework_authorization)
       return unless array.is_a?(Array)
       return unless authorize.present?
 

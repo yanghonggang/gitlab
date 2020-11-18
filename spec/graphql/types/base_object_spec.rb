@@ -6,14 +6,24 @@ RSpec.describe Types::BaseObject do
   include GraphqlHelpers
 
   describe 'scoping items' do
-    let_it_be(:test_schema) do
-      base_object = Class.new(described_class) do
-        # Override authorization so we don't need to mock Ability
-        def self.authorized?(object, context)
+    let_it_be(:custom_auth) do
+      Class.new(::Gitlab::Graphql::Authorize::ObjectAuthorization) do
+        def ok?(object, _current_user)
           return false if object == { id: 100 }
           return false if object.try(:deactivated?)
 
           true
+        end
+      end
+    end
+
+    let_it_be(:test_schema) do
+      auth = custom_auth.new(nil)
+
+      base_object = Class.new(described_class) do
+        # Override authorization so we don't need to mock Ability
+        define_singleton_method :authorization do
+          auth
         end
       end
 
@@ -99,15 +109,31 @@ RSpec.describe Types::BaseObject do
     end
 
     shared_examples 'array member redaction' do |path|
-      it 'redacts the unauthorized array member' do
+      let(:result) do
         query = GraphQL::Query.new(test_schema, document: document(path), context: data)
-        result = query.result.to_h
+        query.result.to_h
+      end
 
+      it 'redacts the unauthorized array member' do
         expect(result.dig('data', 'x', 'title')).to eq('Hey')
         expect(result.dig('data', 'x', *path)).to contain_exactly(
           eq({ 'id' => 1 }),
           eq({ 'id' => 2 })
         )
+      end
+
+      context 'the feature flag is disabled' do
+        before do
+          stub_feature_flags(graphql_framework_authorization: false)
+        end
+
+        it 'does not use framework-native authorization' do
+          expect(result.dig('data', 'x', *path)).to contain_exactly(
+            eq({ 'id' => 1 }),
+            eq({ 'id' => 2 }),
+            eq({ 'id' => 100 })
+          )
+        end
       end
     end
 
