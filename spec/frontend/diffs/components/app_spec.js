@@ -662,7 +662,8 @@ describe('diffs/components/app', () => {
       expect(wrapper.find(CompareVersions).exists()).toBe(true);
       expect(wrapper.find(CompareVersions).props()).toEqual(
         expect.objectContaining({
-          mergeRequestDiffs: diffsMockData,
+          isLimitedContainer: false,
+          diffFilesCountText: null
         }),
       );
     });

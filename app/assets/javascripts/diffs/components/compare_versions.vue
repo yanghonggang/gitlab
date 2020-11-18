@@ -22,10 +22,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    mergeRequestDiffs: {
-      type: Array,
-      required: true,
-    },
     isLimitedContainer: {
       type: Boolean,
       required: false,
@@ -38,15 +34,13 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      diffFiles: state => state.diffs.diffFiles,
-    }),
     ...mapGetters('diffs', [
       'whichCollapsedTypes',
       'diffCompareDropdownTargetVersions',
       'diffCompareDropdownSourceVersions',
     ]),
     ...mapState('diffs', [
+      'diffFiles',
       'commit',
       'showTreeList',
       'startVersion',
@@ -101,8 +95,12 @@ export default {
         :selected="showTreeList"
         @click="toggleShowTreeList"
       />
+      <div v-if="commit">
+        {{ __('Viewing commit') }}
+        <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
+      </div>
       <gl-sprintf
-        v-if="!commit && hasSourceVersions"
+        v-else-if="hasSourceVersions"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
@@ -120,10 +118,6 @@ export default {
           />
         </template>
       </gl-sprintf>
-      <div v-if="commit">
-        {{ __('Viewing commit') }}
-        <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
-      </div>
       <div v-if="hasChanges" class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"

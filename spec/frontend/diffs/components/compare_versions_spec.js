@@ -15,16 +15,6 @@ describe('CompareVersions', () => {
   const targetBranchName = 'tmp-wine-dev';
 
   const createWrapper = props => {
-    store = createStore();
-    const mergeRequestDiff = diffsMockData[0];
-
-    store.state.diffs.addedLines = 10;
-    store.state.diffs.removedLines = 20;
-    store.state.diffs.diffFiles.push('test');
-    store.state.diffs.targetBranchName = targetBranchName;
-    store.state.diffs.mergeRequestDiff = mergeRequestDiff;
-    store.state.diffs.mergeRequestDiffs = diffsMockData;
-
     wrapper = mount(CompareVersionsComponent, {
       localVue,
       store,
@@ -35,9 +25,20 @@ describe('CompareVersions', () => {
       },
     });
   };
+  const findLimitedContainer = () => wrapper.find('.container-limited.limit-container-width');
+  const findCompareSourceDropdown = () => wrapper.find('.mr-version-dropdown');
+  const findCompareTargetDropdown = () => wrapper.find('.mr-version-compare-dropdown');
 
   beforeEach(() => {
-    createWrapper();
+    store = createStore();
+    const mergeRequestDiff = diffsMockData[0];
+
+    store.state.diffs.addedLines = 10;
+    store.state.diffs.removedLines = 20;
+    store.state.diffs.diffFiles.push('test');
+    store.state.diffs.targetBranchName = targetBranchName;
+    store.state.diffs.mergeRequestDiff = mergeRequestDiff;
+    store.state.diffs.mergeRequestDiffs = diffsMockData;
   });
 
   afterEach(() => {
@@ -46,6 +47,10 @@ describe('CompareVersions', () => {
   });
 
   describe('template', () => {
+    beforeEach(() => {
+      createWrapper();
+    });
+
     it('should render Tree List toggle button with correct attribute values', () => {
       const treeListBtn = wrapper.find('.js-toggle-tree-list');
 
@@ -55,8 +60,8 @@ describe('CompareVersions', () => {
     });
 
     it('should render comparison dropdowns with correct values', () => {
-      const sourceDropdown = wrapper.find('.mr-version-dropdown');
-      const targetDropdown = wrapper.find('.mr-version-compare-dropdown');
+      const sourceDropdown = findCompareSourceDropdown();
+      const targetDropdown = findCompareTargetDropdown();
 
       expect(sourceDropdown.exists()).toBe(true);
       expect(targetDropdown.exists()).toBe(true);
@@ -79,17 +84,13 @@ describe('CompareVersions', () => {
     it('adds container-limiting classes when showFileTree is false with inline diffs', () => {
       createWrapper({ isLimitedContainer: true });
 
-      const limitedContainer = wrapper.find('.container-limited.limit-container-width');
-
-      expect(limitedContainer.exists()).toBe(true);
+      expect(findLimitedContainer().exists()).toBe(true);
     });
 
     it('does not add container-limiting classes when showFileTree is false with inline diffs', () => {
       createWrapper({ isLimitedContainer: false });
 
-      const limitedContainer = wrapper.find('.container-limited.limit-container-width');
-
-      expect(limitedContainer.exists()).toBe(false);
+      expect(findLimitedContainer().exists()).toBe(false);
     });
   });
 
@@ -99,14 +100,24 @@ describe('CompareVersions', () => {
     });
 
     it('should not render Tree List toggle button when there are no changes', () => {
+      createWrapper();
+
       const treeListBtn = wrapper.find('.js-toggle-tree-list');
 
       expect(treeListBtn.exists()).toBe(false);
+    });
+
+    it('should add container-limiting class', () => {
+      createWrapper({ isLimitedContainer: false });
+
+      expect(findLimitedContainer().exists()).toBe(true);
     });
   });
 
   describe('setInlineDiffViewType', () => {
     it('should persist the view type in the url', () => {
+      createWrapper();
+
       const viewTypeBtn = wrapper.find('#inline-diff-btn');
       viewTypeBtn.trigger('click');
 
@@ -116,6 +127,7 @@ describe('CompareVersions', () => {
 
   describe('setParallelDiffViewType', () => {
     it('should persist the view type in the url', () => {
+      createWrapper();
       const viewTypeBtn = wrapper.find('#parallel-diff-btn');
       viewTypeBtn.trigger('click');
 
@@ -124,11 +136,14 @@ describe('CompareVersions', () => {
   });
 
   describe('commit', () => {
-    beforeEach(done => {
-      wrapper.vm.$store.state.diffs.commit = getDiffWithCommit().commit;
-      wrapper.mergeRequestDiffs = [];
+    beforeEach(() => {
+      store.state.diffs.commit = getDiffWithCommit().commit;
+      createWrapper();
+    });
 
-      wrapper.vm.$nextTick(done);
+    it('does not render compare dropdowns', () => {
+      expect(findCompareSourceDropdown().exists()).toBe(false);
+      expect(findCompareTargetDropdown().exists()).toBe(false);
     });
 
     it('renders latest version button', () => {
@@ -138,6 +153,18 @@ describe('CompareVersions', () => {
     it('renders short commit ID', () => {
       expect(wrapper.text()).toContain('Viewing commit');
       expect(wrapper.text()).toContain(wrapper.vm.commit.short_id);
+    });
+  });
+
+  describe('with no versions', () => {
+    beforeEach(() => {
+      store.state.diffs.mergeRequestDiffs = [];
+      createWrapper();
+    });
+
+    it('does not render compare dropdowns', () => {
+      expect(findCompareSourceDropdown().exists()).toBe(false);
+      expect(findCompareTargetDropdown().exists()).toBe(false);
     });
   });
 });

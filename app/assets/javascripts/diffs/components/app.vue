@@ -132,8 +132,6 @@ export default {
       isBatchLoading: state => state.diffs.isBatchLoading,
       diffFiles: state => state.diffs.diffFiles,
       diffViewType: state => state.diffs.diffViewType,
-      mergeRequestDiffs: state => state.diffs.mergeRequestDiffs,
-      mergeRequestDiff: state => state.diffs.mergeRequestDiff,
       commit: state => state.diffs.commit,
       renderOverflowWarning: state => state.diffs.renderOverflowWarning,
       numTotalFiles: state => state.diffs.realSize,
@@ -152,7 +150,7 @@ export default {
       'canMerge',
       'hasConflicts',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex', 'diffCompareDropdownTargetVersions', 'diffCompareDropdownSourceVersions']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -431,7 +429,6 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
       />
