@@ -173,6 +173,17 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
         end
 
+        context 'when the build user is a project access token bot' do
+          let_it_be(:project_bot_user) { create(:user, :project_bot) }
+          let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
+
+          it 'recognizes project access token' do
+            build.update(user: project_bot_user)
+
+            expect(subject).to eq(Gitlab::Auth::Result.new(build.user, build.project, :build, described_class.build_authentication_abilities))
+          end
+        end
+
         context 'username is not gitlab-ci-token' do
           let(:username) { 'another_username' }
 
