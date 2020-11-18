@@ -14406,9 +14406,6 @@ msgstr ""
 msgid "Includes an MVC structure, mvnw and pom.xml to help you get started."
 msgstr ""
 
-msgid "Includes completed merge requests."
-msgstr ""
-
 msgid "Incoming email"
 msgstr ""
 
@@ -18551,6 +18548,9 @@ msgid "No prioritized labels with such name or description"
 msgstr ""
 
 msgid "No public groups"
+msgstr ""
+
+msgid "No recently merged merge requests found"
 msgstr ""
 
 msgid "No ref selected"
@@ -26804,6 +26804,9 @@ msgstr ""
 msgid "The CSV export will be created in the background. Once finished, it will be sent to %{strong_open}%{email}%{strong_close} in an attachment."
 msgstr ""
 
+msgid "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group."
+msgstr ""
+
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
 msgstr ""
 
@@ -31164,9 +31167,6 @@ msgid "You haven't added any issues to your project yet"
 msgstr ""
 
 msgid "You haven't selected any issues yet"
-msgstr ""
-
-msgid "You haven't yet finished a merge request."
 msgstr ""
 
 msgid "You left the \"%{membershipable_human_name}\" %{source_type}."
