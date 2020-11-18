@@ -48,6 +48,7 @@ module Gitlab
         result =
           service_request_check(login, password, project) ||
           build_access_token_check(login, password) ||
+          build_token_project_bot_check(password) ||
           lfs_token_check(login, password, project) ||
           oauth_access_token_check(login, password) ||
           personal_access_token_check(password, project) ||
@@ -274,6 +275,16 @@ module Gitlab
         if token_handler.token_valid?(encoded_token)
           Gitlab::Auth::Result.new(actor, nil, token_handler.type, authentication_abilities)
         end
+      end
+
+      def build_token_project_bot_check(password)
+        return unless password
+
+        build = find_build_by_token(password)
+        return unless build
+        return unless build.user&.project_bot?
+
+        Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
       end
 
       def build_access_token_check(login, password)
