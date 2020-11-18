@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Banzai::Pipeline::FullPipeline do
+  using RSpec::Parameterized::TableSyntax
+
   describe 'References' do
     let(:project) { create(:project, :public) }
     let(:issue)   { create(:issue, project: project) }
@@ -129,6 +131,18 @@ RSpec.describe Banzai::Pipeline::FullPipeline do
       output = described_class.to_html(invalid_markdown, project: project)
 
       expect(output).to include("test [[<em>TOC</em>]]")
+    end
+  end
+
+  describe 'backslash escapes' do
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be(:issue)   { create(:issue, project: project) }
+
+    it 'does not convert an escaped reference' do
+      markdown = "\\#{issue.to_reference}"
+      output = described_class.to_html(markdown, project: project)
+
+      expect(output).to include("<gl-literal>#</gl-literal>#{issue.iid}")
     end
   end
 end
