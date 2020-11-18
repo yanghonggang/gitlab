@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 
@@ -19,6 +18,7 @@ describe('ee/BoardContentSidebar', () => {
       },
       store,
       stubs: {
+        'board-sidebar-issue-title': '<div></div>',
         'board-sidebar-epic-select': '<div></div>',
         'board-sidebar-time-tracker': '<div></div>',
         'board-sidebar-weight-input': '<div></div>',
@@ -59,10 +59,6 @@ describe('ee/BoardContentSidebar', () => {
 
   it('applies an open attribute', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
-  });
-
-  it('finds IssuableTitle', () => {
-    expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
   it('renders BoardAssigneeDropdown', () => {
