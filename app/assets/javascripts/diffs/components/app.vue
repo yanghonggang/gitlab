@@ -150,7 +150,13 @@ export default {
       'canMerge',
       'hasConflicts',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex', 'diffCompareDropdownTargetVersions', 'diffCompareDropdownSourceVersions']),
+    ...mapGetters('diffs', [
+      'whichCollapsedTypes',
+      'isParallelView',
+      'currentDiffIndex',
+      'diffCompareDropdownTargetVersions',
+      'diffCompareDropdownSourceVersions',
+    ]),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {

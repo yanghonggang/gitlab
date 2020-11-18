@@ -663,7 +663,7 @@ describe('diffs/components/app', () => {
       expect(wrapper.find(CompareVersions).props()).toEqual(
         expect.objectContaining({
           isLimitedContainer: false,
-          diffFilesCountText: null
+          diffFilesCountText: null,
         }),
       );
     });
