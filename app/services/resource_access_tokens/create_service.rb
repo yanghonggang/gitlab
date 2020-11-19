@@ -24,9 +24,12 @@ module ResourceAccessTokens
       end
 
       token_response = create_personal_access_token(user)
-      log_event(token_response)
+
+      token = token_response.payload[:personal_access_token]
+     # log_event(token)
 
       if token_response.success?
+        log_event(token_response.payload[:personal_access_token])
         success(token_response.payload[:personal_access_token])
       else
         delete_failed_user(user)
@@ -106,8 +109,7 @@ module ResourceAccessTokens
       resource.add_user(user, :maintainer, expires_at: params[:expires_at])
     end
 
-    def log_event(project_access_token)
-      token = project_access_token.payload[:personal_access_token]
+    def log_event(token)
       log_info("PROJECT ACCESS TOKEN CREATION: created_by: '#{current_user.username}', created_for: '#{token.user.username}', token_id: '#{token.id}'")
     end
 

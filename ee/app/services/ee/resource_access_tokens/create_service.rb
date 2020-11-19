@@ -5,22 +5,19 @@ module EE
     module CreateService
       def execute
         super.tap do |response|
-          log_audit_event(response.payload[:personal_access_token], response)
+          log_audit_event(response.payload[:personal_access_token])
         end
       end
 
       private
 
-      def log_audit_event(token, response)
-        audit_event_service(token, response).for_user(full_path: target_user.username, entity_id: target_user.id).security_event
+      def log_audit_event(token)
+        audit_event_service(token).for_user(full_path: target_user.username, entity_id: target_user.id).security_event
       end
 
-      def audit_event_service(token, response)
-        message = if response.success?
-                    "Created project access token with id #{token.id}"
-                  else
-                    "Attempted to create project access token but failed with message: #{response.message}"
-                  end
+      def audit_event_service(token)
+        message = "Created project access token with id #{token.id}"
+
 
         ::AuditEventService.new(
           current_user,
