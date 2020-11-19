@@ -22,6 +22,21 @@ module EE
             @updates[:assignee_ids] = extract_users(reassign_param).map(&:id)
           end
 
+          desc _('Change reviewer(s)')
+          explanation _('Change reviewer(s).')
+          execution_message _('Changed reviewer(s).')
+          params '@user1 @user2'
+          types MergeRequest
+          condition do
+            quick_action_target.allows_multiple_reviewers? &&
+              quick_action_target.persisted? &&
+              current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
+              ::Feature.enabled?(:merge_request_reviewers)
+          end
+          command :reassign_reviewer do |reassign_param|
+            @updates[:reviewer_ids] = extract_users(reassign_param).map(&:id)
+          end
+
           desc _('Set weight')
           explanation do |weight|
             _("Sets weight to %{weight}.") % { weight: weight } if weight
