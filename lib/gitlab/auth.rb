@@ -282,7 +282,7 @@ module Gitlab
 
         build = find_build_by_token(password)
         return unless build
-        return unless build.user&.project_bot?
+        return unless build.user&.project_bot? && build.project&.bots&.include?(build.user)
 
         Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
       end

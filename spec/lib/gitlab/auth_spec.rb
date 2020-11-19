@@ -177,6 +177,10 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           let_it_be(:project_bot_user) { create(:user, :project_bot) }
           let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
 
+          before do
+            project.add_maintainer(project_bot_user)
+          end
+
           it 'recognizes project access token' do
             build.update(user: project_bot_user)
 
