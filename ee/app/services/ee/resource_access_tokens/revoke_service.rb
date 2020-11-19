@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module EE
-  module PersonalAccessTokens
+  module ResourceAccessTokens
     module RevokeService
       include ::Gitlab::Allowable
       extend ::Gitlab::Utils::Override
