@@ -345,6 +345,7 @@ excluded_attributes:
     - :board_id
     - :label_id
     - :milestone_id
+    - :iteration_id
   epic:
     - :start_date_sourcing_milestone_id
     - :due_date_sourcing_milestone_id
@@ -402,6 +403,9 @@ preloads:
 ee:
   tree:
     project:
+      - boards:
+        - lists:
+          - :iteration
       - issues:
         - epic_issue:
           - :epic

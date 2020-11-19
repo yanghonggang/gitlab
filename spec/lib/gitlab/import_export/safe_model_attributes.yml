@@ -756,6 +756,7 @@ List:
 - updated_at
 - milestone_id
 - user_id
+- iteration_id
 - max_issue_count
 - max_issue_weight
 - limit_metric
