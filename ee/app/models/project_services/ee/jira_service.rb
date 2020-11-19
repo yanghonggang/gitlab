@@ -11,8 +11,13 @@ module EE
       validates :vulnerabilities_issuetype, presence: true, if: :vulnerabilities_enabled
     end
 
+    def jira_vulnerabilities_integration_available?
+      ::Feature.enabled?(:jira_for_vulnerabilities, parent, default_enabled: false) &&
+        ::Feature.enabled?(:jira_vulnerabilities_integration, parent, type: :licensed, default_enabled: true)
+    end
+
     def jira_vulnerabilities_integration_enabled?
-      project&.jira_vulnerabilities_integration_available? && vulnerabilities_enabled
+      jira_vulnerabilities_integration_available? && vulnerabilities_enabled
     end
 
     def project_key_required?

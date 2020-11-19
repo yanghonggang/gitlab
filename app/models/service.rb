@@ -402,6 +402,10 @@ class Service < ApplicationRecord
     !instance? && !group_id
   end
 
+  def parent
+    group || project
+  end
+
   # Returns a hash of the properties that have been assigned a new value since last save,
   # indicating their original values (attr => original value).
   # ActiveRecord does not provide a mechanism to track changes in serialized keys,
