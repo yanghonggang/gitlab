@@ -3,7 +3,7 @@ import { mapState, mapActions } from 'vuex';
 import { isEmpty } from 'lodash';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import SearchableDropdown from './searchable_dropdown.vue';
-import { ANY, GROUP_DATA, PROJECT_DATA } from '../constants';
+import { ANY_GROUP_OR_PROJECT, GROUP_DATA, PROJECT_DATA } from '../constants';
 
 export default {
   name: 'GroupFilter',
@@ -20,7 +20,7 @@ export default {
   computed: {
     ...mapState(['groups', 'fetchingGroups']),
     selectedGroup() {
-      return isEmpty(this.initialData) ? ANY : this.initialData;
+      return isEmpty(this.initialData) ? ANY_GROUP_OR_PROJECT : this.initialData;
     },
   },
   methods: {
@@ -37,11 +37,13 @@ export default {
 
 <template>
   <searchable-dropdown
-    :display-data="$options.GROUP_DATA"
-    :is-loading="fetchingGroups"
-    :selected-data="selectedGroup"
-    :results="groups"
-    @fetch="fetchGroups"
-    @update="handleGroupChange"
+    :header-text="$options.GROUP_DATA.headerText"
+    :selected-display-value="$options.GROUP_DATA.selectedDisplayValue"
+    :items-display-value="$options.GROUP_DATA.itemsDisplayValue"
+    :loading="fetchingGroups"
+    :selected-item="selectedGroup"
+    :items="groups"
+    @search="fetchGroups"
+    @change="handleGroupChange"
   />
 </template>

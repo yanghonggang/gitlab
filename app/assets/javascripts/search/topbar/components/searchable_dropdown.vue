@@ -9,7 +9,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 
-import { ANY } from '../constants';
+import { ANY_GROUP_OR_PROJECT } from '../constants';
 
 export default {
   name: 'SearchableDropdown',
@@ -25,20 +25,31 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    displayData: {
-      type: Object,
-      required: true,
+    headerText: {
+      type: String,
+      required: false,
+      default: `__('Filter')`,
     },
-    isLoading: {
+    selectedDisplayValue: {
+      type: String,
+      required: false,
+      default: 'name',
+    },
+    itemsDisplayValue: {
+      type: String,
+      required: false,
+      default: 'name',
+    },
+    loading: {
       type: Boolean,
       required: false,
       default: false,
     },
-    selectedData: {
+    selectedItem: {
       type: Object,
       required: true,
     },
-    results: {
+    items: {
       type: Array,
       required: false,
       default: () => [],
@@ -46,15 +57,15 @@ export default {
   },
   data() {
     return {
-      search: '',
+      searchText: '',
     };
   },
   methods: {
     isSelected(selected) {
-      return selected.id === this.selectedData.id;
+      return selected.id === this.selectedItem.id;
     },
   },
-  ANY,
+  ANY_GROUP_OR_PROJECT,
 };
 </script>
 
@@ -63,52 +74,52 @@ export default {
     class="gl-w-full"
     menu-class="gl-w-full!"
     toggle-class="gl-text-truncate gl-reset-line-height!"
-    :header-text="displayData.headerText"
-    @show="$emit('fetch', search)"
+    :header-text="headerText"
+    @show="$emit('search', searchText)"
   >
     <template #button-content>
       <span class="dropdown-toggle-text gl-flex-grow-1 gl-text-truncate">
-        {{ selectedData[displayData.selectedDisplayValue] }}
+        {{ selectedItem[selectedDisplayValue] }}
       </span>
-      <gl-loading-icon v-if="isLoading" inline class="mr-2" />
+      <gl-loading-icon v-if="loading" inline class="gl-mr-3" />
       <gl-icon
-        v-if="!isSelected($options.ANY)"
+        v-if="!isSelected($options.ANY_GROUP_OR_PROJECT)"
         v-gl-tooltip
         name="clear"
         :title="__('Clear')"
         class="gl-text-gray-200! gl-hover-text-blue-800!"
-        @click.stop="$emit('update', $options.ANY)"
+        @click.stop="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
       />
       <gl-icon name="chevron-down" />
     </template>
     <div class="gl-sticky gl-top-0 gl-z-index-1 gl-bg-white">
       <gl-search-box-by-type
-        v-model="search"
-        class="m-2"
+        v-model="searchText"
+        class="gl-m-3"
         :debounce="500"
-        @input="$emit('fetch', search)"
+        @input="$emit('search', searchText)"
       />
       <gl-dropdown-item
         class="gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-2! gl-mb-2"
         :is-check-item="true"
-        :is-checked="isSelected($options.ANY)"
-        @click="$emit('update', $options.ANY)"
+        :is-checked="isSelected($options.ANY_GROUP_OR_PROJECT)"
+        @click="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
       >
-        {{ $options.ANY.name }}
+        {{ $options.ANY_GROUP_OR_PROJECT.name }}
       </gl-dropdown-item>
     </div>
-    <div v-if="!isLoading">
+    <div v-if="!loading">
       <gl-dropdown-item
-        v-for="result in results"
-        :key="result.id"
+        v-for="item in items"
+        :key="item.id"
         :is-check-item="true"
-        :is-checked="isSelected(result)"
-        @click="$emit('update', result)"
+        :is-checked="isSelected(item)"
+        @click="$emit('change', item)"
       >
-        {{ result[displayData.resultsDisplayValue] }}
+        {{ item[itemsDisplayValue] }}
       </gl-dropdown-item>
     </div>
-    <div v-if="isLoading" class="mx-3 mt-2">
+    <div v-if="loading" class="gl-mx-4 gl-mt-3">
       <gl-skeleton-loader :height="100">
         <rect y="0" width="90%" height="20" rx="4" />
         <rect y="40" width="70%" height="20" rx="4" />

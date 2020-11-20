@@ -3,7 +3,7 @@ import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
 import { MOCK_GROUPS, MOCK_GROUP, MOCK_QUERY } from 'jest/search/mock_data';
 import SearchableDropdown from '~/search/topbar/components/searchable_dropdown.vue';
-import { ANY, GROUP_DATA } from '~/search/topbar/constants';
+import { ANY_GROUP_OR_PROJECT, GROUP_DATA } from '~/search/topbar/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,10 +12,12 @@ describe('Global Search Searchable Dropdown', () => {
   let wrapper;
 
   const defaultProps = {
-    displayData: GROUP_DATA,
-    isLoading: false,
-    selectedData: ANY,
-    results: [],
+    headerText: GROUP_DATA.headerText,
+    selectedDisplayValue: GROUP_DATA.selectedDisplayValue,
+    itemsDisplayValue: GROUP_DATA.itemsDisplayValue,
+    loading: false,
+    selectedItem: ANY_GROUP_OR_PROJECT,
+    items: [],
   };
 
   const createComponent = (initialState, props, mountFn = shallowMount) => {
@@ -75,16 +77,16 @@ describe('Global Search Searchable Dropdown', () => {
           findGlDropdownSearch().vm.$emit('input', search);
         });
 
-        it('$emits @fetch when input event is fired from GlSearchBoxByType', () => {
-          expect(wrapper.emitted('fetch')[0]).toEqual([search]);
+        it('$emits @search when input event is fired from GlSearchBoxByType', () => {
+          expect(wrapper.emitted('search')[0]).toEqual([search]);
         });
       });
     });
 
     describe('findDropdownItems', () => {
-      describe('when isLoading is false', () => {
+      describe('when loading is false', () => {
         beforeEach(() => {
-          createComponent({}, { results: MOCK_GROUPS });
+          createComponent({}, { items: MOCK_GROUPS });
         });
 
         it('does not render loader', () => {
@@ -97,9 +99,9 @@ describe('Global Search Searchable Dropdown', () => {
         });
       });
 
-      describe('when isLoading is true', () => {
+      describe('when loading is true', () => {
         beforeEach(() => {
-          createComponent({}, { isLoading: true, results: MOCK_GROUPS });
+          createComponent({}, { loading: true, items: MOCK_GROUPS });
         });
 
         it('does render loader', () => {
@@ -113,22 +115,22 @@ describe('Global Search Searchable Dropdown', () => {
     });
 
     describe('Dropdown Text', () => {
-      describe('when selectedData is any', () => {
+      describe('when selectedItem is any', () => {
         beforeEach(() => {
           createComponent({}, {}, mount);
         });
 
         it('sets dropdown text to Any', () => {
-          expect(findDropdownText().text()).toBe(ANY.name);
+          expect(findDropdownText().text()).toBe(ANY_GROUP_OR_PROJECT.name);
         });
       });
 
-      describe('selectedData is set', () => {
+      describe('selectedItem is set', () => {
         beforeEach(() => {
-          createComponent({}, { selectedData: MOCK_GROUP }, mount);
+          createComponent({}, { selectedItem: MOCK_GROUP }, mount);
         });
 
-        it('sets dropdown text to the selectedData selectedDisplayValue', () => {
+        it('sets dropdown text to the selectedItem selectedDisplayValue', () => {
           expect(findDropdownText().text()).toBe(MOCK_GROUP[GROUP_DATA.selectedDisplayValue]);
         });
       });
@@ -137,19 +139,19 @@ describe('Global Search Searchable Dropdown', () => {
 
   describe('actions', () => {
     beforeEach(() => {
-      createComponent({}, { results: MOCK_GROUPS });
+      createComponent({}, { items: MOCK_GROUPS });
     });
 
-    it('clicking "Any" dropdown item $emits @update with ANY', () => {
+    it('clicking "Any" dropdown item $emits @change with ANY_GROUP_OR_PROJECT', () => {
       findAnyDropdownItem().vm.$emit('click');
 
-      expect(wrapper.emitted('update')[0]).toEqual([ANY]);
+      expect(wrapper.emitted('change')[0]).toEqual([ANY_GROUP_OR_PROJECT]);
     });
 
-    it('clicking result dropdown item $emits @update with result', () => {
+    it('clicking result dropdown item $emits @change with result', () => {
       findFirstGroupDropdownItem().vm.$emit('click');
 
-      expect(wrapper.emitted('update')[0]).toEqual([MOCK_GROUPS[0]]);
+      expect(wrapper.emitted('change')[0]).toEqual([MOCK_GROUPS[0]]);
     });
   });
 });

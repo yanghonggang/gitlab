@@ -6,6 +6,11 @@ Vue.use(Translate);
 
 const mountSearchableDropdown = (store, { id, component }) => {
   const el = document.getElementById(id);
+
+  if (!el) {
+    return false;
+  }
+
   let { initialData } = el.dataset;
 
   initialData = JSON.parse(initialData);
@@ -31,4 +36,4 @@ const searchableDropdowns = [
 ];
 
 export const initTopbar = store =>
-  [...searchableDropdowns].map(dropdown => mountSearchableDropdown(store, dropdown));
+  searchableDropdowns.map(dropdown => mountSearchableDropdown(store, dropdown));
