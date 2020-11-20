@@ -18053,7 +18053,7 @@ type Query {
     """
     Return only admin users
     """
-    admins: Boolean
+    admins: Boolean = false
 
     """
     Returns the elements in the list that come after the specified cursor.
@@ -23165,11 +23165,6 @@ type UpdateSnippetPayload {
 scalar Upload
 
 type User {
-  """
-  Whether this user is an admin
-  """
-  admin: Boolean!
-
   """
   Merge Requests assigned to the user
   """

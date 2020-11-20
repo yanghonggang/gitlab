@@ -22,10 +22,13 @@ module Resolvers
     argument :search, GraphQL::STRING_TYPE,
              required: false,
              description: "Query to search users by name, username, or primary email."
-    argument :admins, GraphQL::BOOLEAN_TYPE, required: false,
+
+    argument :admins, GraphQL::BOOLEAN_TYPE,
+              required: false,
+              default_value: false,
               description: 'Return only admin users'
 
-    def resolve(ids: nil, usernames: nil, sort: nil, search: nil, admins: false)
+    def resolve(ids: nil, usernames: nil, sort: nil, search: nil, admins: nil)
       authorize!
 
       ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort, search, admins)).execute
@@ -36,7 +39,7 @@ module Resolvers
 
       return super if args.values.compact.blank?
 
-      if args.values.all?
+      if args[:usernames]&.present? && args[:ids]&.present?
         raise Gitlab::Graphql::Errors::ArgumentError, 'Provide either a list of usernames or ids'
       end
 

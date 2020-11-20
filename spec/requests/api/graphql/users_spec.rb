@@ -61,15 +61,27 @@ RSpec.describe 'Users' do
       context 'current user is not an admin' do
         let(:post_query) { post_graphql(query, current_user: current_user) }
 
-        it_behaves_like 'a failure to find anything'
+        it_behaves_like 'a working users query'
+
+        it 'includes all users', :aggregate_failures do
+          post_graphql(query)
+
+          expect(graphql_data.dig('users', 'nodes').count).to eq(4)
+
+          # rubocop: disable Lint/DuplicateHashKey
+          expect(graphql_data.dig('users', 'nodes')).to include(
+            a_hash_including("id" => user1.to_global_id.to_s,
+                             "id" => user2.to_global_id.to_s,
+                             "id" => user3.to_global_id.to_s,
+                             "id" => current_user.to_global_id.to_s
+                            ))
+          # rubocop: enable Lint/DuplicateHashKey
+        end
       end
 
       context 'when current user is an admin' do
         let_it_be(:admin) { create(:user, :admin) }
-
-        before do
-          user1.update!(admin: true)
-        end
+        let_it_be(:another_admin) { create(:user, :admin) }
 
         it_behaves_like 'a working users query'
 
@@ -80,7 +92,7 @@ RSpec.describe 'Users' do
 
           # rubocop: disable Lint/DuplicateHashKey
           expect(graphql_data.dig('users', 'nodes')).to include(
-            a_hash_including("id" => user1.to_global_id.to_s,
+            a_hash_including("id" => another_admin.to_global_id.to_s,
                              "id" => admin.to_global_id.to_s))
           # rubocop: enable Lint/DuplicateHashKey
         end
