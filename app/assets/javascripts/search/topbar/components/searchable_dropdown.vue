@@ -5,6 +5,7 @@ import {
   GlSearchBoxByType,
   GlLoadingIcon,
   GlIcon,
+  GlButton,
   GlSkeletonLoader,
   GlTooltipDirective,
 } from '@gitlab/ui';
@@ -19,6 +20,7 @@ export default {
     GlSearchBoxByType,
     GlLoadingIcon,
     GlIcon,
+    GlButton,
     GlSkeletonLoader,
   },
   directives: {
@@ -64,6 +66,9 @@ export default {
     isSelected(selected) {
       return selected.id === this.selectedItem.id;
     },
+    openDropdown() {
+      this.$emit('search', this.searchText);
+    },
   },
   ANY_GROUP_OR_PROJECT,
 };
@@ -76,24 +81,29 @@ export default {
     toggle-class="gl-text-truncate gl-reset-line-height!"
     :header-text="headerText"
     @show="$emit('search', searchText)"
+    @shown="$refs.searchBox.focusInput()"
   >
     <template #button-content>
       <span class="dropdown-toggle-text gl-flex-grow-1 gl-text-truncate">
         {{ selectedItem[selectedDisplayValue] }}
       </span>
       <gl-loading-icon v-if="loading" inline class="gl-mr-3" />
-      <gl-icon
+      <gl-button
         v-if="!isSelected($options.ANY_GROUP_OR_PROJECT)"
         v-gl-tooltip
-        name="clear"
+        category="tertiary"
         :title="__('Clear')"
-        class="gl-text-gray-200! gl-hover-text-blue-800!"
+        class="gl-p-0! gl-mr-2"
+        @keydown.enter.stop="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
         @click.stop="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
-      />
+      >
+        <gl-icon name="clear" class="gl-text-gray-200! gl-hover-text-blue-800!" />
+      </gl-button>
       <gl-icon name="chevron-down" />
     </template>
     <div class="gl-sticky gl-top-0 gl-z-index-1 gl-bg-white">
       <gl-search-box-by-type
+        ref="searchBox"
         v-model="searchText"
         class="gl-m-3"
         :debounce="500"
