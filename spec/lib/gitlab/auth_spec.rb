@@ -174,9 +174,9 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         end
 
         context 'when the build user is a project access token bot' do
-          let(:username) { 'project_bot' }
           let_it_be(:project_bot_user) { create(:user, :project_bot) }
           let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
+          let(:username) { 'project_bot' }
 
           before do
             project.add_maintainer(project_bot_user)
