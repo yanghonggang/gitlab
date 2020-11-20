@@ -153,7 +153,10 @@ export default {
           });
         }
       })
-      .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+      .catch(e => {
+        console.log('ERROR', e);
+        commit(types.RECEIVE_SWIMLANES_FAILURE);
+      });
   },
 
   updateBoardEpicUserPreferences({ commit, state }, { epicId, collapsed }) {
@@ -213,7 +216,7 @@ export default {
             const list = data.boardListUpdateLimitMetrics?.list;
             commit(types.UPDATE_LIST_SUCCESS, {
               listId,
-              list: boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+              list, //: boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
             });
           }
         })

@@ -36,13 +36,13 @@ export default {
     ...mapState(['filterParams']),
     ...mapGetters(['getIssuesByList']),
     showBoardListAndBoardInfo() {
-      return this.list.type !== ListType.promotion;
+      return this.list.listType !== ListType.promotion;
     },
     listIssues() {
       return this.getIssuesByList(this.list.id);
     },
     shouldFetchIssues() {
-      return this.list.type !== ListType.blank;
+      return this.list.listType !== ListType.blank;
     },
   },
   watch: {
@@ -68,7 +68,7 @@ export default {
     :class="{
       'is-draggable': !list.preset,
       'is-expandable': list.isExpandable,
-      'is-collapsed': !list.isExpanded,
+      'is-collapsed': list.collapsed,
       'board-type-assignee': list.type === 'assignee',
     }"
     :data-id="list.id"

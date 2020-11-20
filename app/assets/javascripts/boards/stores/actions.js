@@ -122,7 +122,8 @@ export default {
     // Temporarily using positioning logic from boardStore
     commit(
       types.RECEIVE_ADD_LIST_SUCCESS,
-      boardStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+      list,
+      //boardStore.updateListPosition({ ...list, doNotFetchIssues: true }),
     );
   },
 

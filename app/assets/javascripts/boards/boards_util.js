@@ -11,7 +11,9 @@ export function formatBoardLists(lists) {
   const formattedLists = lists.nodes.map(list =>
     boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
   );
-  return formattedLists.reduce((map, list) => {
+  console.log('OLD', formattedLists[0]);
+  console.log('NEW', lists.nodes[0]);
+  return lists.nodes.reduce((map, list) => {
     return {
       ...map,
       [list.id]: list,

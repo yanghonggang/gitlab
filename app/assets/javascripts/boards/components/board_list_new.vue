@@ -49,11 +49,11 @@ export default {
     paginatedIssueText() {
       return sprintf(__('Showing %{pageSize} of %{total} issues'), {
         pageSize: this.issues.length,
-        total: this.list.issuesSize,
+        total: this.list.issuesCount,
       });
     },
     issuesSizeExceedsMax() {
-      return this.list.maxIssueCount > 0 && this.list.issuesSize > this.list.maxIssueCount;
+      return this.list.maxIssueCount > 0 && this.list.issuesCount > this.list.maxIssueCount;
     },
     hasNextPage() {
       return this.pageInfoByListId[this.list.id].hasNextPage;
@@ -198,7 +198,7 @@ export default {
 
 <template>
   <div
-    v-show="list.isExpanded"
+    v-show="!list.collapsed"
     class="board-list-component gl-relative gl-h-full gl-display-flex gl-flex-direction-column"
     data-qa-selector="board_list_cards_area"
   >
@@ -210,14 +210,14 @@ export default {
     >
       <gl-loading-icon />
     </div>
-    <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
+    <board-new-issue v-if="list.listType !== 'closed' && showIssueForm" :list="list" />
     <component
       :is="treeRootWrapper"
       v-show="!loading"
       ref="list"
       v-bind="treeRootOptions"
       :data-board="list.id"
-      :data-board-type="list.type"
+      :data-board-type="list.listType"
       :class="{ 'bg-danger-100': issuesSizeExceedsMax }"
       class="board-list gl-w-full gl-h-full gl-list-style-none gl-mb-0 gl-p-2 js-board-list"
       data-testid="tree-root-wrapper"
@@ -235,7 +235,7 @@ export default {
       />
       <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
         <gl-loading-icon v-show="list.loadingMore" label="Loading more issues" />
-        <span v-if="issues.length === list.issuesSize">{{ __('Showing all issues') }}</span>
+        <span v-if="issues.length === list.issuesCount">{{ __('Showing all issues') }}</span>
         <span v-else>{{ paginatedIssueText }}</span>
       </li>
     </component>
