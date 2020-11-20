@@ -277,11 +277,11 @@ module Gitlab
       end
 
       def build_access_token_check(login, password)
+        return unless login == CI_JOB_USER
         return unless password
 
         build = find_build_by_token(password)
         return unless build
-        return unless login == CI_JOB_USER || build.user&.project_bot?
         return unless build.project.builds_enabled?
 
         if build.user
