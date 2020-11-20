@@ -48,7 +48,6 @@ module Gitlab
         result =
           service_request_check(login, password, project) ||
           build_access_token_check(login, password) ||
-          build_token_project_bot_check(password) ||
           lfs_token_check(login, password, project) ||
           oauth_access_token_check(login, password) ||
           personal_access_token_check(password, project) ||
@@ -277,26 +276,16 @@ module Gitlab
         end
       end
 
-      def build_token_project_bot_check(password)
-        return unless password
-
-        build = find_build_by_token(password)
-        return unless build
-        return unless build.user&.project_bot? && build.project&.bots&.include?(build.user)
-
-        Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
-      end
-
       def build_access_token_check(login, password)
-        return unless login == CI_JOB_USER
         return unless password
 
         build = find_build_by_token(password)
         return unless build
+        return unless login == CI_JOB_USER || build.user&.project_bot?
         return unless build.project.builds_enabled?
 
         if build.user
-          return unless build.user.can?(:log_in)
+          return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
