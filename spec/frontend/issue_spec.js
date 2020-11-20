@@ -16,6 +16,34 @@ describe('Issue', () => {
   preloadFixtures('issues/closed-issue.html');
   preloadFixtures('issues/open-issue.html');
 
+  function expectNewBranchButtonState(isPending, canCreate) {
+    const $btnNewBranch = $('#new-branch');
+
+    if ($btnNewBranch.length === 0) {
+      return;
+    }
+
+    const $available = $btnNewBranch.find('.available');
+
+    expect($available).toHaveText('New branch');
+
+    if (!isPending && canCreate) {
+      expect($available).toBeVisible();
+    } else {
+      expect($available).toBeHidden();
+    }
+
+    const $unavailable = $btnNewBranch.find('.unavailable');
+
+    expect($unavailable).toHaveText('New branch unavailable');
+
+    if (!isPending && !canCreate) {
+      expect($unavailable).toBeVisible();
+    } else {
+      expect($unavailable).toBeHidden();
+    }
+  }
+
   function expectVisibility($element, shouldBeVisible) {
     if (shouldBeVisible) {
       expect($element).not.toHaveClass('hidden');
@@ -54,6 +82,13 @@ describe('Issue', () => {
         testContext.$projectIssuesCounter.text('1,001');
       }
 
+      function mockCanCreateBranch(canCreateBranch) {
+        mock.onGet(/(.*)\/can_create_branch$/).reply(200, {
+          can_create_branch: canCreateBranch,
+          suggested_branch_name: 'foo-99',
+        });
+      }
+
       beforeEach(() => {
         if (isIssueInitiallyOpen) {
           loadFixtures('issues/open-issue.html');
@@ -65,7 +100,7 @@ describe('Issue', () => {
         mock.onGet(/(.*)\/related_branches$/).reply(200, {});
         jest.spyOn(axios, 'get');
 
-        findElements(isIssueInitiallyOpen);
+        findElements();
       });
 
       afterEach(() => {
@@ -74,6 +109,8 @@ describe('Issue', () => {
       });
 
       it(`${action}s the issue on dispatch of issuable_vue_app:change event`, () => {
+        mockCanCreateBranch(!isIssueInitiallyOpen);
+
         setup();
 
         document.dispatchEvent(
@@ -86,6 +123,10 @@ describe('Issue', () => {
         );
 
         expectIssueState(!isIssueInitiallyOpen);
+        expect(testContext.$projectIssuesCounter.text()).toBe(
+          isIssueInitiallyOpen ? '1,000' : '1,002',
+        );
+        expectNewBranchButtonState(false, !isIssueInitiallyOpen);
       });
     });
   });
