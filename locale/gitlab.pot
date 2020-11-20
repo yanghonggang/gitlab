@@ -1262,6 +1262,9 @@ msgstr ""
 msgid "A merge request approval is required when the license compliance report contains a denied license."
 msgstr ""
 
+msgid "A merge request hasn't yet been merged"
+msgstr ""
+
 msgid "A new Auto DevOps pipeline has been created, go to %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details"
 msgstr ""
 
@@ -18548,9 +18551,6 @@ msgid "No prioritized labels with such name or description"
 msgstr ""
 
 msgid "No public groups"
-msgstr ""
-
-msgid "No recently merged merge requests found"
 msgstr ""
 
 msgid "No ref selected"

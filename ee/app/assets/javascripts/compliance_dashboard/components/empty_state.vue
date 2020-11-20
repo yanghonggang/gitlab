@@ -14,7 +14,7 @@ export default {
     },
   },
   strings: {
-    heading: __('No recently merged merge requests found'),
+    heading: __("A merge request hasn't yet been merged"),
     subheading: __(
       "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group.",
     ),
