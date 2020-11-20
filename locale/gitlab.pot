@@ -11627,9 +11627,6 @@ msgstr ""
 msgid "Feature flag was successfully removed."
 msgstr ""
 
-msgid "Feature not available"
-msgstr ""
-
 msgid "FeatureFlags|%d user"
 msgid_plural "FeatureFlags|%d users"
 msgstr[0] ""
@@ -18734,6 +18731,9 @@ msgid "Not enough data"
 msgstr ""
 
 msgid "Not found."
+msgstr ""
+
+msgid "Not permitted to create framework"
 msgstr ""
 
 msgid "Not permitted to destroy framework"

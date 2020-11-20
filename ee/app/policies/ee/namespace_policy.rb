@@ -5,7 +5,7 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
-      condition(:custom_compliance_frameworks_enabled) { License.feature_available?(:custom_compliance_frameworks) }
+      condition(:custom_compliance_frameworks_enabled) { License.feature_available?(:custom_compliance_frameworks) && ::Feature.enabled?(:ff_custom_compliance_frameworks) }
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
