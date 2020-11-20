@@ -492,6 +492,9 @@ msgstr ""
 msgid "%{edit_in_new_fork_notice} Try to upload a file again."
 msgstr ""
 
+msgid "%{emails} will be notified of your comment."
+msgstr ""
+
 msgid "%{extra} more downstream pipelines"
 msgstr ""
 
