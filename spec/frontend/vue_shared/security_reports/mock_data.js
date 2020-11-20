@@ -316,3 +316,84 @@ export const secretScanningDiffSuccessMock = {
   base_report_out_of_date: false,
   head_report_created_at: '2020-01-10T10:00:00.000Z',
 };
+
+export const reportTypeDownloadPathsQueryResponse = {
+  project: {
+    mergeRequest: {
+      headPipeline: {
+        id: 'gid://gitlab/Ci::Pipeline/176',
+        jobs: {
+          nodes: [
+            {
+              name: 'secret_detection',
+              artifacts: {
+                nodes: [
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1399/artifacts/download?file_type=trace',
+                    fileType: 'TRACE',
+                    __typename: 'CiJobArtifact',
+                  },
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1399/artifacts/download?file_type=secret_detection',
+                    fileType: 'SECRET_DETECTION',
+                    __typename: 'CiJobArtifact',
+                  },
+                ],
+                __typename: 'CiJobArtifactConnection',
+              },
+              __typename: 'CiJob',
+            },
+            {
+              name: 'bandit-sast',
+              artifacts: {
+                nodes: [
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1400/artifacts/download?file_type=trace',
+                    fileType: 'TRACE',
+                    __typename: 'CiJobArtifact',
+                  },
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1400/artifacts/download?file_type=sast',
+                    fileType: 'SAST',
+                    __typename: 'CiJobArtifact',
+                  },
+                ],
+                __typename: 'CiJobArtifactConnection',
+              },
+              __typename: 'CiJob',
+            },
+            {
+              name: 'eslint-sast',
+              artifacts: {
+                nodes: [
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1401/artifacts/download?file_type=trace',
+                    fileType: 'TRACE',
+                    __typename: 'CiJobArtifact',
+                  },
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1401/artifacts/download?file_type=sast',
+                    fileType: 'SAST',
+                    __typename: 'CiJobArtifact',
+                  },
+                ],
+                __typename: 'CiJobArtifactConnection',
+              },
+              __typename: 'CiJob',
+            },
+          ],
+          __typename: 'CiJobConnection',
+        },
+        __typename: 'Pipeline',
+      },
+      __typename: 'MergeRequest',
+    },
+    __typename: 'Project',
+  },
+};
