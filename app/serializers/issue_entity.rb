@@ -71,6 +71,10 @@ class IssueEntity < IssuableEntity
   expose :archived_project_docs_path, if: -> (issue) { issue.project.archived? } do |issue|
     help_page_path('user/project/settings/index.md', anchor: 'archiving-a-project')
   end
+
+  expose :issue_email_participants, if: -> (issue) { issue.from_service_desk? } do |issue|
+    issue.issue_email_participants.map{ |x| x.email }
+  end
 end
 
 IssueEntity.prepend_if_ee('::EE::IssueEntity')

@@ -9,12 +9,14 @@ import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
 import { __, sprintf } from '~/locale';
 import { getDraft, updateDraft } from '~/lib/utils/autosave';
+import ExternalEmailWarning from './external_email_warning.vue';
 
 export default {
   name: 'NoteForm',
   components: {
     NoteableWarning,
     markdownField,
+    ExternalEmailWarning,
   },
   mixins: [issuableStateMixin, resolvable],
   props: {
@@ -356,6 +358,10 @@ export default {
           @input="onInput"
         ></textarea>
       </markdown-field>
+      <external-email-warning
+        v-if="getNoteableData.issue_email_participants.length"
+        :emails="getNoteableData.issue_email_participants"
+      />
       <div class="note-form-actions clearfix">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">

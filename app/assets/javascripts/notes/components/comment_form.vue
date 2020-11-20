@@ -23,6 +23,7 @@ import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
+import ExternalEmailWarning from './external_email_warning.vue';
 
 export default {
   name: 'CommentForm',
@@ -39,6 +40,7 @@ export default {
     GlLink,
     GlSprintf,
     GlIcon,
+    ExternalEmailWarning,
   },
   mixins: [issuableStateMixin],
   props: {
@@ -392,6 +394,10 @@ export default {
                 @keydown.ctrl.enter="handleSave()"
               ></textarea>
             </markdown-field>
+            <external-email-warning
+              v-if="getNoteableData.issue_email_participants.length"
+              :emails="getNoteableData.issue_email_participants"
+            />
             <gl-alert
               v-if="isToggleBlockedIssueWarning"
               class="gl-mt-5"
