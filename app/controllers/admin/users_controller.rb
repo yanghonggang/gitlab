@@ -73,14 +73,10 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def reject
-    name = user.name
-    email = user.email
-
-    result = Users::DestroyService.new(current_user).execute(user, hard_delete: true)
+    result = Users::RejectService.new(current_user).execute(user)
 
     if result[:status] == :success
-      NotificationService.new.user_admin_rejection(name, email).deliver_later
-      redirect_back_or_admin_user(notice: _("The user is being deleted."))
+      redirect_to admin_users_path, status: :found, notice: _("You've rejected %{user}" % { user: user.name })
     else
       redirect_back_or_admin_user(alert: result[:message])
     end
