@@ -359,7 +359,7 @@ export default {
         ></textarea>
       </markdown-field>
       <external-email-warning
-        v-if="getNoteableData.issue_email_participants.length"
+        v-if="getNoteableData.issue_email_participants"
         :emails="getNoteableData.issue_email_participants"
       />
       <div class="note-form-actions clearfix">

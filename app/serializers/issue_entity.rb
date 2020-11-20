@@ -72,8 +72,8 @@ class IssueEntity < IssuableEntity
     help_page_path('user/project/settings/index.md', anchor: 'archiving-a-project')
   end
 
-  expose :issue_email_participants, if: -> (issue) { issue.from_service_desk? } do |issue|
-    issue.issue_email_participants.map{ |x| x.email }
+  expose :issue_email_participants do |issue|
+    issue.issue_email_participants.map { |x| x.email }
   end
 end
 
