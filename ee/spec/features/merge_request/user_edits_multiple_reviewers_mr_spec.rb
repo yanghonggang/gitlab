@@ -18,6 +18,7 @@ RSpec.describe 'Merge request > User edits MR with multiple reviewers' do
 
     it 'is not shown in assignee dropdown' do
       find('.js-assignee-search').click
+      wait_for_requests
 
       page.within '.dropdown-menu-assignee' do
         expect(page).not_to have_content(rule_name)
@@ -26,6 +27,7 @@ RSpec.describe 'Merge request > User edits MR with multiple reviewers' do
 
     it 'is shown in reviewer dropdown' do
       find('.js-reviewer-search').click
+      wait_for_requests
 
       page.within '.dropdown-menu-reviewer' do
         expect(page).to have_content(rule_name)
