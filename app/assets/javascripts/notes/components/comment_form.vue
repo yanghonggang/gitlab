@@ -23,7 +23,7 @@ import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
-import ExternalEmailWarning from './external_email_warning.vue';
+import EmailParticipantsWarning from './email_participants_warning.vue';
 
 export default {
   name: 'CommentForm',
@@ -40,7 +40,7 @@ export default {
     GlLink,
     GlSprintf,
     GlIcon,
-    ExternalEmailWarning,
+    EmailParticipantsWarning,
   },
   mixins: [issuableStateMixin],
   props: {
@@ -334,6 +334,12 @@ export default {
         Autosize.update(this.$refs.textarea);
       });
     },
+    hasEmailParticipants() {
+      return (
+        this.getNoteableData.issue_email_participants &&
+        this.getNoteableData.issue_email_participants.length
+      );
+    },
   },
 };
 </script>
@@ -394,8 +400,8 @@ export default {
                 @keydown.ctrl.enter="handleSave()"
               ></textarea>
             </markdown-field>
-            <external-email-warning
-              v-if="getNoteableData.issue_email_participants"
+            <email-participants-warning
+              v-if="hasEmailParticipants()"
               :emails="getNoteableData.issue_email_participants"
             />
             <gl-alert

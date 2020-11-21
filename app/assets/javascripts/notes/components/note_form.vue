@@ -9,14 +9,14 @@ import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
 import { __, sprintf } from '~/locale';
 import { getDraft, updateDraft } from '~/lib/utils/autosave';
-import ExternalEmailWarning from './external_email_warning.vue';
+import EmailParticipantsWarning from './email_participants_warning.vue';
 
 export default {
   name: 'NoteForm',
   components: {
     NoteableWarning,
     markdownField,
-    ExternalEmailWarning,
+    EmailParticipantsWarning,
   },
   mixins: [issuableStateMixin, resolvable],
   props: {
@@ -305,6 +305,12 @@ export default {
 
       this.$emit('handleFormUpdateAddToReview', this.updatedNoteBody, shouldResolve);
     },
+    hasEmailParticipants() {
+      return (
+        this.getNoteableData.issue_email_participants &&
+        this.getNoteableData.issue_email_participants.length
+      );
+    },
   },
 };
 </script>
@@ -358,8 +364,8 @@ export default {
           @input="onInput"
         ></textarea>
       </markdown-field>
-      <external-email-warning
-        v-if="getNoteableData.issue_email_participants"
+      <email-participants-warning
+        v-if="hasEmailParticipants()"
         :emails="getNoteableData.issue_email_participants"
       />
       <div class="note-form-actions clearfix">
