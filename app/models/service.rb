@@ -403,7 +403,7 @@ class Service < ApplicationRecord
   end
 
   def parent
-    group || project
+    project || group
   end
 
   # Returns a hash of the properties that have been assigned a new value since last save,
