@@ -1,6 +1,7 @@
 <script>
 import { GlBadge, GlIcon, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import StateActions from './states_table_actions.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -11,6 +12,7 @@ export default {
     GlSprintf,
     GlTable,
     GlTooltip,
+    StateActions,
     TimeAgoTooltip,
   },
   mixins: [timeagoMixin],
@@ -31,6 +33,11 @@ export default {
           key: 'updated',
           thClass: 'gl-display-none',
           tdClass: 'gl-text-right',
+        },
+        {
+          key: 'actions',
+          thClass: 'gl-display-none',
+          tdClass: 'gl-w-10',
         },
       ];
     },
@@ -96,6 +103,10 @@ export default {
           </template>
         </gl-sprintf>
       </p>
+    </template>
+
+    <template #cell(actions)="{ item }">
+      <state-actions :state="item" />
     </template>
   </gl-table>
 </template>

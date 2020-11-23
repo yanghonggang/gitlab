@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { fetchPolicies } from '~/lib/graphql';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
@@ -8,6 +9,7 @@ import { MAX_LIST_COUNT } from '../constants';
 export default {
   apollo: {
     states: {
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: getStatesQuery,
       variables() {
         return {
@@ -15,13 +17,7 @@ export default {
           ...this.cursor,
         };
       },
-      update: data => {
-        return {
-          count: data?.project?.terraformStates?.count,
-          list: data?.project?.terraformStates?.nodes,
-          pageInfo: data?.project?.terraformStates?.pageInfo,
-        };
-      },
+      update: data => data,
       error() {
         this.states = null;
       },
@@ -62,35 +58,34 @@ export default {
       return this.$apollo.queries.states.loading;
     },
     pageInfo() {
-      return this.states?.pageInfo || {};
+      return this.states?.project?.terraformStates?.pageInfo || {};
     },
     showPagination() {
       return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
     },
     statesCount() {
-      return this.states?.count;
+      return this.states?.project?.terraformStates?.count;
     },
     statesList() {
-      return this.states?.list;
+      return this.states?.project?.terraformStates?.nodes;
     },
   },
   methods: {
-    updatePagination(item) {
-      if (item === this.pageInfo.endCursor) {
-        this.cursor = {
-          first: MAX_LIST_COUNT,
-          after: item,
-          last: null,
-          before: null,
-        };
-      } else {
-        this.cursor = {
-          first: null,
-          after: null,
-          last: MAX_LIST_COUNT,
-          before: item,
-        };
-      }
+    nextPage(item) {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        after: item,
+        last: null,
+        before: null,
+      };
+    },
+    prevPage(item) {
+      this.cursor = {
+        first: null,
+        after: null,
+        last: MAX_LIST_COUNT,
+        before: item,
+      };
     },
   },
 };
@@ -114,11 +109,7 @@ export default {
             <states-table :states="statesList" />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
-              <gl-keyset-pagination
-                v-bind="pageInfo"
-                @prev="updatePagination"
-                @next="updatePagination"
-              />
+              <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
             </div>
           </div>
 
