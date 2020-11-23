@@ -203,17 +203,34 @@ describe('Settings Form', () => {
 
   describe('form', () => {
     describe('form reset event', () => {
-      beforeEach(() => {
+      it('calls the appropriate function', () => {
         mountComponent();
 
         findForm().trigger('reset');
-      });
-      it('calls the appropriate function', () => {
+
         expect(wrapper.emitted('reset')).toEqual([[]]);
       });
 
       it('tracks the reset event', () => {
+        mountComponent();
+
+        findForm().trigger('reset');
+
         expect(Tracking.event).toHaveBeenCalledWith(undefined, 'reset_form', trackingPayload);
+      });
+
+      it('resets the errors objects', async () => {
+        mountComponent({
+          data: { apiErrors: { nameRegex: 'bar' }, localErrors: { nameRegexKeep: 'zab' } },
+        });
+
+        findForm().trigger('reset');
+
+        await wrapper.vm.$nextTick();
+
+        expect(findKeepRegexTextarea().props('error')).toBe('');
+        expect(findRemoveRegexTextarea().props('error')).toBe('');
+        expect(findSaveButton().props('disabled')).toBe(false);
       });
     });
 

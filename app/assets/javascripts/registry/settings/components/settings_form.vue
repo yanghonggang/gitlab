@@ -133,6 +133,7 @@ export default {
     reset() {
       this.track('reset_form');
       this.apiErrors = {};
+      this.localErrors = {};
       this.$emit('reset');
     },
     setApiErrors(response) {
