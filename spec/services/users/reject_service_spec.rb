@@ -38,7 +38,7 @@ RSpec.describe Users::RejectService do
           subject
 
           expect(subject[:status]).to eq(:success)
-          expect { user.reload }.not_to exist
+          expect { User.find(user.id) }.to raise_error(ActiveRecord::RecordNotFound)
         end
 
         it 'emails the user on rejection' do

@@ -111,7 +111,7 @@ RSpec.describe Admin::UsersController do
       it 'hard deletes the user' do
         subject
 
-        expect(user.reload).not_to exist
+        expect(User.exists?(user.id)).to be_falsy
       end
 
       it 'sends them a rejection email' do
@@ -135,7 +135,7 @@ RSpec.describe Admin::UsersController do
       it 'does not reject and delete the user' do
         subject
 
-        expect(user.reload).to exist
+        expect(User.exists?(user.id)).to be_truthy
       end
 
       it 'does not email the user' do
