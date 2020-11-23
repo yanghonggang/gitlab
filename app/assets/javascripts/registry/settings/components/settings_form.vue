@@ -11,7 +11,6 @@ import {
   KEEP_INFO_TEXT,
   KEEP_N_LABEL,
   NAME_REGEX_KEEP_LABEL,
-  NAME_REGEX_KEEP_PLACEHOLDER,
   NAME_REGEX_KEEP_DESCRIPTION,
   REMOVE_HEADER_TEXT,
   REMOVE_INFO_TEXT,
@@ -66,7 +65,6 @@ export default {
     KEEP_N_LABEL,
     NAME_REGEX_KEEP_LABEL,
     SET_CLEANUP_POLICY_BUTTON,
-    NAME_REGEX_KEEP_PLACEHOLDER,
     NAME_REGEX_KEEP_DESCRIPTION,
     REMOVE_HEADER_TEXT,
     REMOVE_INFO_TEXT,
@@ -241,7 +239,6 @@ export default {
             :error="apiErrors.nameRegexKeep"
             :disabled="isFieldDisabled"
             :label="$options.i18n.NAME_REGEX_KEEP_LABEL"
-            :placeholder="$options.i18n.NAME_REGEX_KEEP_PLACEHOLDER"
             :description="$options.i18n.NAME_REGEX_KEEP_DESCRIPTION"
             name="keep-regex"
             data-testid="keep-regex-textarea"

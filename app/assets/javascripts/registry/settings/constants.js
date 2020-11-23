@@ -23,7 +23,6 @@ export const KEEP_INFO_TEXT = s__(
 );
 export const KEEP_N_LABEL = s__('ContainerRegistry|Keep the most recent:');
 export const NAME_REGEX_KEEP_LABEL = s__('ContainerRegistry|Keep tags matching:');
-export const NAME_REGEX_KEEP_PLACEHOLDER = 'production-v.*';
 export const NAME_REGEX_KEEP_DESCRIPTION = s__(
   'ContainerRegistry|Tags with names matching this regex pattern will be kept. %{linkStart}More information%{linkEnd}',
 );
