@@ -4,7 +4,7 @@ import { MOCK_GROUP, MOCK_QUERY } from 'jest/search/mock_data';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import GroupFilter from '~/search/topbar/components/group_filter.vue';
 import SearchableDropdown from '~/search/topbar/components/searchable_dropdown.vue';
-import { ANY_GROUP_OR_PROJECT, GROUP_DATA, PROJECT_DATA } from '~/search/topbar/constants';
+import { ANY_OPTION, GROUP_DATA, PROJECT_DATA } from '~/search/topbar/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -102,8 +102,8 @@ describe('GroupFilter', () => {
           createComponent();
         });
 
-        it('sets selectedGroup to ANY_GROUP_OR_PROJECT', () => {
-          expect(wrapper.vm.selectedGroup).toBe(ANY_GROUP_OR_PROJECT);
+        it('sets selectedGroup to ANY_OPTION', () => {
+          expect(wrapper.vm.selectedGroup).toBe(ANY_OPTION);
         });
       });
 
@@ -112,7 +112,7 @@ describe('GroupFilter', () => {
           createComponent({}, { initialData: MOCK_GROUP });
         });
 
-        it('sets selectedGroup to ANY_GROUP_OR_PROJECT', () => {
+        it('sets selectedGroup to ANY_OPTION', () => {
           expect(wrapper.vm.selectedGroup).toBe(MOCK_GROUP);
         });
       });

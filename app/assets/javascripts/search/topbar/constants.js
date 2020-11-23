@@ -1,6 +1,6 @@
 import { __ } from '~/locale';
 
-export const ANY_GROUP_OR_PROJECT = Object.freeze({
+export const ANY_OPTION = Object.freeze({
   id: null,
   name: __('Any'),
   name_with_namespace: __('Any'),

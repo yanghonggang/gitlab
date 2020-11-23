@@ -3,7 +3,7 @@ import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlSkeletonLoader } from '@gitlab/ui';
 import { MOCK_GROUPS, MOCK_GROUP, MOCK_QUERY } from 'jest/search/mock_data';
 import SearchableDropdown from '~/search/topbar/components/searchable_dropdown.vue';
-import { ANY_GROUP_OR_PROJECT, GROUP_DATA } from '~/search/topbar/constants';
+import { ANY_OPTION, GROUP_DATA } from '~/search/topbar/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -16,7 +16,7 @@ describe('Global Search Searchable Dropdown', () => {
     selectedDisplayValue: GROUP_DATA.selectedDisplayValue,
     itemsDisplayValue: GROUP_DATA.itemsDisplayValue,
     loading: false,
-    selectedItem: ANY_GROUP_OR_PROJECT,
+    selectedItem: ANY_OPTION,
     items: [],
   };
 
@@ -112,6 +112,16 @@ describe('Global Search Searchable Dropdown', () => {
           expect(findDropdownItemsText()).toStrictEqual(['Any']);
         });
       });
+
+      describe('when item is selected', () => {
+        beforeEach(() => {
+          createComponent({}, { items: MOCK_GROUPS, selectedItem: MOCK_GROUPS[0] });
+        });
+
+        it('marks the dropdown as checked', () => {
+          expect(findFirstGroupDropdownItem().attributes('ischecked')).toBe('true');
+        });
+      });
     });
 
     describe('Dropdown Text', () => {
@@ -121,7 +131,7 @@ describe('Global Search Searchable Dropdown', () => {
         });
 
         it('sets dropdown text to Any', () => {
-          expect(findDropdownText().text()).toBe(ANY_GROUP_OR_PROJECT.name);
+          expect(findDropdownText().text()).toBe(ANY_OPTION.name);
         });
       });
 
@@ -142,10 +152,10 @@ describe('Global Search Searchable Dropdown', () => {
       createComponent({}, { items: MOCK_GROUPS });
     });
 
-    it('clicking "Any" dropdown item $emits @change with ANY_GROUP_OR_PROJECT', () => {
+    it('clicking "Any" dropdown item $emits @change with ANY_OPTION', () => {
       findAnyDropdownItem().vm.$emit('click');
 
-      expect(wrapper.emitted('change')[0]).toEqual([ANY_GROUP_OR_PROJECT]);
+      expect(wrapper.emitted('change')[0]).toEqual([ANY_OPTION]);
     });
 
     it('clicking result dropdown item $emits @change with result', () => {

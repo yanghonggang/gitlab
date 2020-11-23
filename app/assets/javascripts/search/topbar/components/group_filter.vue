@@ -3,7 +3,7 @@ import { mapState, mapActions } from 'vuex';
 import { isEmpty } from 'lodash';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import SearchableDropdown from './searchable_dropdown.vue';
-import { ANY_GROUP_OR_PROJECT, GROUP_DATA, PROJECT_DATA } from '../constants';
+import { ANY_OPTION, GROUP_DATA, PROJECT_DATA } from '../constants';
 
 export default {
   name: 'GroupFilter',
@@ -20,7 +20,7 @@ export default {
   computed: {
     ...mapState(['groups', 'fetchingGroups']),
     selectedGroup() {
-      return isEmpty(this.initialData) ? ANY_GROUP_OR_PROJECT : this.initialData;
+      return isEmpty(this.initialData) ? ANY_OPTION : this.initialData;
     },
   },
   methods: {

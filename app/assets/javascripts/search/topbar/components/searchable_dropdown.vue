@@ -10,7 +10,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 
-import { ANY_GROUP_OR_PROJECT } from '../constants';
+import { ANY_OPTION } from '../constants';
 
 export default {
   name: 'SearchableDropdown',
@@ -30,7 +30,7 @@ export default {
     headerText: {
       type: String,
       required: false,
-      default: `__('Filter')`,
+      default: "__('Filter')",
     },
     selectedDisplayValue: {
       type: String,
@@ -69,8 +69,11 @@ export default {
     openDropdown() {
       this.$emit('search', this.searchText);
     },
+    resetDropdown() {
+      this.$emit('change', ANY_OPTION);
+    },
   },
-  ANY_GROUP_OR_PROJECT,
+  ANY_OPTION,
 };
 </script>
 
@@ -89,13 +92,14 @@ export default {
       </span>
       <gl-loading-icon v-if="loading" inline class="gl-mr-3" />
       <gl-button
-        v-if="!isSelected($options.ANY_GROUP_OR_PROJECT)"
+        v-if="!isSelected($options.ANY_OPTION)"
         v-gl-tooltip
+        name="clear"
         category="tertiary"
         :title="__('Clear')"
         class="gl-p-0! gl-mr-2"
-        @keydown.enter.stop="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
-        @click.stop="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
+        @keydown.enter.stop="resetDropdown"
+        @click.stop="resetDropdown"
       >
         <gl-icon name="clear" class="gl-text-gray-200! gl-hover-text-blue-800!" />
       </gl-button>
@@ -112,10 +116,10 @@ export default {
       <gl-dropdown-item
         class="gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-2! gl-mb-2"
         :is-check-item="true"
-        :is-checked="isSelected($options.ANY_GROUP_OR_PROJECT)"
-        @click="$emit('change', $options.ANY_GROUP_OR_PROJECT)"
+        :is-checked="isSelected($options.ANY_OPTION)"
+        @click="resetDropdown"
       >
-        {{ $options.ANY_GROUP_OR_PROJECT.name }}
+        {{ $options.ANY_OPTION.name }}
       </gl-dropdown-item>
     </div>
     <div v-if="!loading">
