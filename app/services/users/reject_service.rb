@@ -12,14 +12,12 @@ module Users
 
       user_data = user.delete_async
 
-      # rubocop: disable CodeReuse/ActiveRecord
       if user_data.destroyed?
         NotificationService.new.user_admin_rejection(user_data.name, user_data.email)
         success
       else
         error(user.errors.full_messages.uniq.join('. '))
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     private
