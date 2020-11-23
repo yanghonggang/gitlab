@@ -17,6 +17,10 @@ export default {
   },
   mixins: [timeagoMixin],
   props: {
+    projectId: {
+      required: true,
+      type: Number,
+    },
     states: {
       required: true,
       type: Array,
@@ -106,7 +110,7 @@ export default {
     </template>
 
     <template #cell(actions)="{ item }">
-      <state-actions :state="item" />
+      <state-actions :state="item" :project-id="projectId" />
     </template>
   </gl-table>
 </template>

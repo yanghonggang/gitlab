@@ -30,6 +30,11 @@ module Types
       field :updated_at, Types::TimeType,
             null: false,
             description: 'Timestamp the version was updated'
+
+      field :version,
+            GraphQL::INT_TYPE,
+            null: true,
+            description: 'The version number of the state'
     end
   end
 end

@@ -1,5 +1,7 @@
 <script>
 import { GlDropdown, GlDropdownDivider, GlDropdownItem, GlDropdownSectionHeader } from '@gitlab/ui';
+import Api from '~/api';
+import downloader from '~/lib/utils/downloader';
 import deleteState from '../graphql/mutations/delete_state.mutation.graphql';
 import lockState from '../graphql/mutations/lock_state.mutation.graphql';
 import unlockState from '../graphql/mutations/unlock_state.mutation.graphql';
@@ -12,6 +14,10 @@ export default {
     GlDropdownSectionHeader,
   },
   props: {
+    projectId: {
+      required: true,
+      type: Number,
+    },
     state: {
       required: true,
       type: Object,
@@ -23,6 +29,20 @@ export default {
     };
   },
   methods: {
+    downloadVersion() {
+      Api.downloadProjectTerraformStateVersion(
+        this.projectId,
+        this.state.name,
+        this.state.latestVersion.version,
+      )
+        .then(response => {
+          downloader({
+            fileName: `${this.state.name}.json`,
+            url: window.URL.createObjectURL(response.data),
+          });
+        })
+        .catch(() => {});
+    },
     deleteState() {
       this.stateMutation(deleteState);
     },
@@ -59,6 +79,10 @@ export default {
     <gl-dropdown-section-header>
       {{ s__('Terraform|Actions') }}
     </gl-dropdown-section-header>
+
+    <gl-dropdown-item v-if="state.latestVersion" icon-name="download" @click="downloadVersion">
+      {{ s__('Terraform|Download latest (JSON)') }}
+    </gl-dropdown-item>
 
     <gl-dropdown-item v-if="state.lockedAt" icon-name="lock-open" @click="unlockState">
       {{ s__('Terraform|UnLock') }}

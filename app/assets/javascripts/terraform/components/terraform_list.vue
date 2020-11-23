@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlBadge, GlKeysetPagination, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
 import StatesTable from './states_table.vue';
@@ -60,6 +61,9 @@ export default {
     pageInfo() {
       return this.states?.project?.terraformStates?.pageInfo || {};
     },
+    projectId() {
+      return getIdFromGraphQLId(this.states?.project?.id);
+    },
     showPagination() {
       return this.pageInfo.hasPreviousPage || this.pageInfo.hasNextPage;
     },
@@ -106,7 +110,7 @@ export default {
 
         <div v-else-if="statesList">
           <div v-if="statesCount">
-            <states-table :states="statesList" />
+            <states-table :states="statesList" :project-id="projectId" />
 
             <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />

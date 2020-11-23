@@ -33,6 +33,7 @@ const Api = {
   projectSearchPath: '/api/:version/projects/:id/search',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
   projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
+  projectTerraformStateVersion: '/api/:version/projects/:id/terraform/state/:name/versions/:serial',
   mergeRequestsPath: '/api/:version/merge_requests',
   groupLabelsPath: '/groups/:namespace_path/-/labels',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
@@ -828,6 +829,19 @@ const Api = {
         callback(data);
         return { data, headers };
       });
+  },
+
+  downloadProjectTerraformStateVersion(projectID, stateName, versionNumber) {
+    const url = Api.buildUrl(this.projectTerraformStateVersion)
+      .replace(':id', projectID)
+      .replace(':name', stateName)
+      .replace(':serial', versionNumber);
+
+    return axios({
+      url,
+      type: 'GET',
+      responseType: 'blob',
+    });
   },
 };
 

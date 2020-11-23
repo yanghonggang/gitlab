@@ -2,6 +2,7 @@
 
 fragment StateVersion on TerraformStateVersion {
   updatedAt
+  version
 
   createdByUser {
     ...User
