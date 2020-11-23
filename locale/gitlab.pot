@@ -5559,7 +5559,7 @@ msgstr ""
 msgid "ClassificationLabelUnavailable|is unavailable: %{reason}"
 msgstr ""
 
-msgid "Cleanup policy for tags"
+msgid "Clean up image tags"
 msgstr ""
 
 msgid "Cleanup policy maximum processing time (seconds)"
@@ -23673,7 +23673,7 @@ msgstr ""
 msgid "Save pipeline schedule"
 msgstr ""
 
-msgid "Save space and find tags in the Container Registry more easily. Enable the cleanup policy to remove stale tags and keep only the ones you need."
+msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
