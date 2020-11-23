@@ -33,7 +33,6 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
       subject
 
       within '#js-registry-policies' do
-
         select('7 days until tags are automatically removed', from: 'Remove tags older than:')
         select('Every day', from: 'Run cleanup every:')
         select('50 tags per image name', from: 'Keep the most recent:')
@@ -52,7 +51,6 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
       subject
 
       within '#js-registry-policies' do
-
         fill_in('Remove tags matching:', with: '*-production')
 
         submit_button = find('.btn.btn-success')
