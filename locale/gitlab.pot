@@ -2736,6 +2736,9 @@ msgstr ""
 msgid "AlertsIntegrations|The integration token could not be reset. Please try again."
 msgstr ""
 
+msgid "AlertsIntegrations|The test alert has been successfully sent, and should now be visible on your alerts list."
+msgstr ""
+
 msgid "AlertsIntegrations|You have opted to delete the %{integrationName} integration. Do you want to proceed? It means you will no longer receive alerts from this endpoint in your alert list, and this action cannot be undone."
 msgstr ""
 
@@ -31265,6 +31268,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an HTTP integration for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to create an on-call schedule for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to remove this HTTP integration"
 msgstr ""
 
@@ -31629,6 +31635,9 @@ msgid "Your issues are being imported. Once finished, you'll get a confirmation 
 msgstr ""
 
 msgid "Your issues will be imported in the background. Once finished, you'll get a confirmation email."
+msgstr ""
+
+msgid "Your license does not support on-call schedules"
 msgstr ""
 
 msgid "Your license is valid from"
