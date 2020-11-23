@@ -10,7 +10,7 @@ module Users
       return error(_('You are not allowed to reject a user')) unless allowed?
       return error(_('This user does not have a pending request')) unless user.blocked_pending_approval?
 
-      user_data = user.delete_async
+      user_data = Users::DestroyService.new(current_user).execute(user, hard_delete: true)
 
       if user_data.destroyed?
         NotificationService.new.user_admin_rejection(user_data.name, user_data.email)
