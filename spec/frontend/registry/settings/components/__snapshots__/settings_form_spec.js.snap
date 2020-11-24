@@ -36,7 +36,7 @@ exports[`Settings Form Keep Regex matches snapshot 1`] = `
   error=""
   label="Keep tags matching:"
   name="keep-regex"
-  placeholder="production-v.*"
+  placeholder=""
   value="sss"
 />
 `;
