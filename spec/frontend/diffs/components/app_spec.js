@@ -12,7 +12,6 @@ import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
 import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
 import CommitWidget from '~/diffs/components/commit_widget.vue';
 import TreeList from '~/diffs/components/tree_list.vue';
-import { INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '~/diffs/constants';
 import createDiffsStore from '../create_diffs_store';
 import axios from '~/lib/utils/axios_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
@@ -75,12 +74,6 @@ describe('diffs/components/app', () => {
     });
   }
 
-  function getOppositeViewType(currentViewType) {
-    return currentViewType === INLINE_DIFF_VIEW_TYPE
-      ? PARALLEL_DIFF_VIEW_TYPE
-      : INLINE_DIFF_VIEW_TYPE;
-  }
-
   beforeEach(() => {
     // setup globals (needed for component to mount :/)
     window.mrTabs = {
@@ -123,104 +116,6 @@ describe('diffs/components/app', () => {
       store.state.diffs.retrievingBatches = true;
       store.state.diffs.diffFiles = [];
       wrapper.vm.$nextTick(done);
-    });
-
-    describe('when the diff view type changes and it should load a single diff view style', () => {
-      const noLinesDiff = {
-        highlighted_diff_lines: [],
-        parallel_diff_lines: [],
-      };
-      const parallelLinesDiff = {
-        highlighted_diff_lines: [],
-        parallel_diff_lines: ['line'],
-      };
-      const inlineLinesDiff = {
-        highlighted_diff_lines: ['line'],
-        parallel_diff_lines: [],
-      };
-      const fullDiff = {
-        highlighted_diff_lines: ['line'],
-        parallel_diff_lines: ['line'],
-      };
-
-      function expectFetchToOccur({ vueInstance, done = () => {}, existingFiles = 1 } = {}) {
-        vueInstance.$nextTick(() => {
-          expect(vueInstance.diffFiles.length).toEqual(existingFiles);
-          expect(vueInstance.fetchDiffFilesBatch).toHaveBeenCalled();
-
-          done();
-        });
-      }
-
-      it('fetches diffs if it has none', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, existingFiles: 0, done });
-      });
-
-      it('fetches diffs if it has both view styles, but no lines in either', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(noLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches diffs if it only has inline view style', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(inlineLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches diffs if it only has parallel view style', done => {
-        wrapper.vm.isLatestVersion = () => false;
-
-        store.state.diffs.diffFiles.push(parallelLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it has none', done => {
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, existingFiles: 0, done });
-      });
-
-      it('fetches batch diffs if it has both view styles, but no lines in either', done => {
-        store.state.diffs.diffFiles.push(noLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it only has inline view style', done => {
-        store.state.diffs.diffFiles.push(inlineLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('fetches batch diffs if it only has parallel view style', done => {
-        store.state.diffs.diffFiles.push(parallelLinesDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expectFetchToOccur({ vueInstance: wrapper.vm, done });
-      });
-
-      it('does not fetch batch diffs if it has already fetched both styles of diff', () => {
-        store.state.diffs.diffFiles.push(fullDiff);
-        store.state.diffs.diffViewType = getOppositeViewType(wrapper.vm.diffViewType);
-
-        expect(wrapper.vm.diffFiles.length).toEqual(1);
-        expect(wrapper.vm.fetchDiffFilesBatch).not.toHaveBeenCalled();
-      });
     });
 
     it('calls batch methods if diffsBatchLoad is enabled, and not latest version', done => {
@@ -697,7 +592,7 @@ describe('diffs/components/app', () => {
       });
 
       describe('collapsed files', () => {
-        it('should render the collapsed files warning if there are any collapsed files', () => {
+        it('should render the collapsed files warning if there are any automatically collapsed files', () => {
           createComponent({}, ({ state }) => {
             state.diffs.diffFiles = [{ viewer: { automaticallyCollapsed: true } }];
           });
@@ -705,15 +600,13 @@ describe('diffs/components/app', () => {
           expect(getCollapsedFilesWarning(wrapper).exists()).toBe(true);
         });
 
-        it('should not render the collapsed files warning if the user has dismissed the alert already', async () => {
+        it('should not render the collapsed files warning if there are no automatically collapsed files', () => {
           createComponent({}, ({ state }) => {
-            state.diffs.diffFiles = [{ viewer: { automaticallyCollapsed: true } }];
+            state.diffs.diffFiles = [
+              { viewer: { automaticallyCollapsed: false, manuallyCollapsed: true } },
+              { viewer: { automaticallyCollapsed: false, manuallyCollapsed: false } },
+            ];
           });
-
-          expect(getCollapsedFilesWarning(wrapper).exists()).toBe(true);
-
-          wrapper.vm.collapsedWarningDismissed = true;
-          await wrapper.vm.$nextTick();
 
           expect(getCollapsedFilesWarning(wrapper).exists()).toBe(false);
         });

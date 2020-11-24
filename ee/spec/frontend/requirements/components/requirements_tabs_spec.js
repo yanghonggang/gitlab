@@ -1,3 +1,4 @@
+import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import { GlTab, GlDeprecatedBadge as GlBadge, GlButton } from '@gitlab/ui';

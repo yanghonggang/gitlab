@@ -1,6 +1,10 @@
 import { __, n__ } from '~/locale';
 import { parallelizeDiffLines } from './utils';
-import { PARALLEL_DIFF_VIEW_TYPE, INLINE_DIFF_VIEW_TYPE } from '../constants';
+import {
+  PARALLEL_DIFF_VIEW_TYPE,
+  INLINE_DIFF_VIEW_TYPE,
+  INLINE_DIFF_LINES_KEY,
+} from '../constants';
 
 export * from './getters_versions_dropdowns';
 
@@ -8,8 +12,16 @@ export const isParallelView = state => state.diffViewType === PARALLEL_DIFF_VIEW
 
 export const isInlineView = state => state.diffViewType === INLINE_DIFF_VIEW_TYPE;
 
-export const hasCollapsedFile = state =>
-  state.diffFiles.some(file => file.viewer && file.viewer.automaticallyCollapsed);
+export const whichCollapsedTypes = state => {
+  const automatic = state.diffFiles.some(file => file.viewer?.automaticallyCollapsed);
+  const manual = state.diffFiles.some(file => file.viewer?.manuallyCollapsed);
+
+  return {
+    any: automatic || manual,
+    automatic,
+    manual,
+  };
+};
 
 export const commitId = state => (state.commit && state.commit.id ? state.commit.id : null);
 
@@ -46,24 +58,10 @@ export const diffHasAllCollapsedDiscussions = (state, getters) => diff => {
  * @param {Object} diff
  * @returns {Boolean}
  */
-export const diffHasExpandedDiscussions = state => diff => {
-  const lines = {
-    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines || [],
-    [PARALLEL_DIFF_VIEW_TYPE]: (diff.parallel_diff_lines || []).reduce((acc, line) => {
-      if (line.left) {
-        acc.push(line.left);
-      }
-
-      if (line.right) {
-        acc.push(line.right);
-      }
-
-      return acc;
-    }, []),
-  };
-  return lines[window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType]
-    .filter(l => l.discussions.length >= 1)
-    .some(l => l.discussionsExpanded);
+export const diffHasExpandedDiscussions = () => diff => {
+  return diff[INLINE_DIFF_LINES_KEY].filter(l => l.discussions.length >= 1).some(
+    l => l.discussionsExpanded,
+  );
 };
 
 /**
@@ -71,24 +69,8 @@ export const diffHasExpandedDiscussions = state => diff => {
  * @param {Boolean} diff
  * @returns {Boolean}
  */
-export const diffHasDiscussions = state => diff => {
-  const lines = {
-    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines || [],
-    [PARALLEL_DIFF_VIEW_TYPE]: (diff.parallel_diff_lines || []).reduce((acc, line) => {
-      if (line.left) {
-        acc.push(line.left);
-      }
-
-      if (line.right) {
-        acc.push(line.right);
-      }
-
-      return acc;
-    }, []),
-  };
-  return lines[window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType].some(
-    l => l.discussions.length >= 1,
-  );
+export const diffHasDiscussions = () => diff => {
+  return diff[INLINE_DIFF_LINES_KEY].some(l => l.discussions.length >= 1);
 };
 
 /**
@@ -157,10 +139,13 @@ export const fileLineCoverage = state => (file, line) => {
 export const currentDiffIndex = state =>
   Math.max(0, state.diffFiles.findIndex(diff => diff.file_hash === state.currentDiffFileId));
 
-export const diffLines = state => file => {
-  if (state.diffViewType === INLINE_DIFF_VIEW_TYPE) {
+export const diffLines = state => (file, unifiedDiffComponents) => {
+  if (!unifiedDiffComponents && state.diffViewType === INLINE_DIFF_VIEW_TYPE) {
     return null;
   }
 
-  return parallelizeDiffLines(file.highlighted_diff_lines || []);
+  return parallelizeDiffLines(
+    file.highlighted_diff_lines || [],
+    state.diffViewType === INLINE_DIFF_VIEW_TYPE,
+  );
 };

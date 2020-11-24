@@ -12,7 +12,7 @@ Variables can be specified using double curly braces, such as `"{{ci_environment
 
 Support for the `"%{ci_environment_slug}"` format was
 [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31581) in GitLab 13.0.
-Queries that continue to use the old format will show no data.
+Queries that continue to use the old format display no data.
 
 ## Predefined variables
 
@@ -49,6 +49,8 @@ For example, if the dashboard time range is set to 8 hours, the value of
 ## User-defined variables
 
 [Variables can be defined](../../../operations/metrics/dashboards/yaml.md#templating-templating-properties) in a custom dashboard YAML file.
+
+Variable names are case-sensitive.
 
 ## Query variables from URL
 

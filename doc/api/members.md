@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Group and project members API
 
 ## Valid access levels
@@ -13,7 +19,7 @@ The access levels are defined in the `Gitlab::Access` module. Currently, these l
 
 CAUTION: **Caution:**
 Due to [an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/219299),
-projects in personal namespaces will not show owner (`50`) permission
+projects in personal namespaces don't show owner (`50`) permission
 for owner.
 
 ## Limitations

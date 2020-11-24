@@ -25,7 +25,7 @@ FactoryBot.define do
     end
   end
 
-  factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding', aliases: [:vulnerabilities_occurrence] do
+  factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding' do
     name { 'Cipher with no integrity' }
     project
     sequence(:uuid) { generate(:vulnerability_finding_uuid) }
@@ -56,18 +56,58 @@ FactoryBot.define do
             url: 'https://crypto.stackexchange.com/questions/31428/pbewithmd5anddes-cipher-does-not-check-for-integrity-first'
           }
         ],
+        assets: [
+          {
+            type: "postman",
+            name: "Test Postman Collection",
+            url: "http://localhost/test.collection"
+          }
+        ],
         evidence: {
           summary: 'Credit card detected',
           request: {
             headers: [{ name: 'Accept', value: '*/*' }],
             method: 'GET',
-            url: 'http://goat:8080/WebGoat/logout'
+            url: 'http://goat:8080/WebGoat/logout',
+            body: nil
           },
           response: {
             headers: [{ name: 'Content-Length', value: '0' }],
             reason_phrase: 'OK',
-            status_code: 200
-          }
+            status_code: 200,
+            body: nil
+          },
+          source: {
+            id: 'assert:Response Body Analysis',
+            name: 'Response Body Analysis',
+            url: 'htpp://hostname/documentation'
+          },
+          supporting_messages: [
+            {
+              name: 'Origional',
+              request: {
+                headers: [{ name: 'Accept', value: '*/*' }],
+                method: 'GET',
+                url: 'http://goat:8080/WebGoat/logout',
+                body: ''
+              }
+            },
+            {
+              name: 'Recorded',
+              request: {
+                headers: [{ name: 'Accept', value: '*/*' }],
+                method: 'GET',
+                url: 'http://goat:8080/WebGoat/logout',
+                body: ''
+              },
+              response: {
+                headers: [{ name: 'Content-Length', value: '0' }],
+                reason_phrase: 'OK',
+                status_code: 200,
+                body: ''
+              }
+            }
+          ]
         }
       }.to_json
     end
@@ -91,8 +131,15 @@ FactoryBot.define do
     end
 
     trait :dismissed do
+      with_dismissal_feedback
+
       after(:create) do |finding|
         create(:vulnerability, :dismissed, project: finding.project, findings: [finding])
+      end
+    end
+
+    trait :with_dismissal_feedback do
+      after(:create) do |finding|
         create(:vulnerability_feedback,
                :dismissal,
                project: finding.project,
@@ -106,6 +153,34 @@ FactoryBot.define do
                :issue,
                project: finding.project,
                project_fingerprint: finding.project_fingerprint)
+      end
+    end
+
+    trait :with_secret_detection do
+      after(:build) do |finding|
+        finding.severity = "critical"
+        finding.confidence = "unknown"
+        finding.report_type = "secret_detection"
+        finding.name = "AWS API key"
+        finding.metadata_version = "3.0"
+        finding.raw_metadata =
+          { category: "secret_detection",
+            name: "AWS API key",
+            message: "AWS API key",
+            description: "Amazon Web Services API key detected; please remove and revoke it if this is a leak.",
+            cve: "aws-key.py:fac8c3618ca3c0b55431402635743c0d6884016058f696be4a567c4183c66cfd:AWS",
+            severity: "Critical",
+            confidence: "Unknown",
+            raw_source_code_extract: "AKIAIOSFODNN7EXAMPLE",
+            scanner: { id: "gitleaks", name: "Gitleaks" },
+            location: { file: "aws-key.py",
+                        commit: { author: "Analyzer", sha: "d874aae969588eb718e1ed18aa0be73ea69b3539" },
+                        start_line: 5, end_line: 5 },
+            identifiers: [{ type: "gitleaks_rule_id", name: "Gitleaks rule ID AWS", value: "AWS" }] }.to_json
+      end
+
+      after(:create) do |finding|
+        create(:vulnerability, :detected, project: finding.project, findings: [finding])
       end
     end
 

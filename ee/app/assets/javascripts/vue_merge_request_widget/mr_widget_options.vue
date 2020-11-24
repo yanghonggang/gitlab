@@ -1,5 +1,4 @@
 <script>
-import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
@@ -13,13 +12,17 @@ import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
 
+// import ExtensionsContainer from '~/vue_merge_request_widget/components/extensions/container';
+
 export default {
   components: {
+    // ExtensionsContainer,
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
     BlockingMergeRequestsReport,
-    GroupedSecurityReportsApp,
+    GroupedSecurityReportsApp: () =>
+      import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
     ReportSection,
   },
@@ -85,9 +88,13 @@ export default {
 
       return Boolean(loadPerformance.head_path && loadPerformance.base_path);
     },
-    shouldRenderSecurityReport() {
+    shouldRenderBaseSecurityReport() {
+      return !this.mr.canReadVulnerabilities && this.shouldRenderSecurityReport;
+    },
+    shouldRenderExtendedSecurityReport() {
       const { enabledReports } = this.mr;
       return (
+        this.mr.canReadVulnerabilities &&
         enabledReports &&
         this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
       );
@@ -227,6 +234,8 @@ export default {
       };
     },
   },
+  // TODO: Use the snake_case report types rather than the camelCased versions
+  // of them. See https://gitlab.com/gitlab-org/gitlab/-/issues/282430
   securityReportTypes: [
     'dast',
     'sast',
@@ -262,6 +271,7 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <!-- <extensions-container :mr="mr" /> -->
       <blocking-merge-requests-report :mr="mr" />
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
@@ -302,8 +312,17 @@ export default {
         :endpoint="mr.metricsReportsPath"
         class="js-metrics-reports-container"
       />
+
+      <security-reports-app
+        v-if="shouldRenderBaseSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.targetProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+      />
       <grouped-security-reports-app
-        v-if="shouldRenderSecurityReport"
+        v-else-if="shouldRenderExtendedSecurityReport"
         :head-blob-path="mr.headBlobPath"
         :source-branch="mr.sourceBranch"
         :target-branch="mr.targetBranch"
@@ -326,11 +345,18 @@ export default {
         :pipeline-path="mr.pipeline.path"
         :pipeline-id="mr.securityReportsPipelineId"
         :pipeline-iid="mr.securityReportsPipelineIid"
+        :project-id="mr.targetProjectId"
         :project-full-path="mr.sourceProjectFullPath"
         :diverged-commits-count="mr.divergedCommitsCount"
         :mr-state="mr.state"
         :target-branch-tree-path="mr.targetBranchTreePath"
         :new-pipeline-path="mr.newPipelinePath"
+        :container-scanning-comparison-path="mr.containerScanningComparisonPath"
+        :coverage-fuzzing-comparison-path="mr.coverageFuzzingComparisonPath"
+        :dast-comparison-path="mr.dastComparisonPath"
+        :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
         class="js-security-widget"
       />
       <mr-widget-licenses

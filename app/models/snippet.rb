@@ -213,7 +213,8 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(default_branch).map { |file| Blob.lazy(repository, default_branch, file) }
+    branch = default_branch
+    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
   end
 
   def hook_attrs
@@ -293,9 +294,7 @@ class Snippet < ApplicationRecord
     @storage ||= Storage::Hashed.new(self, prefix: Storage::Hashed::SNIPPET_REPOSITORY_PATH_PREFIX)
   end
 
-  # This is the full_path used to identify the
-  # the snippet repository. It will be used mostly
-  # for logging purposes.
+  # This is the full_path used to identify the the snippet repository.
   override :full_path
   def full_path
     return unless persisted?
@@ -303,7 +302,7 @@ class Snippet < ApplicationRecord
     @full_path ||= begin
       components = []
       components << project.full_path if project_id?
-      components << '@snippets'
+      components << 'snippets'
       components << self.id
       components.join('/')
     end

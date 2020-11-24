@@ -236,57 +236,41 @@ RSpec.describe BlobHelper do
         let(:data) { File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml')) }
         let(:blob) { fake_blob(path: Gitlab::FileDetector::PATTERNS[:gitlab_ci], data: data) }
 
-        context 'experiment enabled' do
-          before do
-            allow(helper).to receive(:experiment_enabled?).and_return(true)
-          end
+        it 'is true' do
+          expect(helper.show_suggest_pipeline_creation_celebration?).to be_truthy
+        end
 
-          it 'is true' do
-            expect(helper.show_suggest_pipeline_creation_celebration?).to be_truthy
-          end
+        context 'file is invalid format' do
+          let(:data) { 'foo' }
 
-          context 'file is invalid format' do
-            let(:data) { 'foo' }
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'does not use the default ci config' do
-            before do
-              project.ci_config_path = 'something_bad'
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'does not have the needed cookie' do
-            before do
-              helper.request.cookies.delete "suggest_gitlab_ci_yml_commit_#{project.id}"
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'blob does not have auxiliary view' do
-            before do
-              allow(blob).to receive(:auxiliary_viewer).and_return(nil)
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
           end
         end
 
-        context 'experiment disabled' do
+        context 'does not use the default ci config' do
           before do
-            allow(helper).to receive(:experiment_enabled?).and_return(false)
+            project.ci_config_path = 'something_bad'
+          end
+
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
+          end
+        end
+
+        context 'does not have the needed cookie' do
+          before do
+            helper.request.cookies.delete "suggest_gitlab_ci_yml_commit_#{project.id}"
+          end
+
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
+          end
+        end
+
+        context 'blob does not have auxiliary view' do
+          before do
+            allow(blob).to receive(:auxiliary_viewer).and_return(nil)
           end
 
           it 'is false' do
@@ -298,14 +282,8 @@ RSpec.describe BlobHelper do
       context 'when file is not a pipeline config file' do
         let(:blob) { fake_blob(path: 'LICENSE') }
 
-        context 'experiment enabled' do
-          before do
-            allow(helper).to receive(:experiment_enabled?).and_return(true)
-          end
-
-          it 'is false' do
-            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-          end
+        it 'is false' do
+          expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
         end
       end
     end
@@ -440,6 +418,55 @@ RSpec.describe BlobHelper do
 
       it "returns IDE path with the user's fork" do
         expect(helper.ide_edit_path(project, "master", "")).to eq("/-/ide/project/#{current_user.namespace.full_path}/#{project.path}/edit/master")
+      end
+    end
+  end
+
+  describe '#ide_merge_request_path' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) { create(:merge_request, source_project: project)}
+
+    it 'returns IDE path for the given MR if MR is not merged' do
+      expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{project.full_path}/merge_requests/#{merge_request.iid}")
+    end
+
+    context 'when the MR comes from a fork' do
+      include ProjectForksHelper
+
+      let(:forked_project) { fork_project(project, nil, repository: true) }
+      let(:merge_request) { create(:merge_request, source_project: forked_project, target_project: project) }
+
+      it 'returns IDE path for MR in the forked repo with target project included as param' do
+        expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{forked_project.full_path}/merge_requests/#{merge_request.iid}?target_project=#{CGI.escape(project.full_path)}")
+      end
+    end
+
+    context 'when the MR is merged' do
+      let(:current_user) { build(:user) }
+
+      let_it_be(:merge_request) { create(:merge_request, :merged, source_project: project, source_branch: 'testing-1', target_branch: 'feature-1') }
+
+      before do
+        allow(helper).to receive(:current_user).and_return(current_user)
+        allow(helper).to receive(:can?).and_return(true)
+      end
+
+      it 'returns default IDE url with master branch' do
+        expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{project.full_path}/edit/master")
+      end
+
+      it 'includes file path passed' do
+        expect(helper.ide_merge_request_path(merge_request, 'README.md')).to eq("/-/ide/project/#{project.full_path}/edit/master/-/README.md")
+      end
+
+      context 'when target branch exists' do
+        before do
+          allow(merge_request).to receive(:target_branch_exists?).and_return(true)
+        end
+
+        it 'returns IDE edit url with the target branch' do
+          expect(helper.ide_merge_request_path(merge_request)).to eq("/-/ide/project/#{project.full_path}/edit/feature-1")
+        end
       end
     end
   end

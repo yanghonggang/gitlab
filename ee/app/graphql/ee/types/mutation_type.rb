@@ -13,6 +13,8 @@ module EE
         mount_mutation ::Mutations::Issues::SetIteration
         mount_mutation ::Mutations::Issues::SetWeight
         mount_mutation ::Mutations::Issues::SetEpic
+        mount_mutation ::Mutations::Issues::PromoteToEpic
+        mount_mutation ::Mutations::Environments::CanaryIngress::Update
         mount_mutation ::Mutations::EpicTree::Reorder
         mount_mutation ::Mutations::Epics::Update
         mount_mutation ::Mutations::Epics::Create
@@ -35,6 +37,7 @@ module EE
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
         mount_mutation ::Mutations::DastSiteProfiles::Delete
+        mount_mutation ::Mutations::DastSiteValidations::Create
         mount_mutation ::Mutations::DastScannerProfiles::Create
         mount_mutation ::Mutations::DastScannerProfiles::Update
         mount_mutation ::Mutations::DastScannerProfiles::Delete
@@ -42,6 +45,10 @@ module EE
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Update
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
 
         prepend(Types::DeprecatedMutations)
       end

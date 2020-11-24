@@ -97,7 +97,15 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
+  :tags: []
+- :name: container_repository:container_expiration_policies_cleanup_container_repository
+  :feature_category: :container_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: container_repository:delete_container_repository
   :feature_category: :container_registry
@@ -116,7 +124,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:analytics_instance_statistics_count_job_trigger
-  :feature_category: :instance_statistics
+  :feature_category: :devops_reports
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -315,6 +323,22 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: cronjob:releases_create_evidence
+  :feature_category: :release_evidence
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: cronjob:releases_manage_evidence
+  :feature_category: :release_evidence
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:remove_expired_group_links
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -370,6 +394,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: cronjob:schedule_merge_request_cleanup_refs
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:schedule_migrate_external_diffs
   :feature_category: :source_code_management
@@ -430,6 +462,14 @@
 - :name: cronjob:x509_issuer_crl_check
   :feature_category: :source_code_management
   :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: dependency_proxy:purge_dependency_proxy_cache
+  :feature_category: :dependency_proxy
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -818,6 +858,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: jira_connect:jira_connect_sync_project
+  :feature_category: :integrations
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: jira_importer:jira_import_advance_stage
   :feature_category: :importers
@@ -1281,7 +1329,7 @@
   :idempotent: true
   :tags: []
 - :name: analytics_instance_statistics_counter_job
-  :feature_category: :instance_statistics
+  :feature_category: :devops_reports
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -1312,6 +1360,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: bulk_import
+  :feature_category: :importers
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: chat_notification
   :feature_category: :chatops
   :has_external_dependencies: true
@@ -1336,14 +1392,6 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent: true
-  :tags: []
-- :name: create_evidence
-  :feature_category: :release_evidence
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 2
-  :idempotent:
   :tags: []
 - :name: create_note_diff_file
   :feature_category: :source_code_management
@@ -1408,6 +1456,14 @@
   :resource_boundary: :memory
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: destroy_pages_deployments
+  :feature_category: :pages
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: detect_repository_languages
   :feature_category: :source_code_management
@@ -1832,6 +1888,14 @@
   :idempotent: true
   :tags: []
 - :name: propagate_integration_inherit
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: propagate_integration_inherit_descendant
   :feature_category: :integrations
   :has_external_dependencies:
   :urgency: :low

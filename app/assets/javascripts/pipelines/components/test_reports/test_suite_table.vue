@@ -1,7 +1,15 @@
 <script>
-import { mapGetters } from 'vuex';
-import { GlTooltipDirective, GlFriendlyWrap, GlIcon, GlButton } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  GlModalDirective,
+  GlTooltipDirective,
+  GlFriendlyWrap,
+  GlIcon,
+  GlButton,
+  GlPagination,
+} from '@gitlab/ui';
 import { __ } from '~/locale';
+import TestCaseDetails from './test_case_details.vue';
 
 export default {
   name: 'TestsSuiteTable',
@@ -9,9 +17,12 @@ export default {
     GlIcon,
     GlFriendlyWrap,
     GlButton,
+    GlPagination,
+    TestCaseDetails,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     heading: {
@@ -21,10 +32,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getSuiteTests']),
+    ...mapState(['pageInfo']),
+    ...mapGetters(['getSuiteTests', 'getSuiteTestCount']),
     hasSuites() {
       return this.getSuiteTests.length > 0;
     },
+  },
+  methods: {
+    ...mapActions(['setPage']),
   },
   wrapSymbols: ['::', '#', '.', '_', '-', '/', '\\'],
 };
@@ -43,7 +58,7 @@ export default {
         <div role="rowheader" class="table-section section-20">
           {{ __('Suite') }}
         </div>
-        <div role="rowheader" class="table-section section-20">
+        <div role="rowheader" class="table-section section-40">
           {{ __('Name') }}
         </div>
         <div role="rowheader" class="table-section section-10">
@@ -52,11 +67,11 @@ export default {
         <div role="rowheader" class="table-section section-10 text-center">
           {{ __('Status') }}
         </div>
-        <div role="rowheader" class="table-section flex-grow-1">
-          {{ __('Trace'), }}
-        </div>
-        <div role="rowheader" class="table-section section-10 text-right">
+        <div role="rowheader" class="table-section section-10">
           {{ __('Duration') }}
+        </div>
+        <div role="rowheader" class="table-section section-10">
+          {{ __('Details'), }}
         </div>
       </div>
 
@@ -72,7 +87,7 @@ export default {
           </div>
         </div>
 
-        <div class="table-section section-20 section-wrap">
+        <div class="table-section section-40 section-wrap">
           <div role="rowheader" class="table-mobile-header">{{ __('Name') }}</div>
           <div class="table-mobile-content gl-md-pr-2 gl-overflow-wrap-break">
             <gl-friendly-wrap :symbols="$options.wrapSymbols" :text="testCase.name" />
@@ -107,25 +122,33 @@ export default {
           </div>
         </div>
 
-        <div class="table-section flex-grow-1">
-          <div role="rowheader" class="table-mobile-header">{{ __('Trace'), }}</div>
-          <div class="table-mobile-content">
-            <pre
-              v-if="testCase.system_output"
-              class="build-trace build-trace-rounded text-left"
-            ><code class="bash p-0">{{testCase.system_output}}</code></pre>
-          </div>
-        </div>
-
         <div class="table-section section-10 section-wrap">
           <div role="rowheader" class="table-mobile-header">
             {{ __('Duration') }}
           </div>
-          <div class="table-mobile-content text-right pr-sm-1">
+          <div class="table-mobile-content pr-sm-1">
             {{ testCase.formattedTime }}
           </div>
         </div>
+
+        <div class="table-section section-10 section-wrap">
+          <div role="rowheader" class="table-mobile-header">{{ __('Details'), }}</div>
+          <div class="table-mobile-content">
+            <gl-button v-gl-modal-directive="`test-case-details-${index}`">{{
+              __('View details')
+            }}</gl-button>
+            <test-case-details :modal-id="`test-case-details-${index}`" :test-case="testCase" />
+          </div>
+        </div>
       </div>
+
+      <gl-pagination
+        v-model="pageInfo.page"
+        class="gl-display-flex gl-justify-content-center"
+        :per-page="pageInfo.perPage"
+        :total-items="getSuiteTestCount"
+        @input="setPage"
+      />
     </div>
 
     <div v-else>

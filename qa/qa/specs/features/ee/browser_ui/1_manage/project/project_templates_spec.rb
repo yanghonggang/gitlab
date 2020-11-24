@@ -4,6 +4,8 @@ require 'securerandom'
 module QA
   RSpec.describe 'Manage' do
     describe 'Project templates' do
+      include Support::Api
+
       before(:all) do
         @files = [
           {
@@ -67,7 +69,12 @@ module QA
         end
       end
 
-      context 'instance level', :requires_admin, quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/228624' } do
+      # This was originally quarantined only on staging
+      # against the issue https://gitlab.com/gitlab-org/gitlab/-/issues/228624
+      # Now quarantining against a new issue due to failures on master
+      # If dequarantining, the original staging quarantine should be reverted
+      # if still applicable.
+      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :bug } do
         before do
           Flow::Login.sign_in_as_admin
 
@@ -158,11 +165,17 @@ module QA
 
           Page::Project::Show.perform do |project|
             project.wait_for_import_success
+            @project_id = project.project_id
 
             @files.each do |file|
               expect(project).to have_file(file[:name])
             end
           end
+        end
+
+        after do
+          api_client = Runtime::API::Client.new(:gitlab)
+          delete Runtime::API::Request.new(api_client, "/projects/#{@project_id}").url
         end
       end
 

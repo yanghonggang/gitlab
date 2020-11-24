@@ -27,7 +27,6 @@ import {
   scrollToLineIfNeededInline,
   scrollToLineIfNeededParallel,
   loadCollapsedDiff,
-  expandAllFiles,
   toggleFileDiscussions,
   saveDiffDiscussion,
   setHighlightedRow,
@@ -42,7 +41,7 @@ import {
   fetchFullDiff,
   toggleFullDiff,
   switchToFullDiffFromRenamedFile,
-  setFileCollapsed,
+  setFileCollapsedByUser,
   setExpandedDiffLines,
   setSuggestPopoverDismissed,
   changeCurrentCommit,
@@ -658,23 +657,6 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('expandAllFiles', () => {
-    it('should change the collapsed prop from the diffFiles', done => {
-      testAction(
-        expandAllFiles,
-        null,
-        {},
-        [
-          {
-            type: types.EXPAND_ALL_FILES,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('toggleFileDiscussions', () => {
     it('should dispatch collapseDiscussion when all discussions are expanded', () => {
       const getters = {
@@ -1167,7 +1149,11 @@ describe('DiffsStoreActions', () => {
       file_hash: 'testhash',
       alternate_viewer: { name: updatedViewerName },
     };
-    const updatedViewer = { name: updatedViewerName, automaticallyCollapsed: false };
+    const updatedViewer = {
+      name: updatedViewerName,
+      automaticallyCollapsed: false,
+      manuallyCollapsed: false,
+    };
     const testData = [{ rich_text: 'test' }, { rich_text: 'file2' }];
     let renamedFile;
     let mock;
@@ -1216,13 +1202,18 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('setFileCollapsed', () => {
+  describe('setFileUserCollapsed', () => {
     it('commits SET_FILE_COLLAPSED', done => {
       testAction(
-        setFileCollapsed,
+        setFileCollapsedByUser,
         { filePath: 'test', collapsed: true },
         null,
-        [{ type: types.SET_FILE_COLLAPSED, payload: { filePath: 'test', collapsed: true } }],
+        [
+          {
+            type: types.SET_FILE_COLLAPSED,
+            payload: { filePath: 'test', collapsed: true, trigger: 'manual' },
+          },
+        ],
         [],
         done,
       );
@@ -1245,10 +1236,6 @@ describe('DiffsStoreActions', () => {
         { diffViewType: 'inline' },
         [
           {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines: ['test'] },
-          },
-          {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: ['test'] },
           },
@@ -1267,10 +1254,6 @@ describe('DiffsStoreActions', () => {
         { file: { file_path: 'path' }, data: [] },
         { diffViewType: 'inline' },
         [
-          {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines },
-          },
           {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: lines.slice(0, 200) },

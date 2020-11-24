@@ -193,9 +193,12 @@ export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
 
+  const endOfDay = newDate(endDate);
+  endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
+
   for (
     let currentDate = newDate(startDate);
-    currentDate <= endDate;
+    currentDate <= endOfDay;
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);
@@ -253,7 +256,6 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
     return {
       groupBy: [],
       data: [],
-      seriesNames: [],
     };
   }
 
@@ -269,14 +271,19 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
   const transformed = data.reduce(
     (acc, curr) => {
       const {
-        label: { title },
+        label: { title: name },
         series,
       } = curr;
-      acc.seriesNames = [...acc.seriesNames, title];
       acc.data = [
         ...acc.data,
-        // adds 0 values for each data point and overrides with data from the series
-        flattenTaskByTypeSeries({ ...zeroValuesForEachDataPoint, ...Object.fromEntries(series) }),
+        {
+          name,
+          // adds 0 values for each data point and overrides with data from the series
+          data: flattenTaskByTypeSeries({
+            ...zeroValuesForEachDataPoint,
+            ...Object.fromEntries(series),
+          }),
+        },
       ];
       return acc;
     },

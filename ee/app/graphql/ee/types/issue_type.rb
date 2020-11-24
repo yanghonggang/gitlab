@@ -20,7 +20,17 @@ module EE
         field :blocked, GraphQL::BOOLEAN_TYPE, null: false,
               description: 'Indicates the issue is blocked',
               resolve: -> (obj, _args, ctx) {
-                ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id)
+                ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id) do |count|
+                  (count || 0) > 0
+                end
+              }
+
+        field :blocked_by_count, GraphQL::INT_TYPE, null: true,
+              description: 'Count of issues blocking this issue',
+              resolve: -> (obj, _args, ctx) {
+                ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id) do |count|
+                  count || 0
+                end
               }
 
         field :health_status, ::Types::HealthStatusEnum, null: true,
@@ -32,6 +42,9 @@ module EE
 
         field :sla_due_at, ::Types::TimeType, null: true,
           description: 'Timestamp of when the issue SLA expires.'
+
+        field :metric_images, [::Types::MetricImageType], null: true,
+          description: 'Metric images associated to the issue.'
       end
     end
   end

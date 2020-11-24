@@ -12,6 +12,7 @@ import DiffDiscussions from '~/diffs/components/diff_discussions.vue';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import diffFileMockData from '../mock_data/diff_file';
 import { diffViewerModes } from '~/ide/constants';
+import DiffView from '~/diffs/components/diff_view.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -33,7 +34,7 @@ describe('DiffContent', () => {
     diffFile: JSON.parse(JSON.stringify(diffFileMockData)),
   };
 
-  const createComponent = ({ props, state } = {}) => {
+  const createComponent = ({ props, state, provide } = {}) => {
     const fakeStore = new Vuex.Store({
       getters: {
         getNoteableData() {
@@ -55,6 +56,10 @@ describe('DiffContent', () => {
           namespaced: true,
           getters: {
             draftsForFile: () => () => true,
+            draftForLine: () => () => true,
+            shouldRenderDraftRow: () => () => true,
+            hasParallelDraftLeft: () => () => true,
+            hasParallelDraftRight: () => () => true,
           },
         },
         diffs: {
@@ -68,6 +73,7 @@ describe('DiffContent', () => {
             isInlineView: isInlineViewGetterMock,
             isParallelView: isParallelViewGetterMock,
             getCommentFormForDiffFile: getCommentFormForDiffFileGetterMock,
+            diffLines: () => () => [...diffFileMockData.parallel_diff_lines],
           },
           actions: {
             saveDiffDiscussion: saveDiffDiscussionMock,
@@ -77,6 +83,8 @@ describe('DiffContent', () => {
       },
     });
 
+    const glFeatures = provide ? { ...provide.glFeatures } : {};
+
     wrapper = shallowMount(DiffContentComponent, {
       propsData: {
         ...defaultProps,
@@ -84,6 +92,7 @@ describe('DiffContent', () => {
       },
       localVue,
       store: fakeStore,
+      provide: { glFeatures },
     });
   };
 
@@ -110,6 +119,16 @@ describe('DiffContent', () => {
       createComponent({ props: { diffFile: textDiffFile } });
 
       expect(wrapper.find(ParallelDiffView).exists()).toBe(true);
+    });
+
+    it('should render diff view if `unifiedDiffComponents` are true', () => {
+      isParallelViewGetterMock.mockReturnValue(true);
+      createComponent({
+        props: { diffFile: textDiffFile },
+        provide: { glFeatures: { unifiedDiffComponents: true } },
+      });
+
+      expect(wrapper.find(DiffView).exists()).toBe(true);
     });
 
     it('renders rendering more lines loading icon', () => {

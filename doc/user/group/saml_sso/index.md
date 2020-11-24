@@ -88,8 +88,6 @@ We intend to add a similar SSO requirement for [Git and API activity](https://gi
 
 When SSO enforcement is enabled for a group, users cannot share a project in the group outside the top-level group, even if the project is forked.
 
-To disallow users to contribute outside of the top-level group, please see [Group Managed Accounts](group_managed_accounts.md).
-
 ## Providers
 
 NOTE: **Note:**
@@ -107,7 +105,7 @@ When [configuring your identify provider](#configuring-your-identity-provider), 
 ### Azure setup notes
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For a demo of the Azure SAML setup including SCIM, see [SCIM Provisioning on Azure Using SAML SSO for Groups Demo](https://youtu.be/24-ZxmTeEBU).
+For a demo of the Azure SAML setup including SCIM, see [SCIM Provisioning on Azure Using SAML SSO for Groups Demo](https://youtu.be/24-ZxmTeEBU). Please note that the video is outdated in regards to objectID mapping and the [SCIM documentation should be followed](scim_setup.md#azure-configuration-steps).
 
 | GitLab Setting | Azure Field |
 |--------------|----------------|
@@ -136,7 +134,7 @@ For a demo of the Okta SAML setup including SCIM, see [Demo: Okta Group SAML & S
 
 Under Okta's **Single sign-on URL** field, check the option **Use this for Recipient URL and Destination URL**.
 
-We recommend:
+For NameID, the following settings are recommended; for SCIM, the following settings are required:
 
 - **Application username** (NameID) set to **Custom** `user.getInternalProperty("id")`.
 - **Name ID Format** set to **Persistent**.
@@ -243,6 +241,42 @@ Users can unlink SAML for a group from their profile page. This can be helpful i
 For example, to unlink the `MyOrg` account, the following **Disconnect** button will be available under **Profile > Accounts**:
 
 ![Unlink Group SAML](img/unlink_group_saml.png)
+
+## Group Sync
+
+When the SAML response includes a user and their group memberships from the SAML identity provider,
+GitLab uses that information to automatically manage that user's GitLab group memberships.
+
+Ensure your SAML identity provider sends an attribute statement named `Groups` or `groups` like the following:
+
+```xml
+<saml:AttributeStatement>
+  <saml:Attribute Name="Groups">
+    <saml:AttributeValue xsi:type="xs:string">Developers</saml:AttributeValue>
+    <saml:AttributeValue xsi:type="xs:string">Product Managers</saml:AttributeValue>
+  </saml:Attribute>
+</saml:AttributeStatement>
+```
+
+When SAML SSO is enabled for the top-level group, `Maintainer` and `Owner` level users
+see a new menu item in group **Settings -> SAML Group Links**. Each group can specify
+one or more group links to map a SAML identity provider group name to a GitLab access level.
+
+![SAML Group Links navigation](img/saml_group_links_nav_v13_6.png)
+
+To link the SAML `Freelancers` group in the attribute statement example above:
+
+1. Enter `Freelancers` in the `SAML Group Name` field.
+1. Choose the desired `Access Level`.
+1. **Save** the group link. 
+1. Repeat to add additional group links if desired. 
+
+![SAML Group Links](img/saml_group_links_v13_6.png)
+
+If a user is a member of multiple SAML groups mapped to the same GitLab group, 
+the user gets the highest access level from the groups. For example, if one group
+is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer` 
+access.
 
 ## Glossary
 

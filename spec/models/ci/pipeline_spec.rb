@@ -498,6 +498,16 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       end
     end
 
+    context 'when pipeline has a codequality report' do
+      subject { described_class.with_reports(Ci::JobArtifact.codequality_reports) }
+
+      let(:pipeline_with_report) { create(:ci_pipeline, :with_codequality_reports) }
+
+      it 'selects the pipeline' do
+        is_expected.to eq([pipeline_with_report])
+      end
+    end
+
     context 'when pipeline has a terraform report' do
       it 'selects the pipeline' do
         pipeline_with_report = create(:ci_pipeline, :with_terraform_reports)
@@ -625,7 +635,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
-  describe "coverage" do
+  describe '#coverage' do
     let(:project) { create(:project, build_coverage_regex: "/.*/") }
     let(:pipeline) { create(:ci_empty_pipeline, project: project) }
 
@@ -1969,6 +1979,32 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     it 'returns the latest successful pipeline' do
       expect(described_class.latest_successful_for_ref('ref'))
         .to eq(latest_successful_pipeline)
+    end
+  end
+
+  describe '.latest_running_for_ref' do
+    include_context 'with some outdated pipelines'
+
+    let!(:latest_running_pipeline) do
+      create_pipeline(:running, 'ref', 'D', project)
+    end
+
+    it 'returns the latest running pipeline' do
+      expect(described_class.latest_running_for_ref('ref'))
+        .to eq(latest_running_pipeline)
+    end
+  end
+
+  describe '.latest_failed_for_ref' do
+    include_context 'with some outdated pipelines'
+
+    let!(:latest_failed_pipeline) do
+      create_pipeline(:failed, 'ref', 'D', project)
+    end
+
+    it 'returns the latest failed pipeline' do
+      expect(described_class.latest_failed_for_ref('ref'))
+        .to eq(latest_failed_pipeline)
     end
   end
 
@@ -3330,6 +3366,39 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     context 'when pipeline does not have any builds with coverage reports' do
       it 'returns empty coverage reports' do
         expect(subject.files).to eql({})
+      end
+    end
+  end
+
+  describe '#codequality_reports' do
+    subject(:codequality_reports) { pipeline.codequality_reports }
+
+    context 'when pipeline has multiple builds with codequality reports' do
+      let(:build_rspec) { create(:ci_build, :success, name: 'rspec', pipeline: pipeline, project: project) }
+      let(:build_golang) { create(:ci_build, :success, name: 'golang', pipeline: pipeline, project: project) }
+
+      before do
+        create(:ci_job_artifact, :codequality, job: build_rspec, project: project)
+        create(:ci_job_artifact, :codequality_without_errors, job: build_golang, project: project)
+      end
+
+      it 'returns codequality report with collected data' do
+        expect(codequality_reports.degradations_count).to eq(3)
+      end
+
+      context 'when builds are retried' do
+        let(:build_rspec) { create(:ci_build, :retried, :success, name: 'rspec', pipeline: pipeline, project: project) }
+        let(:build_golang) { create(:ci_build, :retried, :success, name: 'golang', pipeline: pipeline, project: project) }
+
+        it 'returns a codequality reports without degradations' do
+          expect(codequality_reports.degradations).to be_empty
+        end
+      end
+    end
+
+    context 'when pipeline does not have any builds with codequality reports' do
+      it 'returns codequality reports without degradations' do
+        expect(codequality_reports.degradations).to be_empty
       end
     end
   end

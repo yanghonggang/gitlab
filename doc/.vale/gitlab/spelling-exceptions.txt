@@ -216,7 +216,7 @@ jsdom
 JupyterHub
 kanban
 kanbans
-Kaniko
+kaniko
 Karma
 Kerberos
 keyset
@@ -231,6 +231,7 @@ Kubesec
 Laravel
 LDAP
 ldapsearch
+Lefthook
 Leiningen
 Libravatar
 liveness
@@ -316,6 +317,7 @@ PgBouncer
 Phabricator
 phaser
 phasers
+phpenv
 Pipfile
 Pipfiles
 Piwik
@@ -347,6 +349,7 @@ proxied
 proxies
 proxyable
 proxying
+pseudocode
 pseudonymized
 pseudonymizer
 Puma
@@ -474,6 +477,8 @@ substrings
 subtree
 subtrees
 sudo
+swimlane
+swimlanes
 syslog
 tcpdump
 Thanos

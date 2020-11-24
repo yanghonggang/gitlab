@@ -30,10 +30,8 @@ sast:
 .sast-analyzer:
   extends: sast
   allow_failure: true
-  rules:
-    - if: $SAST_DISABLED
-      when: never
-    - if: $CI_COMMIT_BRANCH
+  # `rules` must be overridden explicitly by each child job
+  # see https://gitlab.com/gitlab-org/gitlab/-/issues/218444
   script:
     - /analyzer run
 
@@ -134,6 +132,7 @@ mobsf-android-sast:
     name: "$SAST_ANALYZER_IMAGE"
   variables:
     SAST_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/mobsf:$SAST_ANALYZER_IMAGE_TAG"
+    MOBSF_API_KEY: key
   rules:
     - if: $SAST_DISABLED
       when: never
@@ -152,6 +151,7 @@ mobsf-ios-sast:
     name: "$SAST_ANALYZER_IMAGE"
   variables:
     SAST_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/mobsf:$SAST_ANALYZER_IMAGE_TAG"
+    MOBSF_API_KEY: key
   rules:
     - if: $SAST_DISABLED
       when: never

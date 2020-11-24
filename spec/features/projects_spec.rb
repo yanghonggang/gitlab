@@ -61,7 +61,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
     end
 
     it 'parses Markdown' do
@@ -125,7 +125,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -156,7 +156,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -279,7 +279,7 @@ RSpec.describe 'Project' do
     end
 
     it 'deletes a project', :sidekiq_might_not_need_inline do
-      expect { remove_with_confirm('Delete project', "Delete #{project.full_name}", 'Yes, delete project') }.to change { Project.count }.by(-1)
+      expect { remove_with_confirm('Delete project', project.path, 'Yes, delete project') }.to change { Project.count }.by(-1)
       expect(page).to have_content "Project '#{project.full_name}' is in the process of being deleted."
       expect(Project.all.count).to be_zero
       expect(project.issues).to be_empty

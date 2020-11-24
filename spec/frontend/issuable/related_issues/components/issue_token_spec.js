@@ -100,7 +100,7 @@ describe('IssueToken', () => {
         state,
       });
 
-      expect(findReferenceIcon().attributes('aria-label')).toBe(state);
+      expect(findReferenceIcon().props('ariaLabel')).toBe(state);
       expect(findReference().text()).toBe(displayReference);
       expect(findTitle().text()).toBe(title);
     });
@@ -137,9 +137,7 @@ describe('IssueToken', () => {
       });
 
       it('tooltip should not be escaped', () => {
-        expect(findRemoveBtn().attributes('data-original-title')).toBe(
-          `Remove ${displayReference}`,
-        );
+        expect(findRemoveBtn().attributes('aria-label')).toBe(`Remove ${displayReference}`);
       });
     });
   });

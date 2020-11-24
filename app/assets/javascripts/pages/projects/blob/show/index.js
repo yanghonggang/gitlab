@@ -7,7 +7,6 @@ import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
 import '~/sourcegraph/load';
 import PipelineTourSuccessModal from '~/blob/pipeline_tour_success_modal.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { isExperimentEnabled } from '~/lib/utils/experimentation';
 
 const createGitlabCiYmlVisualization = (containerId = '#js-blob-toggle-graph-preview') => {
   const el = document.querySelector(containerId);
@@ -74,22 +73,20 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  if (isExperimentEnabled('suggestPipeline')) {
-    const successPipelineEl = document.querySelector('.js-success-pipeline-modal');
+  const successPipelineEl = document.querySelector('.js-success-pipeline-modal');
 
-    if (successPipelineEl) {
-      // eslint-disable-next-line no-new
-      new Vue({
-        el: successPipelineEl,
-        render(createElement) {
-          return createElement(PipelineTourSuccessModal, {
-            props: {
-              ...successPipelineEl.dataset,
-            },
-          });
-        },
-      });
-    }
+  if (successPipelineEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: successPipelineEl,
+      render(createElement) {
+        return createElement(PipelineTourSuccessModal, {
+          props: {
+            ...successPipelineEl.dataset,
+          },
+        });
+      },
+    });
   }
 
   if (gon?.features?.gitlabCiYmlPreview) {

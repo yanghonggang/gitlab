@@ -118,20 +118,6 @@ module EE
       project.full_path.sub(/\A#{Regexp.escape(full_path)}/, full_path_before_last_save)
     end
 
-    # This makes the feature disabled by default, in contrary to how
-    # `#feature_available?` makes a feature enabled by default.
-    #
-    # This allows to:
-    # - Enable the feature flag for a given group, regardless of the license.
-    #   This is useful for early testing a feature in production on a given group.
-    # - Enable the feature flag globally and still check that the license allows
-    #   it. This is the case when we're ready to enable a feature for anyone
-    #   with the correct license.
-    def beta_feature_available?(feature)
-      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
-    end
-    alias_method :alpha_feature_available?, :beta_feature_available?
-
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.
@@ -264,11 +250,6 @@ module EE
         actual_shared_runners_minutes_limit.nonzero?
     end
 
-    def shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        shared_runners_minutes.to_i >= actual_shared_runners_minutes_limit
-    end
-
     def shared_runners_remaining_minutes_percent
       return 0 if shared_runners_remaining_minutes.to_f <= 0
       return 0 if actual_shared_runners_minutes_limit.to_f == 0
@@ -387,7 +368,9 @@ module EE
     end
 
     def additional_repo_storage_by_namespace_enabled?
-      !::Feature.enabled?(:namespace_storage_limit, self) && ::Feature.enabled?(:additional_repo_storage_by_namespace, self)
+      !::Feature.enabled?(:namespace_storage_limit, self) &&
+        ::Feature.enabled?(:additional_repo_storage_by_namespace, self) &&
+        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
     end
 
     def root_storage_size

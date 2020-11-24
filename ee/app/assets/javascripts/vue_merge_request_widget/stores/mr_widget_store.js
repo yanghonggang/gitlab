@@ -13,6 +13,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.coverageFuzzingHelp = data.coverage_fuzzing_help_path;
     this.secretScanningHelp = data.secret_scanning_help_path;
     this.dependencyScanningHelp = data.dependency_scanning_help_path;
+    this.canReadVulnerabilities = data.can_read_vulnerabilities;
     this.vulnerabilityFeedbackPath = data.vulnerability_feedback_path;
     this.canReadVulnerabilityFeedback = data.can_read_vulnerability_feedback;
     this.vulnerabilityFeedbackHelpPath = data.vulnerability_feedback_help_path;
@@ -47,6 +48,17 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.policyViolation = data.policy_violation;
 
     super.setData(data, isRebased);
+  }
+
+  setPaths(data) {
+    // Paths are set on the first load of the page and not auto-refreshed
+    super.setPaths(data);
+
+    // Security scan diff paths
+    this.containerScanningComparisonPath = data.container_scanning_comparison_path;
+    this.coverageFuzzingComparisonPath = data.coverage_fuzzing_comparison_path;
+    this.dastComparisonPath = data.dast_comparison_path;
+    this.dependencyScanningComparisonPath = data.dependency_scanning_comparison_path;
   }
 
   initGeo(data) {

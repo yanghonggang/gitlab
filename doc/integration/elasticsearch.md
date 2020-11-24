@@ -23,7 +23,9 @@ and the advantage of the following special searches:
 
 | GitLab version                              | Elasticsearch version         |
 |---------------------------------------------|-------------------------------|
-| GitLab Enterprise Edition 12.7 or greater   | Elasticsearch 6.x through 7.x |
+| GitLab Enterprise Edition 13.9 or greater   | Elasticsearch 6.8 through 7.x |
+| GitLab Enterprise Edition 13.3 through 13.8 | Elasticsearch 6.4 through 7.x |
+| GitLab Enterprise Edition 12.7 through 13.2 | Elasticsearch 6.x through 7.x |
 | GitLab Enterprise Edition 11.5 through 12.6 | Elasticsearch 5.6 through 6.x |
 | GitLab Enterprise Edition 9.0 through 11.4  | Elasticsearch 5.1 through 5.5 |
 | GitLab Enterprise Edition 8.4 through 8.17  | Elasticsearch 2.4 with [Delete By Query Plugin](https://www.elastic.co/guide/en/elasticsearch/plugins/2.4/plugins-delete-by-query.html) installed |
@@ -56,7 +58,7 @@ A few notes on CPU and storage:
   see boosts in both query and indexing performance.
 
 Keep in mind, these are **minimum requirements** for Elasticsearch.
-Heavily-utilized Elasticsearch clusters will likely require considerably more
+Heavily-used Elasticsearch clusters will likely require considerably more
 resources.
 
 ## Installing Elasticsearch
@@ -244,6 +246,29 @@ for filtering to work correctly. To do this run the Rake tasks `gitlab:elastic:r
 `gitlab:elastic:clear_index_status`. Afterwards, removing a namespace or a project from the list will delete the data
 from the Elasticsearch index as expected.
 
+## Enabling custom language analyzers
+
+You can improve the language support for Chinese and Japanese languages by utilizing [smartcn](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html) and/or [kuromoji](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html) analysis plugins from Elastic.
+
+To enable language(s) support:
+
+1. Install the desired plugin(s), please refer to [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/plugins/7.9/installation.html) for plugins installation instructions. The plugin(s) must be installed on every node in the cluster, and each node must be restarted after installation. For a list of plugins, see the table later in this section.
+1. Navigate to the **Admin Area** (wrench icon), then **Settings > General**..
+1. Expand the **Advanced Search** section and locate **Custom analyzers: language support**.
+1. Enable plugin(s) support for **Indexing**.
+1. Click **Save changes** for the changes to take effect.
+1. Trigger [Zero downtime reindexing](#zero-downtime-reindexing) or reindex everything from scratch to create a new index with updated mappings.
+1. Enable plugin(s) support for **Searching** after the previous step is completed.
+
+For guidance on what to install, see the following Elasticsearch language plugin options:
+
+| Parameter                                             | Description |
+|-------------------------------------------------------|-------------|
+| `Enable Chinese (smartcn) custom analyzer: Indexing`   | Enables or disables Chinese language support using [smartcn](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html) custom analyzer for newly created indices.|
+| `Enable Chinese (smartcn) custom analyzer: Search`   | Enables or disables using [smartcn](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html) fields for Advanced Search. Please only enable this after [installing the plugin](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-smartcn.html), enabling custom analyzer indexing and recreating the index.|
+| `Enable Japanese (kuromoji) custom analyzer: Indexing`   | Enables or disables Japanese language support using [kuromoji](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html) custom analyzer for newly created indices.|
+| `Enable Japanese (kuromoji) custom analyzer: Search`  | Enables or disables using [kuromoji](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html) fields for Advanced Search. Please only enable this after [installing the plugin](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html), enabling custom analyzer indexing and recreating the index.|
+
 ## Disabling Advanced Search
 
 To disable the Elasticsearch integration:
@@ -409,6 +434,55 @@ CAUTION: **Caution:**
 After the reindexing is completed, the original index will be scheduled to be deleted after 14 days. You can cancel this action by pressing the cancel button.
 
 While the reindexing is running, you will be able to follow its progress under that same section.
+
+## Background migrations
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/234046) in GitLab 13.6.
+
+With reindex migrations running in the background, there's no need for a manual
+intervention. This usually happens in situations where new features are added to
+Advanced Search, which means adding or changing the way content is indexed.
+
+To confirm that the background migrations ran, you can check with:
+
+```shell
+curl "$CLUSTER_URL/gitlab-production-migrations/_search?q=*" | jq .
+```
+
+This should return something similar to:
+
+```json
+{
+  "took": 14,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "gitlab-production-migrations",
+        "_type": "_doc",
+        "_id": "20201105181100",
+        "_score": 1,
+        "_source": {
+          "completed": true
+        }
+      }
+    ]
+  }
+}
+```
+
+In order to debug issues with the migrations you can check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog).
 
 ## GitLab Advanced Search Rake tasks
 
@@ -687,6 +761,17 @@ However, some larger installations may wish to tune the merge policy settings:
 
 ## Troubleshooting
 
+One of the most valuable tools for identifying issues with the Elasticsearch
+integration will be logs. The most relevant logs for this integration are:
+
+1. [`sidekiq.log`](../administration/logs.md#sidekiqlog) - All of the
+   indexing happens in Sidekiq, so much of the relevant logs for the
+   Elasticsearch integration can be found in this file.
+1. [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) - There
+   are additional logs specific to Elasticsearch that are sent to this file
+   that may contain useful diagnostic information about searching,
+   indexing or migrations.
+
 Here are some common pitfalls and how to overcome them.
 
 ### How can I verify that my GitLab instance is using Elasticsearch?
@@ -843,6 +928,13 @@ Gitlab::Elastic::Indexer::Error: time="2020-01-23T09:13:00Z" level=fatal msg="he
 
 You probably have not used either `http://` or `https://` as part of your value in the **"URL"** field of the Elasticsearch Integration Menu. Please make sure you are using either `http://` or `https://` in this field as the [Elasticsearch client for Go](https://github.com/olivere/elastic) that we are using [needs the prefix for the URL to be accepted as valid](https://github.com/olivere/elastic/commit/a80af35aa41856dc2c986204e2b64eab81ccac3a).
 Once you have corrected the formatting of the URL, delete the index (via the [dedicated Rake task](#gitlab-advanced-search-rake-tasks)) and [reindex the content of your instance](#enabling-advanced-search).
+
+### My Elasticsearch cluster has a plugin and the integration is not working
+
+Certain 3rd party plugins may introduce bugs in your cluster or for whatever
+reason may be incompatible with our integration. You should try disabling
+plugins so you can rule out the possibility that the plugin is causing the
+problem.
 
 ### Low-level troubleshooting
 

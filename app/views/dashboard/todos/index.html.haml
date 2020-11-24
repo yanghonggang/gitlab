@@ -71,7 +71,7 @@
                 = sort_options_hash[@sort]
               - else
                 = sort_title_recently_created
-              = icon('chevron-down')
+              = sprite_icon('chevron-down', css_class: 'dropdown-menu-toggle-icon gl-top-3')
             %ul.dropdown-menu.dropdown-menu-sort.dropdown-menu-right
               %li
                 = link_to todos_filter_path(sort: sort_value_label_priority) do
@@ -114,7 +114,7 @@
     .todos-empty
       .todos-empty-hero.svg-content
         = image_tag 'illustrations/todos_empty.svg'
-      .todos-empty-content
+      .todos-empty-content.gl-mx-5
         %h4
           Your To-Do List shows what to work on next
         %p

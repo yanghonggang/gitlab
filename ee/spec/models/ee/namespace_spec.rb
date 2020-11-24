@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Namespace do
+  using RSpec::Parameterized::TableSyntax
+
   include EE::GeoHelpers
 
   let(:namespace) { create(:namespace) }
@@ -401,7 +403,6 @@ RSpec.describe Namespace do
 
       before do
         create(:gitlab_subscription, :active_trial, namespace: group, hosted_plan: hosted_plan)
-        stub_licensed_features(feature => true)
         stub_ee_application_setting(should_check_namespace_plan: true)
       end
 
@@ -623,6 +624,7 @@ RSpec.describe Namespace do
     subject { namespace.any_project_with_shared_runners_enabled? }
 
     context 'subgroup with shared runners enabled project' do
+      let(:namespace) { create(:group) }
       let(:subgroup) { create(:group, parent: namespace) }
       let!(:subproject) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
 
@@ -643,117 +645,6 @@ RSpec.describe Namespace do
       it "returns false" do
         is_expected.to eq(false)
       end
-    end
-  end
-
-  describe '#extra_shared_runners_minutes_used?' do
-    subject { namespace.extra_shared_runners_minutes_used? }
-
-    context 'with project' do
-      let!(:project) do
-        create(:project, namespace: namespace, shared_runners_enabled: true)
-      end
-
-      context 'shared_runners_minutes_limit is not enabled' do
-        before do
-          allow(namespace).to receive(:shared_runners_minutes_limit_enabled?).and_return(false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'shared_runners_minutes_limit is enabled' do
-        context 'when limit is defined' do
-          before do
-            namespace.update_attribute(:extra_shared_runners_minutes_limit, 100)
-          end
-
-          context "when usage is below the quota" do
-            before do
-              allow(namespace).to receive(:extra_shared_runners_minutes).and_return(50)
-            end
-
-            it { is_expected.to be_falsey }
-          end
-
-          context "when usage is above the quota" do
-            before do
-              allow(namespace).to receive(:extra_shared_runners_minutes).and_return(101)
-            end
-
-            it { is_expected.to be_truthy }
-          end
-
-          context 'and main limit is unlimited' do
-            before do
-              namespace.update_attribute(:shared_runners_minutes_limit, 0)
-            end
-
-            context "and it's above the quota" do
-              it { is_expected.to be_falsey }
-            end
-          end
-        end
-
-        context 'without limit' do
-          before do
-            namespace.update_attribute(:shared_runners_minutes_limit, 100)
-            namespace.update_attribute(:extra_shared_runners_minutes_limit, nil)
-          end
-
-          context 'when main usage is above the quota' do
-            before do
-              allow(namespace).to receive(:shared_runners_minutes).and_return(101)
-            end
-
-            it { is_expected.to be_falsey }
-          end
-        end
-      end
-    end
-
-    context 'without project' do
-      it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#shared_runners_minutes_used?' do
-    subject { namespace.shared_runners_minutes_used? }
-
-    context 'with project' do
-      let!(:project) do
-        create(:project,
-          namespace: namespace,
-          shared_runners_enabled: true)
-      end
-
-      context 'when limit is defined' do
-        context 'when limit is used' do
-          let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
-
-          it { is_expected.to be_truthy }
-        end
-
-        context 'when limit not yet used' do
-          let(:namespace) { create(:namespace, :with_not_used_build_minutes_limit) }
-
-          it { is_expected.to be_falsey }
-        end
-
-        context 'when minutes are not yet set' do
-          it { is_expected.to be_falsey }
-        end
-      end
-
-      context 'without limit' do
-        let(:namespace) { create(:namespace, :with_build_minutes_limit) }
-
-        it { is_expected.to be_falsey }
-      end
-    end
-
-    context 'without project' do
-      it { is_expected.to be_falsey }
     end
   end
 
@@ -1752,7 +1643,7 @@ RSpec.describe Namespace do
     it 'sets a date' do
       namespace = build(:namespace)
 
-      Timecop.freeze do
+      freeze_time do
         namespace.enable_temporary_storage_increase!
 
         expect(namespace.temporary_storage_increase_ends_on).to eq(30.days.from_now.to_date)
@@ -1770,12 +1661,48 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#additional_repo_storage_by_namespace_enabled?' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.additional_repo_storage_by_namespace_enabled? }
+
+    where(:namespace_storage_limit, :additional_repo_storage_by_namespace, :automatic_purchased_storage_allocation, :result) do
+      false | false | false | false
+      false | false | true  | false
+      false | true  | false | false
+      true  | false | false | false
+      false | true  | true  | true
+      true  | true  | false | false
+      true  | false | true  | false
+      true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(
+          namespace_storage_limit: namespace_storage_limit,
+          additional_repo_storage_by_namespace: additional_repo_storage_by_namespace
+        )
+        stub_application_setting(automatic_purchased_storage_allocation: automatic_purchased_storage_allocation)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
   describe '#root_storage_size' do
     let_it_be(:namespace) { build(:namespace) }
 
     subject { namespace.root_storage_size }
 
-    context 'with feature flag :namespace_storage_limit enabled' do
+    before do
+      allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
+        .and_return(additional_repo_storage_by_namespace_enabled)
+    end
+
+    context 'when additional_repo_storage_by_namespace_enabled is false' do
+      let(:additional_repo_storage_by_namespace_enabled) { false }
+
       it 'initializes a new instance of EE::Namespace::RootStorageSize' do
         expect(EE::Namespace::RootStorageSize).to receive(:new).with(namespace)
 
@@ -1783,10 +1710,8 @@ RSpec.describe Namespace do
       end
     end
 
-    context 'with feature flag :namespace_storage_limit disabled' do
-      before do
-        stub_feature_flags(namespace_storage_limit: false)
-      end
+    context 'when additional_repo_storage_by_namespace_enabled is true' do
+      let(:additional_repo_storage_by_namespace_enabled) { true }
 
       it 'initializes a new instance of EE::Namespace::RootExcessStorageSize' do
         expect(EE::Namespace::RootExcessStorageSize).to receive(:new).with(namespace)

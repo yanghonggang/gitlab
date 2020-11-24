@@ -6,12 +6,13 @@ module Terraform
 
     belongs_to :terraform_state, class_name: 'Terraform::State', optional: false
     belongs_to :created_by_user, class_name: 'User', optional: true
+    belongs_to :build, class_name: 'Ci::Build', optional: true, foreign_key: :ci_build_id
 
     scope :ordered_by_version_desc, -> { order(version: :desc) }
 
-    default_value_for(:file_store) { VersionedStateUploader.default_store }
+    default_value_for(:file_store) { StateUploader.default_store }
 
-    mount_file_store_uploader VersionedStateUploader
+    mount_file_store_uploader StateUploader
 
     delegate :project_id, :uuid, to: :terraform_state, allow_nil: true
 

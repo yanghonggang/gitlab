@@ -1,12 +1,6 @@
 import Vue from 'vue';
-import Mousetrap from 'mousetrap';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import headerComponent from '~/vue_merge_request_widget/components/mr_widget_header.vue';
-
-jest.mock('mousetrap', () => ({
-  bind: jest.fn(),
-  unbind: jest.fn(),
-}));
 
 describe('MRWidgetHeader', () => {
   let vm;
@@ -136,35 +130,6 @@ describe('MRWidgetHeader', () => {
       it('renders target branch', () => {
         expect(vm.$el.querySelector('.js-target-branch').textContent.trim()).toEqual('master');
       });
-
-      describe('keyboard shortcuts', () => {
-        it('binds a keyboard shortcut handler to the "b" key', () => {
-          expect(Mousetrap.bind).toHaveBeenCalledWith('b', expect.any(Function));
-        });
-
-        it('triggers a click on the "copy to clipboard" button when the handler is executed', () => {
-          const testClickHandler = jest.fn();
-          vm.$refs.copyBranchNameButton.$el.addEventListener('click', testClickHandler);
-
-          // Get a reference to the function that was assigned to the "b" shortcut key.
-          const shortcutHandler = Mousetrap.bind.mock.calls[0][1];
-
-          expect(testClickHandler).not.toHaveBeenCalled();
-
-          // Simulate Mousetrap calling the function.
-          shortcutHandler();
-
-          expect(testClickHandler).toHaveBeenCalledTimes(1);
-        });
-
-        it('unbinds the keyboard shortcut when the component is destroyed', () => {
-          expect(Mousetrap.unbind).not.toHaveBeenCalled();
-
-          vm.$destroy();
-
-          expect(Mousetrap.unbind).toHaveBeenCalledWith('b');
-        });
-      });
     });
 
     describe('with an open merge request', () => {
@@ -199,9 +164,7 @@ describe('MRWidgetHeader', () => {
       it('renders checkout branch button with modal trigger', () => {
         const button = vm.$el.querySelector('.js-check-out-branch');
 
-        expect(button.textContent.trim()).toEqual('Check out branch');
-        expect(button.getAttribute('data-target')).toEqual('#modal_merge_info');
-        expect(button.getAttribute('data-toggle')).toEqual('modal');
+        expect(button.textContent.trim()).toBe('Check out branch');
       });
 
       it('renders web ide button', () => {

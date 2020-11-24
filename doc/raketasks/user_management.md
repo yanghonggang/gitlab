@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # User management **(CORE ONLY)**
 
 GitLab provides Rake tasks for user management.
@@ -26,7 +32,6 @@ sudo gitlab-rake gitlab:import:all_users_to_all_projects
 bundle exec rake gitlab:import:all_users_to_all_projects RAILS_ENV=production
 ```
 
-NOTE: **Note:**
 Admin users are added as maintainers.
 
 ## Add user as a developer to all groups
@@ -53,10 +58,9 @@ sudo gitlab-rake gitlab:import:all_users_to_all_groups
 bundle exec rake gitlab:import:all_users_to_all_groups RAILS_ENV=production
 ```
 
-NOTE: **Note:**
-Admin users are added as owners so they can add additional users to the group.
+Administrators are added as owners so they can add additional users to the group.
 
-## Control the number of active users
+## Control the number of billable users
 
 Enable this setting to keep new users blocked until they have been cleared by the administrator.
 Defaults to `false`:
@@ -94,11 +98,11 @@ the leaked key without forcing all users to change their 2FA details.
 To rotate the two-factor authentication encryption key:
 
 1. Look up the old key. This is in the `config/secrets.yml` file, but **make sure you're working
-   with the production section**. The line you're interested in will look like this:
+   with the production section**. The line you're interested in looks like this:
 
    ```yaml
    production:
-     otp_key_base: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+     otp_key_base: fffffffffffffffffffffffffffffffffffffffffffffff
    ```
 
 1. Generate a new secret:
@@ -126,7 +130,7 @@ To rotate the two-factor authentication encryption key:
    ```
 
    The `<old key>` value can be read from `config/secrets.yml` (`<new key>` was
-   generated earlier). The **encrypted** values for the user 2FA secrets will be
+   generated earlier). The **encrypted** values for the user 2FA secrets are
    written to the specified `filename`. You can use this to rollback in case of
    error.
 

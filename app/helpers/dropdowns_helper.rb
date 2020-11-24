@@ -51,7 +51,7 @@ module DropdownsHelper
     default_label = data_attr[:default_label]
     content_tag(:button, disabled: options[:disabled], class: "dropdown-menu-toggle #{options[:toggle_class] if options.key?(:toggle_class)}", id: (options[:id] if options.key?(:id)), type: "button", data: data_attr) do
       output = content_tag(:span, toggle_text, class: "dropdown-toggle-text #{'is-default' if toggle_text == default_label}")
-      output << icon('chevron-down')
+      output << sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
       output.html_safe
     end
   end
@@ -129,8 +129,7 @@ module DropdownsHelper
   end
 
   def dropdown_loading
-    content_tag :div, class: "dropdown-loading" do
-      icon('spinner spin')
-    end
+    spinner = loading_icon(container: true, size: "md", css_class: "gl-mt-7")
+    content_tag(:div, spinner, class: "dropdown-loading")
   end
 end

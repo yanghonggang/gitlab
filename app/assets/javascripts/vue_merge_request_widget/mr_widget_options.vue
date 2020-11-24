@@ -16,7 +16,6 @@ import WidgetHeader from './components/mr_widget_header.vue';
 import WidgetSuggestPipeline from './components/mr_widget_suggest_pipeline.vue';
 import WidgetMergeHelp from './components/mr_widget_merge_help.vue';
 import MrWidgetPipelineContainer from './components/mr_widget_pipeline_container.vue';
-import Deployment from './components/deployment/deployment.vue';
 import WidgetRelatedLinks from './components/mr_widget_related_links.vue';
 import MrWidgetAlertMessage from './components/mr_widget_alert_message.vue';
 import MergedState from './components/states/mr_widget_merged.vue';
@@ -37,6 +36,7 @@ import FailedToMerge from './components/states/mr_widget_failed_to_merge.vue';
 import MrWidgetAutoMergeEnabled from './components/states/mr_widget_auto_merge_enabled.vue';
 import AutoMergeFailed from './components/states/mr_widget_auto_merge_failed.vue';
 import CheckingState from './components/states/mr_widget_checking.vue';
+// import ExtensionsContainer from './components/extensions/container';
 import eventHub from './event_hub';
 import notify from '~/lib/utils/notify';
 import SourceBranchRemovalStatus from './components/source_branch_removal_status.vue';
@@ -46,7 +46,6 @@ import GroupedTestReportsApp from '../reports/components/grouped_test_reports_ap
 import { setFaviconOverlay } from '../lib/utils/common_utils';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import getStateQuery from './queries/get_state.query.graphql';
-import { isExperimentEnabled } from '~/lib/utils/experimentation';
 
 export default {
   el: '#js-vue-mr-widget',
@@ -58,11 +57,11 @@ export default {
   },
   components: {
     Loading,
+    // ExtensionsContainer,
     'mr-widget-header': WidgetHeader,
     'mr-widget-suggest-pipeline': WidgetSuggestPipeline,
     'mr-widget-merge-help': WidgetMergeHelp,
     MrWidgetPipelineContainer,
-    Deployment,
     'mr-widget-related-links': WidgetRelatedLinks,
     MrWidgetAlertMessage,
     'mr-widget-merged': MergedState,
@@ -154,10 +153,7 @@ export default {
     },
     shouldSuggestPipelines() {
       return (
-        isExperimentEnabled('suggestPipeline') &&
-        !this.mr.hasCI &&
-        this.mr.mergeRequestAddCiConfigPath &&
-        !this.mr.isDismissedSuggestPipeline
+        !this.mr.hasCI && this.mr.mergeRequestAddCiConfigPath && !this.mr.isDismissedSuggestPipeline
       );
     },
     shouldRenderCodeQuality() {
@@ -455,6 +451,7 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <!-- <extensions-container :mr="mr" /> -->
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
         :base-path="mr.codeclimate.base_path"
