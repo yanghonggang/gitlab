@@ -4,6 +4,7 @@ query issueSprint($fullPath: ID!, $iid: String!) {
       iteration {
         id
         title
+        webUrl
       }
     }
   }
