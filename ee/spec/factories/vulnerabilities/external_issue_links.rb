@@ -4,8 +4,8 @@ FactoryBot.define do
   factory :vulnerabilities_external_issue_link, class: 'Vulnerabilities::ExternalIssueLink' do
     author
     vulnerability
-    external_issue_id { 'GV-100' }
-    external_project_id { '10001' }
+    external_issue_key { 'GV-100' }
+    external_project_key { '10001' }
     external_type { :jira }
 
     trait :created do

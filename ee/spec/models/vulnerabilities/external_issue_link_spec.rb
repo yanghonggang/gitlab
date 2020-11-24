@@ -14,8 +14,8 @@ RSpec.describe Vulnerabilities::ExternalIssueLink do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:vulnerability) }
-    it { is_expected.to validate_presence_of(:external_issue_id) }
-    it { is_expected.to validate_presence_of(:external_project_id) }
+    it { is_expected.to validate_presence_of(:external_issue_key) }
+    it { is_expected.to validate_presence_of(:external_project_key) }
     it { is_expected.to validate_presence_of(:external_type) }
 
     describe 'uniqueness' do
@@ -25,8 +25,8 @@ RSpec.describe Vulnerabilities::ExternalIssueLink do
 
       it do
         is_expected.to(
-          validate_uniqueness_of(:external_issue_id)
-            .scoped_to([:vulnerability_id, :external_type, :external_project_id])
+          validate_uniqueness_of(:external_issue_key)
+            .scoped_to([:vulnerability_id, :external_type, :external_project_key])
             .with_message('has already been linked to another vulnerability'))
       end
     end

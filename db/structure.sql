@@ -17228,14 +17228,14 @@ CREATE TABLE vulnerability_external_issue_links (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    external_project_id text NOT NULL,
-    external_issue_id text NOT NULL,
+    external_project_key text NOT NULL,
+    external_issue_key text NOT NULL,
     author_id bigint NOT NULL,
     vulnerability_id bigint NOT NULL,
     link_type smallint DEFAULT 1 NOT NULL,
     external_type smallint DEFAULT 1 NOT NULL,
-    CONSTRAINT check_21c24fb9d3 CHECK ((char_length(external_project_id) <= 255)),
-    CONSTRAINT check_bfbfaccfa4 CHECK ((char_length(external_issue_id) <= 255))
+    CONSTRAINT check_3200604f5e CHECK ((char_length(external_issue_key) <= 255)),
+    CONSTRAINT check_68cffd19b0 CHECK ((char_length(external_project_key) <= 255))
 );
 
 CREATE SEQUENCE vulnerability_external_issue_links_id_seq
@@ -22417,6 +22417,8 @@ CREATE INDEX index_vulnerability_exports_on_group_id_not_null ON vulnerability_e
 
 CREATE INDEX index_vulnerability_exports_on_project_id_not_null ON vulnerability_exports USING btree (project_id) WHERE (project_id IS NOT NULL);
 
+CREATE INDEX index_vulnerability_external_issue_links_on_author_id ON vulnerability_external_issue_links USING btree (author_id);
+
 CREATE INDEX index_vulnerability_feedback_on_author_id ON vulnerability_feedback USING btree (author_id);
 
 CREATE INDEX index_vulnerability_feedback_on_comment_author_id ON vulnerability_feedback USING btree (comment_author_id);
@@ -24679,6 +24681,9 @@ ALTER TABLE ONLY vulnerability_occurrence_identifiers
 
 ALTER TABLE ONLY serverless_domain_cluster
     ADD CONSTRAINT fk_rails_e59e868733 FOREIGN KEY (clusters_applications_knative_id) REFERENCES clusters_applications_knative(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_external_issue_links
+    ADD CONSTRAINT fk_rails_e5ba7f7b13 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY approval_merge_request_rule_sources
     ADD CONSTRAINT fk_rails_e605a04f76 FOREIGN KEY (approval_merge_request_rule_id) REFERENCES approval_merge_request_rules(id) ON DELETE CASCADE;

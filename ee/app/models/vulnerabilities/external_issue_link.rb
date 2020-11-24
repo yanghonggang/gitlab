@@ -10,8 +10,8 @@ module Vulnerabilities
     enum link_type: { created: 1 }
     enum external_type: { jira: 1 }
 
-    validates :vulnerability, :external_issue_id, :external_type, :external_project_id, presence: true
-    validates :external_issue_id, uniqueness: { scope: [:vulnerability_id, :external_type, :external_project_id], message: N_('has already been linked to another vulnerability') }
+    validates :vulnerability, :external_issue_key, :external_type, :external_project_key, presence: true
+    validates :external_issue_key, uniqueness: { scope: [:vulnerability_id, :external_type, :external_project_key], message: N_('has already been linked to another vulnerability') }
     validates :vulnerability_id,
               uniqueness: {
                 conditions: -> { where(link_type: 'created') },
