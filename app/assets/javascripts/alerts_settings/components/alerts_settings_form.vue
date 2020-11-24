@@ -472,6 +472,7 @@ export default {
         >
           <gl-form-input
             v-model="integrationForm.name"
+            :disabled="isPrometheus"
             type="text"
             :placeholder="$options.i18n.integrationFormSteps.step2.placeholder"
           />
