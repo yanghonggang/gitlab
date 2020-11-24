@@ -1,5 +1,6 @@
 export default () => ({
   isLoadingVulnerabilities: true,
+  hasRequestedVulnerabilities: false,
   errorLoadingVulnerabilities: false,
   loadingVulnerabilitiesErrorCode: null,
   vulnerabilities: [],

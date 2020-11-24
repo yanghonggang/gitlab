@@ -119,7 +119,7 @@ describe('vulnerabilities actions', () => {
 
       it('should pass through the filters', () => {
         return testAction(
-          actions.fetchVulnerabilities,
+          actions.getVulnerabilities,
           params,
           state,
           [],
@@ -143,7 +143,7 @@ describe('vulnerabilities actions', () => {
 
       it('should dispatch the request and error actions', () => {
         return testAction(
-          actions.fetchVulnerabilities,
+          actions.getVulnerabilities,
           {},
           state,
           [],
