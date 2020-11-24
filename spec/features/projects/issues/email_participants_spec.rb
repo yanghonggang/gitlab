@@ -76,7 +76,7 @@ RSpec.describe 'viewing an issue', :js do
       it 'shows warning on new note form' do
         expect(find('.new-note')).to have_content('a@gitlab.com, b@gitlab.com, c@gitlab.com, d@gitlab.com, and e@gitlab.com will be notified of your comment')
       end
-  
+
       it 'shows warning on reply form' do
         find('.js-reply-button').click
         expect(find('.note-edit-form')).to have_content('a@gitlab.com, b@gitlab.com, c@gitlab.com, d@gitlab.com, and e@gitlab.com will be notified of your comment')
