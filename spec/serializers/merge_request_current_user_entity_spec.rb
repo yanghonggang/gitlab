@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequestUserEntity do
+RSpec.describe MergeRequestCurrentUserEntity do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:request) { EntityRequest.new(project: project, current_user: user) }
