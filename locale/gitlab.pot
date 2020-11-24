@@ -71,6 +71,9 @@ msgstr ""
 msgid " or references (e.g. path/to/project!merge_request_id)"
 msgstr ""
 
+msgid " will be notified of your comment."
+msgstr ""
+
 msgid "\"%{path}\" did not exist on \"%{ref}\""
 msgstr ""
 
@@ -492,7 +495,7 @@ msgstr ""
 msgid "%{edit_in_new_fork_notice} Try to upload a file again."
 msgstr ""
 
-msgid "%{emails} will be notified of your comment."
+msgid "%{emails}"
 msgstr ""
 
 msgid "%{extra} more downstream pipelines"
@@ -31763,6 +31766,9 @@ msgid "among other things"
 msgstr ""
 
 msgid "and"
+msgstr ""
+
+msgid "and %{moreCount} more"
 msgstr ""
 
 msgid "any-approver for the merge request already exists"
