@@ -39,6 +39,15 @@ const noop = () => {};
  *   [], // expected actions
  * ).then(done)
  * .catch(done.fail);
+ *
+ * @example
+ * await testAction({
+ *   action: actions.actionName,
+ *   payload: { deleteListId: 1 },
+ *   state: { lists: [1, 2, 3] },
+ *   expectedMutations: [ { type: types.MUTATION} ],
+ *   expectedActions: [],
+ * })
  */
 export default (
   actionArg,
