@@ -71,14 +71,23 @@ export default {
       {{ error }}
     </gl-alert>
 
-    <gl-dropdown icon="ellipsis_v" right :loading="loading">
+    <gl-dropdown
+      icon="ellipsis_v"
+      right
+      :loading="loading"
+      :data-testid="`terraform-state-actions-${state.name}`"
+    >
       <gl-dropdown-section-header>
         {{ $options.i18n.actions }}
       </gl-dropdown-section-header>
 
       <gl-dropdown-divider />
 
-      <gl-dropdown-item icon-name="remove-all" @click="deleteState">
+      <gl-dropdown-item
+        icon-name="remove-all"
+        data-testid="terraform-state-remove-action"
+        @click="deleteState"
+      >
         {{ $options.i18n.delete }}
       </gl-dropdown-item>
     </gl-dropdown>
