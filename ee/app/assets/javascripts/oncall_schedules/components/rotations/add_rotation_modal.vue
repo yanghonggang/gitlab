@@ -197,6 +197,7 @@ export default {
           v-model="form.participants"
           :dropdown-items="participants"
           :loading="this.$apollo.queries.participants.loading"
+          :container-class="'gl-h-13! gl-overflow-y-auto'"
           @text-input="filterParticipants"
         >
           <template #token-content="{ token }">
@@ -225,6 +226,7 @@ export default {
             v-model="form.length.value"
             type="number"
             class="gl-w-12 gl-mr-3"
+            min="1"
           />
           <gl-dropdown id="rotation-length" :text="form.length.type">
             <gl-dropdown-item
@@ -245,9 +247,10 @@ export default {
         label-size="sm"
         label-for="rotation-time"
       >
-        <div class="gl-display-flex">
+        <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker v-model="form.startsOn.date" class="gl-mr-3" />
-          <gl-dropdown id="rotation-time" :text="formatTime(form.startsOn.time)" class="gl-w-12">
+          <span> {{ __('at') }} </span>
+          <gl-dropdown id="rotation-time" :text="formatTime(form.startsOn.time)" class="gl-w-12 gl-pl-3">
             <gl-dropdown-item
               v-for="n in 24"
               :key="n"
@@ -258,6 +261,8 @@ export default {
               <span class="gl-white-space-nowrap"> {{ formatTime(n) }}</span>
             </gl-dropdown-item>
           </gl-dropdown>
+          <!-- TODO: // Replace with actual timezone following coming work -->
+          <span class="gl-pl-5"> {{ __('PST') }} </span>
         </div>
       </gl-form-group>
     </gl-form>
