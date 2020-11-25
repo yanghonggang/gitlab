@@ -18,7 +18,7 @@ class CreateDependencyProxyManifests < ActiveRecord::Migration[6.0]
         t.text :file, null: false
         t.text :digest, null: false
 
-        t.index [:group_id, :file_name], name: 'index_dependency_proxy_manifests_on_group_id_and_file_name'
+        t.index [:group_id, :digest], name: 'index_dependency_proxy_manifests_on_group_id_and_digest'
       end
     end
 
