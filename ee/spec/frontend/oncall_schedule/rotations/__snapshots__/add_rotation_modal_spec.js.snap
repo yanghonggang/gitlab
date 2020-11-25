@@ -16,6 +16,7 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
     class="w-75 gl-xs-w-full!"
   >
     <gl-form-group-stub
+      invalid-feedback="Rotation name cannot be empty"
       label="Name"
       label-for="rotation-name"
       label-size="sm"
@@ -27,13 +28,14 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
     </gl-form-group-stub>
      
     <gl-form-group-stub
+      invalid-feedback="Rotation participants cannot be empty"
       label="Participants"
       label-for="rotation-participants"
       label-size="sm"
     >
       <gl-token-selector-stub
         autocomplete="off"
-        containerclass=""
+        containerclass="gl-h-13! gl-overflow-y-auto"
         dropdownitems=""
         selectedtokens=""
       />
@@ -50,6 +52,7 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
         <gl-form-input-stub
           class="gl-w-12 gl-mr-3"
           id="rotation-length"
+          min="1"
           type="number"
           value="1"
         />
@@ -104,12 +107,13 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
     </gl-form-group-stub>
      
     <gl-form-group-stub
+      invalid-feedback="Rotation start date cannot be empty"
       label="Starts on"
       label-for="rotation-time"
       label-size="sm"
     >
       <div
-        class="gl-display-flex"
+        class="gl-display-flex gl-align-items-center"
       >
         <gl-datepicker-stub
           ariallabel=""
@@ -123,9 +127,13 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
           theme=""
         />
          
+        <span>
+           at 
+        </span>
+         
         <gl-dropdown-stub
           category="tertiary"
-          class="gl-w-12"
+          class="gl-w-12 gl-pl-3"
           headertext=""
           id="rotation-time"
           size="medium"
@@ -469,6 +477,12 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
             </span>
           </gl-dropdown-item-stub>
         </gl-dropdown-stub>
+         
+        <span
+          class="gl-pl-5"
+        >
+           PST 
+        </span>
       </div>
     </gl-form-group-stub>
   </gl-form-stub>

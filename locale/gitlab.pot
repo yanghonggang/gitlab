@@ -18982,6 +18982,15 @@ msgstr ""
 msgid "OnCallSchedules|Rotation length"
 msgstr ""
 
+msgid "OnCallSchedules|Rotation name cannot be empty"
+msgstr ""
+
+msgid "OnCallSchedules|Rotation participants cannot be empty"
+msgstr ""
+
+msgid "OnCallSchedules|Rotation start date cannot be empty"
+msgstr ""
+
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
 msgstr ""
 

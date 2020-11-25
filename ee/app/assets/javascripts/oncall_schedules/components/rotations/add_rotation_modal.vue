@@ -184,6 +184,8 @@ export default {
         :label="$options.i18n.fields.name.title"
         label-size="sm"
         label-for="rotation-name"
+        :invalid-feedback="s__('OnCallSchedules|Rotation name cannot be empty')"
+        :state="form.name !== ''"
       >
         <gl-form-input id="rotation-name" v-model="form.name" />
       </gl-form-group>
@@ -192,6 +194,8 @@ export default {
         :label="$options.i18n.fields.participants.title"
         label-size="sm"
         label-for="rotation-participants"
+        :invalid-feedback="s__('OnCallSchedules|Rotation participants cannot be empty')"
+        :state="form.participants.length > 0"
       >
         <gl-token-selector
           v-model="form.participants"
@@ -246,11 +250,17 @@ export default {
         :label="$options.i18n.fields.startsOn.title"
         label-size="sm"
         label-for="rotation-time"
+        :invalid-feedback="s__('OnCallSchedules|Rotation start date cannot be empty')"
+        :state="form.startsOn.date !== null"
       >
         <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker v-model="form.startsOn.date" class="gl-mr-3" />
           <span> {{ __('at') }} </span>
-          <gl-dropdown id="rotation-time" :text="formatTime(form.startsOn.time)" class="gl-w-12 gl-pl-3">
+          <gl-dropdown
+            id="rotation-time"
+            :text="formatTime(form.startsOn.time)"
+            class="gl-w-12 gl-pl-3"
+          >
             <gl-dropdown-item
               v-for="n in 24"
               :key="n"
