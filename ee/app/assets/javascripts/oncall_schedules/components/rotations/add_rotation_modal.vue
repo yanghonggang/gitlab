@@ -13,7 +13,6 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import { fetchPolicies } from '~/lib/graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
 import {
@@ -63,7 +62,6 @@ export default {
   },
   apollo: {
     participants: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: usersSearchQuery,
       variables() {
         return {
@@ -119,7 +117,7 @@ export default {
       return this.form.participants.length > 0;
     },
     rotationStartsOnIsValid() {
-      return this.form.startsOn.date !== null;
+      return this.form.startsOn.date !== null || this.form.startsOn.date !== undefined;
     },
     noResults() {
       return this.participants.length === 0;
