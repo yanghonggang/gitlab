@@ -96,14 +96,16 @@ describe('AddRotationModal', () => {
 
   describe('Rotation length and start time', () => {
     it('renders the rotation length value', async () => {
-      expect(findRotationLength().exists()).toBe(true);
-      expect(findRotationLength().attributes('value')).toBe('1');
+      const rotationLength = findRotationLength();
+      expect(rotationLength.exists()).toBe(true);
+      expect(rotationLength.attributes('value')).toBe('1');
     });
 
     it('renders the rotation starts on datepicker', async () => {
-      expect(findRotationStartsOn().exists()).toBe(true);
-      expect(findRotationStartsOn().attributes('text')).toBe('00:00');
-      expect(findRotationStartsOn().attributes('headertext')).toBe('');
+      const startsOn = findRotationStartsOn();
+      expect(startsOn.exists()).toBe(true);
+      expect(startsOn.attributes('text')).toBe('00:00');
+      expect(startsOn.attributes('headertext')).toBe('');
     });
 
     it('should add a check for a rotation length type selected', async () => {
