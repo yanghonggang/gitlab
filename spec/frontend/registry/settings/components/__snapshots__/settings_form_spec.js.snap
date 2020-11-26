@@ -5,7 +5,7 @@ exports[`Settings Form Cadence matches snapshot 1`] = `
   class="gl-mr-7 gl-mb-0!"
   data-testid="cadence-dropdown"
   formoptions="[object Object],[object Object],[object Object],[object Object],[object Object]"
-  label="Run cleanup every:"
+  label="Run cleanup:"
   name="cadence"
   value="EVERY_DAY"
 />
@@ -32,7 +32,7 @@ exports[`Settings Form Keep N matches snapshot 1`] = `
 exports[`Settings Form Keep Regex matches snapshot 1`] = `
 <expiration-textarea-stub
   data-testid="keep-regex-textarea"
-  description="Tags with names matching this regex pattern will be kept. %{linkStart}More information%{linkEnd}"
+  description="Tags with names that match this regex pattern are kept. %{linkStart}More information%{linkEnd}"
   error=""
   label="Keep tags matching:"
   name="keep-regex"
@@ -54,7 +54,7 @@ exports[`Settings Form OlderThan matches snapshot 1`] = `
 exports[`Settings Form Remove regex matches snapshot 1`] = `
 <expiration-textarea-stub
   data-testid="remove-regex-textarea"
-  description="Tags with names matching this regex pattern will be removed. %{linkStart}More information%{linkEnd}"
+  description="Tags with names that match this regex pattern are removed. %{linkStart}More information%{linkEnd}"
   error=""
   label="Remove tags matching:"
   name="remove-regex"

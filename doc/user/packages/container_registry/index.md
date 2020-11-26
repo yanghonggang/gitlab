@@ -519,7 +519,7 @@ To create a cleanup policy in the UI:
    | Field                                                                     | Description                                                                                                       |
    |---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
    | **Toggle** | Turn the policy on or off. |
-   | **Run cleanup every** | How often the policy should run. |
+   | **Run cleanup** | How often the policy should run. |
    | **Keep the most recent** | How many tags to _always_ keep for each image. |
    | **Keep tags matching** | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
    | **Remove tags older than** | Remove only tags older than X days. |

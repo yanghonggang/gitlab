@@ -170,11 +170,6 @@ msgid_plural "%d days"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "%d day until tags are automatically removed"
-msgid_plural "%d days until tags are automatically removed"
-msgstr[0] ""
-msgstr[1] ""
-
 msgid "%d error"
 msgid_plural "%d errors"
 msgstr[0] ""
@@ -7254,7 +7249,7 @@ msgstr ""
 msgid "ContainerRegistry|%{toggleStatus} - Tags matching the patterns defined below will be scheduled for deletion"
 msgstr ""
 
-msgid "ContainerRegistry|%{toggleStatus} - Tags matching the rules defined below will be automatically scheduled for deletion."
+msgid "ContainerRegistry|%{toggleStatus} - Tags that match the rules on this page are automatically scheduled for deletion."
 msgstr ""
 
 msgid "ContainerRegistry|Build an image"
@@ -7391,7 +7386,7 @@ msgstr ""
 msgid "ContainerRegistry|Remove these tags"
 msgstr ""
 
-msgid "ContainerRegistry|Run cleanup every:"
+msgid "ContainerRegistry|Run cleanup:"
 msgstr ""
 
 msgid "ContainerRegistry|Some tags were not deleted"
@@ -7424,19 +7419,16 @@ msgstr ""
 msgid "ContainerRegistry|Sorry, your filter produced no results."
 msgstr ""
 
-msgid "ContainerRegistry|Tag expiration policy"
-msgstr ""
-
 msgid "ContainerRegistry|Tag successfully marked for deletion."
 msgstr ""
 
 msgid "ContainerRegistry|Tags successfully marked for deletion."
 msgstr ""
 
-msgid "ContainerRegistry|Tags that match these rules will always be %{strongStart}kept%{strongEnd}, even if they match a removal rule below. The %{secondStrongStart}latest%{secondStrongEnd} tag will always be kept."
+msgid "ContainerRegistry|Tags that match these rules are %{strongStart}kept%{strongEnd}, even if they match a removal rule below. The %{secondStrongStart}latest%{secondStrongEnd} tag is always kept."
 msgstr ""
 
-msgid "ContainerRegistry|Tags that match these rules will be %{strongStart}removed%{strongEnd}, unless kept by a rule above."
+msgid "ContainerRegistry|Tags that match these rules are %{strongStart}removed%{strongEnd}, unless a rule above says to keep them."
 msgstr ""
 
 msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}be preserved:%{italicEnd}"
@@ -7445,10 +7437,10 @@ msgstr ""
 msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}expire:%{italicEnd}"
 msgstr ""
 
-msgid "ContainerRegistry|Tags with names matching this regex pattern will be kept. %{linkStart}More information%{linkEnd}"
+msgid "ContainerRegistry|Tags with names that match this regex pattern are kept. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
-msgid "ContainerRegistry|Tags with names matching this regex pattern will be removed. %{linkStart}More information%{linkEnd}"
+msgid "ContainerRegistry|Tags with names that match this regex pattern are removed. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
 msgid "ContainerRegistry|The cleanup policy timed out before it could delete all tags. An administrator can %{adminLinkStart}manually run cleanup now%{adminLinkEnd} or you can wait for the cleanup policy to automatically run again. %{docLinkStart}More information%{docLinkEnd}"
