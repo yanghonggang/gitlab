@@ -15,45 +15,38 @@ import {
 import { s__, __ } from '~/locale';
 import { fetchPolicies } from '~/lib/graphql';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import CreateOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
-
-export const i18n = {
-  selectParticipant: s__('OnCallSchedules|Select participant'),
-  addRotation: s__('OnCallSchedules|Add rotation'),
-  noResults: __('No matching results'),
-  cancel: __('Cancel'),
-  errorMsg: s__('OnCallSchedules|Failed to add rotation'),
-  fields: {
-    name: { title: __('Name') },
-    participants: { title: __('Participants') },
-    length: { title: s__('OnCallSchedules|Rotation length') },
-    startsOn: { title: __('Starts on') },
-  },
-};
-
-const LENGTH_ENUM = {
-  hours: 'hours',
-  days: 'days',
-  weeks: 'weeks',
-};
-
-const CHEVRON_SKIPPING_SHADE_ENUM = ['500', '600', '700', '800', '900', '950'];
-
-const CHEVRON_SKIPPING_PALETTE_ENUM = [
-  'gl-bg-data-viz-blue-',
-  'gl-bg-data-viz-orange-',
-  'gl-bg-data-viz-aqua-',
-  'gl-bg-data-viz-green-',
-  'gl-bg-data-viz-magenta-',
-];
+import createOncallScheduleRotationMutation from '../../graphql/create_oncall_schedule_rotation.mutation.graphql';
+import {
+  LENGTH_ENUM,
+  CHEVRON_SKIPPING_SHADE_ENUM,
+  CHEVRON_SKIPPING_PALETTE_ENUM,
+} from '../../constants';
 
 export default {
-  i18n,
-  LENGTH_ENUM,
+  i18n: {
+    selectParticipant: s__('OnCallSchedules|Select participant'),
+    addRotation: s__('OnCallSchedules|Add rotation'),
+    noResults: __('No matching results'),
+    cancel: __('Cancel'),
+    errorMsg: s__('OnCallSchedules|Failed to add rotation'),
+    fields: {
+      name: { title: __('Name'), error: s__('OnCallSchedules|Rotation name cannot be empty') },
+      participants: {
+        title: __('Participants'),
+        error: s__('OnCallSchedules|Rotation participants cannot be empty'),
+      },
+      length: { title: s__('OnCallSchedules|Rotation length') },
+      startsOn: {
+        title: __('Starts on'),
+        error: s__('OnCallSchedules|Rotation start date cannot be empty'),
+      },
+    },
+  },
   tokenColorPalette: {
     shade: CHEVRON_SKIPPING_SHADE_ENUM,
     palette: CHEVRON_SKIPPING_PALETTE_ENUM,
   },
+  LENGTH_ENUM,
   inject: ['projectPath'],
   components: {
     GlModal,
@@ -111,16 +104,25 @@ export default {
     actionsProps() {
       return {
         primary: {
-          text: i18n.addRotation,
+          text: this.$options.i18n.addRotation,
           attributes: [{ variant: 'info' }, { loading: this.loading }],
         },
         cancel: {
-          text: i18n.cancel,
+          text: this.$options.i18n.cancel,
         },
       };
     },
+    rotationNameIsValid() {
+      return this.form.name !== '';
+    },
+    rotationParticipantsAreValid() {
+      return this.form.participants.length > 0;
+    },
+    rotationStartsOnIsValid() {
+      return this.form.startsOn.date !== null;
+    },
     noResults() {
-      return !this.participants.length;
+      return this.participants.length === 0;
     },
   },
   methods: {
@@ -128,7 +130,7 @@ export default {
       this.loading = true;
       this.$apollo
         .mutate({
-          mutation: CreateOncallScheduleRotationMutation,
+          mutation: createOncallScheduleRotationMutation,
           variables: {
             oncallScheduleRotationCreate: {
               projectPath: this.projectPath,
@@ -184,8 +186,8 @@ export default {
         :label="$options.i18n.fields.name.title"
         label-size="sm"
         label-for="rotation-name"
-        :invalid-feedback="s__('OnCallSchedules|Rotation name cannot be empty')"
-        :state="form.name !== ''"
+        :invalid-feedback="$options.i18n.fields.name.error"
+        :state="rotationNameIsValid"
       >
         <gl-form-input id="rotation-name" v-model="form.name" />
       </gl-form-group>
@@ -194,8 +196,8 @@ export default {
         :label="$options.i18n.fields.participants.title"
         label-size="sm"
         label-for="rotation-participants"
-        :invalid-feedback="s__('OnCallSchedules|Rotation participants cannot be empty')"
-        :state="form.participants.length > 0"
+        :invalid-feedback="$options.i18n.fields.participants.error"
+        :state="rotationParticipantsAreValid"
       >
         <gl-token-selector
           v-model="form.participants"
@@ -250,8 +252,8 @@ export default {
         :label="$options.i18n.fields.startsOn.title"
         label-size="sm"
         label-for="rotation-time"
-        :invalid-feedback="s__('OnCallSchedules|Rotation start date cannot be empty')"
-        :state="form.startsOn.date !== null"
+        :invalid-feedback="$options.i18n.fields.startsOn.error"
+        :state="rotationStartsOnIsValid"
       >
         <div class="gl-display-flex gl-align-items-center">
           <gl-datepicker v-model="form.startsOn.date" class="gl-mr-3" />
