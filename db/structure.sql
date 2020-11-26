@@ -12773,6 +12773,43 @@ CREATE SEQUENCE group_import_states_group_id_seq
 
 ALTER SEQUENCE group_import_states_group_id_seq OWNED BY group_import_states.group_id;
 
+CREATE TABLE group_wiki_page_meta (
+    id integer NOT NULL,
+    group_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    title character varying(255) NOT NULL
+);
+
+CREATE SEQUENCE group_wiki_page_meta_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE group_wiki_page_meta_id_seq OWNED BY group_wiki_page_meta.id;
+
+CREATE TABLE group_wiki_page_slugs (
+    id integer NOT NULL,
+    canonical boolean DEFAULT false NOT NULL,
+    group_wiki_page_meta_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    slug character varying(2048) NOT NULL
+);
+
+CREATE SEQUENCE group_wiki_page_slugs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE group_wiki_page_slugs_id_seq OWNED BY group_wiki_page_slugs.id;
+
 CREATE TABLE group_wiki_repositories (
     shard_id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -15126,7 +15163,8 @@ CREATE TABLE project_features (
     pages_access_level integer NOT NULL,
     forking_access_level integer,
     metrics_dashboard_access_level integer,
-    requirements_access_level integer DEFAULT 20 NOT NULL
+    requirements_access_level integer DEFAULT 20 NOT NULL,
+    operations_access_level integer DEFAULT 20 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -18048,6 +18086,10 @@ ALTER TABLE ONLY group_group_links ALTER COLUMN id SET DEFAULT nextval('group_gr
 
 ALTER TABLE ONLY group_import_states ALTER COLUMN group_id SET DEFAULT nextval('group_import_states_group_id_seq'::regclass);
 
+ALTER TABLE ONLY group_wiki_page_meta ALTER COLUMN id SET DEFAULT nextval('group_wiki_page_meta_id_seq'::regclass);
+
+ALTER TABLE ONLY group_wiki_page_slugs ALTER COLUMN id SET DEFAULT nextval('group_wiki_page_slugs_id_seq'::regclass);
+
 ALTER TABLE ONLY historical_data ALTER COLUMN id SET DEFAULT nextval('historical_data_id_seq'::regclass);
 
 ALTER TABLE ONLY identities ALTER COLUMN id SET DEFAULT nextval('identities_id_seq'::regclass);
@@ -19226,6 +19268,12 @@ ALTER TABLE ONLY group_group_links
 
 ALTER TABLE ONLY group_import_states
     ADD CONSTRAINT group_import_states_pkey PRIMARY KEY (group_id);
+
+ALTER TABLE ONLY group_wiki_page_meta
+    ADD CONSTRAINT group_wiki_page_meta_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY group_wiki_page_slugs
+    ADD CONSTRAINT group_wiki_page_slugs_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY group_wiki_repositories
     ADD CONSTRAINT group_wiki_repositories_pkey PRIMARY KEY (group_id);
@@ -21119,6 +21167,10 @@ CREATE INDEX index_group_import_states_on_user_id ON group_import_states USING b
 
 CREATE UNIQUE INDEX index_group_stages_on_group_id_group_value_stream_id_and_name ON analytics_cycle_analytics_group_stages USING btree (group_id, group_value_stream_id, name);
 
+CREATE INDEX index_group_wiki_page_slugs_on_group_wiki_page_meta_id ON group_wiki_page_slugs USING btree (group_wiki_page_meta_id);
+
+CREATE UNIQUE INDEX index_group_wiki_page_slugs_on_slug_and_group_wiki_page_meta_id ON group_wiki_page_slugs USING btree (slug, group_wiki_page_meta_id);
+
 CREATE UNIQUE INDEX index_group_wiki_repositories_on_disk_path ON group_wiki_repositories USING btree (disk_path);
 
 CREATE INDEX index_group_wiki_repositories_on_shard_id ON group_wiki_repositories USING btree (shard_id);
@@ -22323,7 +22375,7 @@ CREATE INDEX index_users_on_name_trigram ON users USING gin (name gin_trgm_ops);
 
 CREATE INDEX index_users_on_public_email ON users USING btree (public_email) WHERE ((public_email)::text <> ''::text);
 
-CREATE INDEX index_users_on_require_two_factor_authentication_from_group ON users USING btree (require_two_factor_authentication_from_group) WHERE (require_two_factor_authentication_from_group = true);
+CREATE INDEX index_users_on_require_two_factor_authentication_from_group ON users USING btree (require_two_factor_authentication_from_group);
 
 CREATE UNIQUE INDEX index_users_on_reset_password_token ON users USING btree (reset_password_token);
 
@@ -22506,6 +22558,8 @@ CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_index ON merge_request_
 CREATE INDEX merge_requests_state_id_temp_index ON merge_requests USING btree (id) WHERE (state_id = ANY (ARRAY[2, 3]));
 
 CREATE INDEX note_mentions_temp_index ON notes USING btree (id, noteable_type) WHERE (note ~~ '%@%'::text);
+
+CREATE UNIQUE INDEX one_canonical_group_wiki_page_slug_per_metadata ON group_wiki_page_slugs USING btree (group_wiki_page_meta_id) WHERE (canonical = true);
 
 CREATE UNIQUE INDEX one_canonical_wiki_page_slug_per_metadata ON wiki_page_slugs USING btree (wiki_page_meta_id) WHERE (canonical = true);
 
@@ -22811,7 +22865,7 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
-CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE FUNCTION table_sync_function_2be879775d();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
@@ -24376,6 +24430,9 @@ ALTER TABLE ONLY resource_milestone_events
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT fk_rails_a88721bcdf FOREIGN KEY (term_id) REFERENCES application_setting_terms(id);
 
+ALTER TABLE ONLY group_wiki_page_meta
+    ADD CONSTRAINT fk_rails_a99aeb0ac4 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_pipeline_artifacts
     ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
@@ -24729,6 +24786,9 @@ ALTER TABLE ONLY approval_project_rules_users
 
 ALTER TABLE ONLY insights
     ADD CONSTRAINT fk_rails_f36fda3932 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY group_wiki_page_slugs
+    ADD CONSTRAINT fk_rails_f38fbb853c FOREIGN KEY (group_wiki_page_meta_id) REFERENCES group_wiki_page_meta(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY board_group_recent_visits
     ADD CONSTRAINT fk_rails_f410736518 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
