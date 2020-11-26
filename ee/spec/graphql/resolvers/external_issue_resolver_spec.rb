@@ -14,9 +14,9 @@ RSpec.describe Resolvers::ExternalIssueResolver do
       double(
         id: vulnerability_external_issue_link.external_issue_key,
         summary: 'Issue Title',
-        created: Time.new(2020, 11, 26).utc,
-        updated: Time.new(2020, 11, 26).utc,
-        resolutiondate: Time.new(2020, 11, 26).utc,
+        created: Time.at(1606348800).utc,
+        updated: Time.at(1606348800).utc,
+        resolutiondate: Time.at(1606348800).utc,
         status: double(name: 'To Do'),
         key: 'GV-1',
         labels: [],
@@ -30,9 +30,9 @@ RSpec.describe Resolvers::ExternalIssueResolver do
       {
         'project_id' => vulnerability_external_issue_link.vulnerability.project_id,
         'title' => 'Issue Title',
-        'created_at' => '2020-11-25T23:00:00.000Z',
-        'updated_at' => '2020-11-25T23:00:00.000Z',
-        'closed_at' => '2020-11-25T23:00:00.000Z',
+        'created_at' => '2020-11-26T00:00:00.000Z',
+        'updated_at' => '2020-11-26T00:00:00.000Z',
+        'closed_at' => '2020-11-26T00:00:00.000Z',
         'status' => 'To Do',
         'labels' => [],
         'author' => {
