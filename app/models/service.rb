@@ -70,6 +70,7 @@ class Service < ApplicationRecord
   scope :by_type, -> (type) { where(type: type) }
   scope :by_active_flag, -> (flag) { where(active: flag) }
   scope :inherit_from_id, -> (id) { where(inherit_from_id: id) }
+  scope :for_project, -> (project) { where(project_id: project, type: available_services_types) }
   scope :for_group, -> (group) { where(group_id: group, type: available_services_types(include_project_specific: false)) }
   scope :for_template, -> { where(template: true, type: available_services_types(include_project_specific: false)) }
   scope :for_instance, -> { where(instance: true, type: available_services_types(include_project_specific: false)) }

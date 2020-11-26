@@ -278,6 +278,10 @@ RSpec.describe Groups::TransferService do
             expect(new_created_integration.webhook).to eq(new_parent_group_integration.webhook)
           end
 
+          it 'keeps the same number of integrations' do
+            expect(Service.count).to eq(2)
+          end
+
           it 'calls to PropagateIntegrationWorker' do
             expect(PropagateIntegrationWorker).to have_received(:perform_async).with(new_created_integration.id)
           end

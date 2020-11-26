@@ -92,6 +92,15 @@ RSpec.describe Service do
       end
     end
 
+    describe '.for_project' do
+      let!(:service1) { create(:jira_service, project: project) }
+      let!(:service2) { create(:jira_service) }
+
+      it 'returns the right group service' do
+        expect(described_class.for_project(project)).to match_array([service1])
+      end
+    end
+
     describe '.for_group' do
       let!(:service1) { create(:jira_service, project_id: nil, group_id: group.id) }
       let!(:service2) { create(:jira_service) }

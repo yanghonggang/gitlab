@@ -120,12 +120,19 @@ RSpec.describe Projects::TransferService do
     end
 
     context 'with a project integration' do
-      let!(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com') }
+      let_it_be(:project) { create(:project, namespace: user.namespace) }
+      let_it_be(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com') }
 
       it 'updates integrations' do
         execute_transfer
 
         expect(project.slack_service.webhook).to eq(group_integration.webhook)
+      end
+
+      it 'keeps the same number of integrations' do
+        execute_transfer
+
+        expect(Service.count).to eq(2)
       end
     end
   end

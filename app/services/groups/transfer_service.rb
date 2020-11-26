@@ -199,12 +199,10 @@ module Groups
       end
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def update_integrations
-      Service.where(group: @group).delete_all
+      Service.for_group(@group).delete_all
       Service.create_from_active_default_integrations(@group, :group_id)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def propagate_integrations
       @group.services.each do |integration|
