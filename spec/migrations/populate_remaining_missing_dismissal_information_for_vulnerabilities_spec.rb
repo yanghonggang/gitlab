@@ -23,17 +23,13 @@ RSpec.describe PopulateRemainingMissingDismissalInformationForVulnerabilities do
   let!(:vulnerability_3) { vulnerabilities.create!(title: 'title', state: 2, severity: 0, confidence: 5, report_type: 2, project_id: project.id, author_id: user.id) }
   let!(:vulnerability_4) { vulnerabilities.create!(title: 'title', state: 3, severity: 0, confidence: 5, report_type: 2, project_id: project.id, author_id: user.id) }
 
-  let(:mock_service) { instance_double(::Gitlab::BackgroundMigration::PopulateMissingVulnerabilityDismissalInformation, perform: true) }
-
-  before do
-    allow(::Gitlab::BackgroundMigration::PopulateMissingVulnerabilityDismissalInformation).to receive(:new).and_return(mock_service)
-  end
-
   describe '#perform' do
     it 'calls the background migration class instance with broken vulnerability IDs' do
-      migrate!
+      expect_next_instance_of(::Gitlab::BackgroundMigration::PopulateMissingVulnerabilityDismissalInformation) do |migrator|
+        expect(migrator).to receive(:perform).with(vulnerability_3.id)
+      end
 
-      expect(mock_service).to have_received(:perform).with(vulnerability_3.id)
+      migrate!
     end
   end
 end
