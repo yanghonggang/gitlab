@@ -111,6 +111,7 @@ exports[`AddRotationModal renders rotation modal layout 1`] = `
       label="Starts on"
       label-for="rotation-time"
       label-size="sm"
+      state="true"
     >
       <div
         class="gl-display-flex gl-align-items-center"
