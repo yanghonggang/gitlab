@@ -13,9 +13,11 @@ module HasWikiPageMetaAttributes
     validates :title, presence: true
     validate :no_two_metarecords_in_same_container_can_have_same_canonical_slug
 
-    # scope :with_canonical_slug, ->(slug) do
-    #   joins(:slugs).where(wiki_page_slugs: { canonical: true, slug: slug })
-    # end
+    scope :with_canonical_slug, ->(slug) do
+      slug_table_name = klass.reflect_on_association(:slugs).table_name
+
+      joins(:slugs).where(slug_table_name => { canonical: true, slug: slug })
+    end
   end
 
   class_methods do
@@ -38,7 +40,7 @@ module HasWikiPageMetaAttributes
       transaction do
         updates = wiki_page_updates(wiki_page)
         found = find_by_canonical_slug(known_slugs, container)
-        meta = found || create!(updates.merge(container_param(container)))
+        meta = found || create!(updates.merge(container_attrs(container)))
 
         meta.update_state(found.nil?, known_slugs, wiki_page, updates)
 
@@ -52,7 +54,7 @@ module HasWikiPageMetaAttributes
 
     def find_by_canonical_slug(canonical_slug, container)
       meta, conflict = with_canonical_slug(canonical_slug)
-        .where(container_param(container))
+        .where(container_attrs(container))
         .limit(2)
 
       if conflict.present?
@@ -79,13 +81,13 @@ module HasWikiPageMetaAttributes
       raise NotImplementedError
     end
 
-    def container_param(container)
+    def container_attrs(container)
       { container_key => container.id }
     end
   end
 
   def canonical_slug
-    strong_memoize(:canonical_slug) { slugs.canonical.first&.slug }
+    strong_memoize(:canonical_slug) { slugs.canonical.take&.slug }
   end
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -127,7 +129,7 @@ module HasWikiPageMetaAttributes
     creation = Time.current.utc
 
     slug_attrs = strings.map do |slug|
-      slug_attributes(slug, canonical_slug, is_new, creation).merge(slug_extra_attributes)
+      slug_attributes(slug, canonical_slug, is_new, creation)
     end
     slugs.insert_all(slug_attrs) unless !is_new && slug_attrs.size == 1
 
@@ -139,12 +141,12 @@ module HasWikiPageMetaAttributes
       slug: slug,
       canonical: (is_new && slug == canonical_slug),
       created_at: creation,
-      updated_at: creation
-    }
+      updated_at: creation,
+    }.merge(slug_meta_attributes)
   end
 
-  def slug_extra_attributes
-    {}
+  def slug_meta_attributes
+    { self.association(:slugs).reflection.foreign_key => id }
   end
 
   def no_two_metarecords_in_same_container_can_have_same_canonical_slug
