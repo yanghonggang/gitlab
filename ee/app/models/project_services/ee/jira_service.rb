@@ -19,6 +19,10 @@ module EE
       issues_enabled || vulnerabilities_enabled
     end
 
+    def configured_to_create_issues_from_vulnerabilities?
+      active? && jira_vulnerabilities_integration_enabled? && project_key.present? && vulnerabilities_issuetype.present?
+    end
+
     def issue_types
       client
         .Issuetype
@@ -40,6 +44,23 @@ module EE
       escaped_summary = CGI.escape(summary)
       escaped_description = CGI.escape(description)
       "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
+    end
+
+    def create_issue(summary, description)
+      return if client_url.blank?
+
+      jira_request do
+        issue = client.Issue.build
+        issue.save(
+          fields: {
+            project: { id: jira_project_id },
+            issuetype: { id: vulnerabilities_issuetype },
+            summary: summary,
+            description: description
+          }
+        )
+        issue
+      end
     end
 
     def jira_project_id
