@@ -141,7 +141,7 @@ module HasWikiPageMetaAttributes
       slug: slug,
       canonical: (is_new && slug == canonical_slug),
       created_at: creation,
-      updated_at: creation,
+      updated_at: creation
     }.merge(slug_meta_attributes)
   end
 
