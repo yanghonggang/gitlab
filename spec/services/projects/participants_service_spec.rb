@@ -3,6 +3,32 @@
 require 'spec_helper'
 
 RSpec.describe Projects::ParticipantsService do
+  describe '#execute' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, :public) }
+    let(:noteable) { create(:issue, project: project) }
+
+    def run_service
+      described_class.new(project, user).execute(noteable)
+    end
+
+    before do
+      project.add_developer(user)
+    end
+
+    it 'avoids N+1 UserDetail queries' do
+      project.add_developer(create(:user))
+
+      run_service # warmup
+      BatchLoader::Executor.clear_current # clear cache
+
+      control_count = ActiveRecord::QueryRecorder.new { run_service }
+
+      project.add_developer(create(:user))
+      expect { run_service }.not_to exceed_query_limit(control_count)
+    end
+  end
+
   describe '#groups' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :public) }

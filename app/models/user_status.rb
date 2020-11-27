@@ -16,4 +16,8 @@ class UserStatus < ApplicationRecord
   validates :message, length: { maximum: 100 }, allow_blank: true
 
   cache_markdown_field :message, pipeline: :emoji
+
+  def self.user_id_in(user_ids)
+    where(user_id: user_ids)
+  end
 end
