@@ -12778,7 +12778,8 @@ CREATE TABLE group_wiki_page_meta (
     group_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    title character varying(255) NOT NULL
+    title text NOT NULL,
+    CONSTRAINT check_59d2ea1e27 CHECK ((char_length(title) <= 255))
 );
 
 CREATE SEQUENCE group_wiki_page_meta_id_seq
@@ -12797,7 +12798,8 @@ CREATE TABLE group_wiki_page_slugs (
     group_wiki_page_meta_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    slug character varying(2048) NOT NULL
+    slug text NOT NULL,
+    CONSTRAINT check_6c43c7db42 CHECK ((char_length(slug) <= 2048))
 );
 
 CREATE SEQUENCE group_wiki_page_slugs_id_seq
@@ -24850,6 +24852,9 @@ ALTER TABLE ONLY resource_label_events
 
 ALTER TABLE ONLY ci_builds_metadata
     ADD CONSTRAINT fk_rails_ffcf702a02 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY services
+    ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT fk_timelogs_issues_issue_id FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
