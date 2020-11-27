@@ -65,12 +65,14 @@ export default (
   let done = doneArg;
 
   if (typeof actionArg !== 'function') {
-    action = actionArg.action;
-    payload = actionArg.payload;
-    state = actionArg.state || {};
-    expectedMutations = actionArg.expectedMutations || [];
-    expectedActions = actionArg.expectedActions || [];
-    done = actionArg.done || noop;
+    ({
+      action,
+      payload,
+      state,
+      expectedMutations = [],
+      expectedActions = [],
+      done = noop,
+    } = actionArg)
   }
 
   const mutations = [];
