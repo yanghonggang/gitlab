@@ -8,6 +8,8 @@ if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
   abort 'Aborting...'
 end
 
+require './spec/deprecation_toolkit_env'
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 
@@ -56,6 +58,7 @@ require_relative('../ee/spec/spec_helper') if Gitlab.ee?
 
 # Load these first since they may be required by other helpers
 require Rails.root.join("spec/support/helpers/git_helpers.rb")
+require Rails.root.join("spec/support/helpers/stub_requests.rb")
 
 # Then the rest
 Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
@@ -130,10 +133,10 @@ RSpec.configure do |config|
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
-  config.include SnowplowHelpers
   config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
+  config.include FileReadHelpers
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::IntegrationHelpers, type: :feature
   config.include LoginHelpers, type: :feature
@@ -215,10 +218,6 @@ RSpec.configure do |config|
       stub_feature_flags(vue_issuable_sidebar: false)
       stub_feature_flags(vue_issuable_epic_sidebar: false)
 
-      # The following can be removed once we are confident the
-      # unified diff lines works as expected
-      stub_feature_flags(unified_diff_lines: false)
-
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
       stub_feature_flags(merge_request_widget_graphql: false)
@@ -237,6 +236,8 @@ RSpec.configure do |config|
       # Disable the usage of file_identifier_hash by default until it is ready
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
       stub_feature_flags(file_identifier_hash: false)
+
+      stub_feature_flags(unified_diff_components: false)
 
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
@@ -279,27 +280,18 @@ RSpec.configure do |config|
     # context 'some test in mocked dir', :do_not_mock_admin_mode do ... end
     admin_mode_mock_dirs = %w(
       ./ee/spec/elastic_integration
-      ./ee/spec/features
       ./ee/spec/finders
       ./ee/spec/lib
       ./ee/spec/requests/admin
       ./ee/spec/serializers
-      ./ee/spec/services
-      ./ee/spec/support/protected_tags
-      ./ee/spec/support/shared_examples/features
       ./ee/spec/support/shared_examples/finders/geo
       ./ee/spec/support/shared_examples/graphql/geo
-      ./ee/spec/support/shared_examples/services
-      ./spec/features
       ./spec/finders
       ./spec/frontend
       ./spec/helpers
       ./spec/lib
       ./spec/requests
       ./spec/serializers
-      ./spec/services
-      ./spec/support/protected_tags
-      ./spec/support/shared_examples/features
       ./spec/support/shared_examples/requests
       ./spec/support/shared_examples/lib/gitlab
       ./spec/views
@@ -369,7 +361,7 @@ RSpec.configure do |config|
   end
 
   config.before(:example, :prometheus) do
-    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "*.db")
+    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "**/*.db")
     Dir[matching_files].map { |filename| File.delete(filename) if File.file?(filename) }
 
     Gitlab::Metrics.reset_registry!

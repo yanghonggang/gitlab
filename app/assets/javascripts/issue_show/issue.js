@@ -17,6 +17,8 @@ export function initIssuableApp(issuableData, store) {
       return createElement(IssuableApp, {
         props: {
           ...issuableData,
+          isConfidential: this.getNoteableData?.confidential,
+          isLocked: this.getNoteableData?.discussion_locked,
           issuableStatus: this.getNoteableData?.state,
         },
       });
@@ -43,11 +45,13 @@ export function initIssueHeaderActions(store) {
     store,
     provide: {
       canCreateIssue: parseBoolean(el.dataset.canCreateIssue),
+      canPromoteToEpic: parseBoolean(el.dataset.canPromoteToEpic),
       canReopenIssue: parseBoolean(el.dataset.canReopenIssue),
       canReportSpam: parseBoolean(el.dataset.canReportSpam),
       canUpdateIssue: parseBoolean(el.dataset.canUpdateIssue),
       iid: el.dataset.iid,
       isIssueAuthor: parseBoolean(el.dataset.isIssueAuthor),
+      issueType: el.dataset.issueType,
       newIssuePath: el.dataset.newIssuePath,
       projectPath: el.dataset.projectPath,
       reportAbusePath: el.dataset.reportAbusePath,

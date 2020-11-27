@@ -64,6 +64,8 @@ class Project < ApplicationRecord
   SORTING_PREFERENCE_FIELD = :projects_sort
   MAX_BUILD_TIMEOUT = 1.month
 
+  GL_REPOSITORY_TYPES = [Gitlab::GlRepository::PROJECT, Gitlab::GlRepository::WIKI, Gitlab::GlRepository::DESIGN].freeze
+
   cache_markdown_field :description, pipeline: :description
 
   default_value_for :packages_enabled, true
@@ -145,6 +147,7 @@ class Project < ApplicationRecord
   # Project services
   has_one :alerts_service
   has_one :campfire_service
+  has_one :datadog_service
   has_one :discord_service
   has_one :drone_ci_service
   has_one :emails_on_push_service
@@ -164,6 +167,7 @@ class Project < ApplicationRecord
   has_one :bamboo_service
   has_one :teamcity_service
   has_one :pushover_service
+  has_one :jenkins_service
   has_one :jira_service
   has_one :redmine_service
   has_one :youtrack_service
@@ -222,6 +226,7 @@ class Project < ApplicationRecord
   has_many :snippets, class_name: 'ProjectSnippet'
   has_many :hooks, class_name: 'ProjectHook'
   has_many :protected_branches
+  has_many :exported_protected_branches
   has_many :protected_tags
   has_many :repository_languages, -> { order "share DESC" }
   has_many :designs, inverse_of: :project, class_name: 'DesignManagement::Design'
@@ -602,7 +607,7 @@ class Project < ApplicationRecord
   # Returns a collection of projects that is either public or visible to the
   # logged in user.
   def self.public_or_visible_to_user(user = nil, min_access_level = nil)
-    min_access_level = nil if user&.admin?
+    min_access_level = nil if user&.can_read_all_resources?
 
     return public_to_user unless user
 
@@ -628,7 +633,7 @@ class Project < ApplicationRecord
   def self.with_feature_available_for_user(feature, user)
     visible = [ProjectFeature::ENABLED, ProjectFeature::PUBLIC]
 
-    if user&.admin?
+    if user&.can_read_all_resources?
       with_feature_enabled(feature)
     elsif user
       min_access_level = ProjectFeature.required_minimum_access_level(feature)
@@ -1195,7 +1200,6 @@ class Project < ApplicationRecord
   end
 
   def changing_shared_runners_enabled_is_allowed
-    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
     if shared_runners_enabled && group && group.shared_runners_setting == 'disabled_and_unoverridable'
@@ -1342,8 +1346,7 @@ class Project < ApplicationRecord
   end
 
   def find_or_initialize_services
-    available_services_names =
-      Service.available_services_names + Service.project_specific_services_names - disabled_services
+    available_services_names = Service.available_services_names - disabled_services
 
     available_services_names.map do |service_name|
       find_or_initialize_service(service_name)
@@ -1351,6 +1354,8 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
+    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+
     []
   end
 
@@ -1468,11 +1473,6 @@ class Project < ApplicationRecord
 
   def has_active_services?(hooks_scope = :push_hooks)
     services.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
-  end
-
-  # Is overridden in EE
-  def lfs_http_url_to_repo(_)
-    http_url_to_repo
   end
 
   def feature_usage
@@ -1824,6 +1824,10 @@ class Project < ApplicationRecord
     ensure_pages_metadatum.update!(deployed: false, artifacts_archive: nil, pages_deployment: nil)
   end
 
+  def update_pages_deployment!(deployment)
+    ensure_pages_metadatum.update!(pages_deployment: deployment)
+  end
+
   def write_repository_config(gl_full_path: full_path)
     # We'd need to keep track of project full path otherwise directory tree
     # created with hashed storage enabled cannot be usefully imported using
@@ -2101,10 +2105,10 @@ class Project < ApplicationRecord
   # already in that state.
   #
   # @return nil. Failures will raise an exception
-  def set_repository_read_only!
+  def set_repository_read_only!(skip_git_transfer_check: false)
     with_lock do
       raise RepositoryReadOnlyError, _('Git transfer in progress') if
-        git_transfer_in_progress?
+        !skip_git_transfer_check && git_transfer_in_progress?
 
       raise RepositoryReadOnlyError, _('Repository already read-only') if
         self.class.where(id: id).pick(:repository_read_only)
@@ -2277,7 +2281,9 @@ class Project < ApplicationRecord
   end
 
   def git_transfer_in_progress?
-    repo_reference_count > 0 || wiki_reference_count > 0
+    GL_REPOSITORY_TYPES.any? do |type|
+      reference_counter(type: type).value > 0
+    end
   end
 
   def storage_version=(value)
@@ -2608,14 +2614,6 @@ class Project < ApplicationRecord
     if self.new_record? && Gitlab::CurrentSettings.hashed_storage_enabled
       self.storage_version = LATEST_STORAGE_VERSION
     end
-  end
-
-  def repo_reference_count
-    reference_counter.value
-  end
-
-  def wiki_reference_count
-    reference_counter(type: Gitlab::GlRepository::WIKI).value
   end
 
   def check_repository_absence!

@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -842,7 +842,8 @@ Example response if commit is GPG signed:
   "gpg_key_primary_keyid": "8254AAB3FBD54AC9",
   "gpg_key_user_name": "John Doe",
   "gpg_key_user_email": "johndoe@example.com",
-  "gpg_key_subkey_id": null
+  "gpg_key_subkey_id": null,
+  "commit_source": "gitaly"
 }
 ```
 
@@ -865,7 +866,8 @@ Example response if commit is X.509 signed:
       "subject_key_identifier": "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB",
       "crl_url": "http://example.com/pki.crl"
     }
-  }
+  },
+  "commit_source": "gitaly"
 }
 ```
 

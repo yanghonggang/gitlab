@@ -1,9 +1,14 @@
 <script>
 import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlLink, GlModal } from '@gitlab/ui';
-import { mapGetters } from 'vuex';
-import createFlash from '~/flash';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import { IssuableType } from '~/issuable_show/constants';
 import { IssuableStatus, IssueStateEvent } from '~/issue_show/constants';
-import { __ } from '~/locale';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __, sprintf } from '~/locale';
+import eventHub from '~/notes/event_hub';
+import promoteToEpicMutation from '../queries/promote_to_epic.mutation.graphql';
 import updateIssueMutation from '../queries/update_issue.mutation.graphql';
 
 export default {
@@ -22,43 +27,93 @@ export default {
     text: __('Yes, close issue'),
     attributes: [{ variant: 'warning' }],
   },
-  inject: [
-    'canCreateIssue',
-    'canReopenIssue',
-    'canReportSpam',
-    'canUpdateIssue',
-    'iid',
-    'isIssueAuthor',
-    'newIssuePath',
-    'projectPath',
-    'reportAbusePath',
-    'submitAsSpamPath',
-  ],
-  data() {
-    return {
-      isUpdatingState: false,
-    };
+  i18n: {
+    promoteErrorMessage: __(
+      'Something went wrong while promoting the issue to an epic. Please try again.',
+    ),
+    promoteSuccessMessage: __(
+      'The issue was successfully promoted to an epic. Redirecting to epic...',
+    ),
+  },
+  inject: {
+    canCreateIssue: {
+      default: false,
+    },
+    canPromoteToEpic: {
+      default: false,
+    },
+    canReopenIssue: {
+      default: false,
+    },
+    canReportSpam: {
+      default: false,
+    },
+    canUpdateIssue: {
+      default: false,
+    },
+    iid: {
+      default: '',
+    },
+    isIssueAuthor: {
+      default: false,
+    },
+    issueType: {
+      default: IssuableType.Issue,
+    },
+    newIssuePath: {
+      default: '',
+    },
+    projectPath: {
+      default: '',
+    },
+    reportAbusePath: {
+      default: '',
+    },
+    submitAsSpamPath: {
+      default: '',
+    },
   },
   computed: {
-    ...mapGetters(['getNoteableData']),
+    ...mapState(['isToggleStateButtonLoading']),
+    ...mapGetters(['openState', 'getBlockedByIssues']),
     isClosed() {
-      return this.getNoteableData.state === IssuableStatus.Closed;
+      return this.openState === IssuableStatus.Closed;
     },
     buttonText() {
-      return this.isClosed ? __('Reopen issue') : __('Close issue');
+      return this.isClosed
+        ? sprintf(__('Reopen %{issueType}'), { issueType: this.issueType })
+        : sprintf(__('Close %{issueType}'), { issueType: this.issueType });
+    },
+    qaSelector() {
+      return this.isClosed ? 'reopen_issue_button' : 'close_issue_button';
     },
     buttonVariant() {
       return this.isClosed ? 'default' : 'warning';
     },
-    showToggleIssueButton() {
+    dropdownText() {
+      return sprintf(__('%{issueType} actions'), {
+        issueType: capitalizeFirstCharacter(this.issueType),
+      });
+    },
+    newIssueTypeText() {
+      return sprintf(__('New %{issueType}'), { issueType: this.issueType });
+    },
+    showToggleIssueStateButton() {
       const canClose = !this.isClosed && this.canUpdateIssue;
       const canReopen = this.isClosed && this.canReopenIssue;
       return canClose || canReopen;
     },
   },
+  created() {
+    eventHub.$on('toggle.issuable.state', this.toggleIssueState);
+  },
+  beforeDestroy() {
+    eventHub.$off('toggle.issuable.state', this.toggleIssueState);
+  },
   methods: {
+    ...mapActions(['toggleStateButtonLoading']),
     toggleIssueState() {
-      if (!this.isClosed && this.getNoteableData?.blocked_by_issues?.length) {
+      if (!this.isClosed && this.getBlockedByIssues?.length) {
         this.$refs.blockedByIssuesModal.show();
         return;
       }
@@ -66,7 +121,7 @@ export default {
       this.invokeUpdateIssueMutation();
     },
     invokeUpdateIssueMutation() {
-      this.isUpdatingState = true;
+      this.toggleStateButtonLoading(true);
 
       this.$apollo
         .mutate({
@@ -81,7 +136,7 @@ export default {
         })
         .then(({ data }) => {
           if (data.updateIssue.errors.length) {
-            createFlash(data.updateIssue.errors.join('. '));
+            createFlash({ message: data.updateIssue.errors.join('. ') });
             return;
           }
 
@@ -95,9 +150,40 @@ export default {
           // Dispatch event which updates open/close state, shared among the issue show page
           document.dispatchEvent(new CustomEvent('issuable_vue_app:change', payload));
         })
-        .catch(() => createFlash(__('Update failed. Please try again.')))
+        .catch(() => createFlash({ message: __('Update failed. Please try again.') }))
         .finally(() => {
-          this.isUpdatingState = false;
+          this.toggleStateButtonLoading(false);
+        });
+    },
+    promoteToEpic() {
+      this.toggleStateButtonLoading(true);
+
+      this.$apollo
+        .mutate({
+          mutation: promoteToEpicMutation,
+          variables: {
+            input: {
+              iid: this.iid,
+              projectPath: this.projectPath,
+            },
+          },
+        })
+        .then(({ data }) => {
+          if (data.promoteToEpic.errors.length) {
+            createFlash({ message: data.promoteToEpic.errors.join('; ') });
+            return;
+          }
+
+          createFlash({
+            message: this.$options.i18n.promoteSuccessMessage,
+            type: FLASH_TYPES.SUCCESS,
+          });
+
+          visitUrl(data.promoteToEpic.epic.webPath);
+        })
+        .catch(() => createFlash({ message: this.$options.i18n.promoteErrorMessage }))
+        .finally(() => {
+          this.toggleStateButtonLoading(false);
         });
     },
   },
@@ -106,16 +192,23 @@ export default {
 
 <template>
   <div class="detail-page-header-actions">
-    <gl-dropdown class="gl-display-block gl-display-sm-none!" block :text="__('Issue actions')">
+    <gl-dropdown class="gl-display-block gl-display-sm-none!" block :text="dropdownText">
       <gl-dropdown-item
-        v-if="showToggleIssueButton"
-        :disabled="isUpdatingState"
+        v-if="showToggleIssueStateButton"
+        :disabled="isToggleStateButtonLoading"
         @click="toggleIssueState"
       >
         {{ buttonText }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
-        {{ __('New issue') }}
+        {{ newIssueTypeText }}
+      </gl-dropdown-item>
+      <gl-dropdown-item
+        v-if="canPromoteToEpic"
+        :disabled="isToggleStateButtonLoading"
+        @click="promoteToEpic"
+      >
+        {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
         {{ __('Report abuse') }}
@@ -131,10 +224,11 @@ export default {
     </gl-dropdown>
 
     <gl-button
-      v-if="showToggleIssueButton"
+      v-if="showToggleIssueStateButton"
       class="gl-display-none gl-display-sm-inline-flex!"
       category="secondary"
-      :loading="isUpdatingState"
+      :data-qa-selector="qaSelector"
+      :loading="isToggleStateButtonLoading"
       :variant="buttonVariant"
       @click="toggleIssueState"
     >
@@ -149,11 +243,19 @@ export default {
     >
       <template #button-content>
         <gl-icon name="ellipsis_v" aria-hidden="true" />
-        <span class="gl-sr-only">{{ __('Actions') }}</span>
+        <span class="gl-sr-only">{{ dropdownText }}</span>
       </template>
 
       <gl-dropdown-item v-if="canCreateIssue" :href="newIssuePath">
-        {{ __('New issue') }}
+        {{ newIssueTypeText }}
+      </gl-dropdown-item>
+      <gl-dropdown-item
+        v-if="canPromoteToEpic"
+        :disabled="isToggleStateButtonLoading"
+        data-testid="promote-button"
+        @click="promoteToEpic"
+      >
+        {{ __('Promote to epic') }}
       </gl-dropdown-item>
       <gl-dropdown-item v-if="!isIssueAuthor" :href="reportAbusePath">
         {{ __('Report abuse') }}
@@ -178,7 +280,7 @@ export default {
     >
       <p>{{ __('This issue is currently blocked by the following issues:') }}</p>
       <ul>
-        <li v-for="issue in getNoteableData.blocked_by_issues" :key="issue.iid">
+        <li v-for="issue in getBlockedByIssues" :key="issue.iid">
           <gl-link :href="issue.web_url">#{{ issue.iid }}</gl-link>
         </li>
       </ul>

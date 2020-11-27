@@ -7,6 +7,7 @@ RSpec.describe RegistrationsController do
 
   before do
     stub_feature_flags(invisible_captcha: false)
+    stub_application_setting(require_admin_approval_after_user_signup: false)
   end
 
   describe '#new' do
@@ -53,6 +54,14 @@ RSpec.describe RegistrationsController do
             .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
         end
 
+        it 'emails the access request to approvers' do
+          expect_next_instance_of(NotificationService) do |notification|
+            allow(notification).to receive(:new_instance_access_request).with(User.find_by(email: 'new@user.com'))
+          end
+
+          subject
+        end
+
         context 'email confirmation' do
           context 'when `send_user_confirmation_email` is true' do
             before do
@@ -68,10 +77,6 @@ RSpec.describe RegistrationsController do
       end
 
       context 'when the `require_admin_approval_after_user_signup` setting is turned off' do
-        before do
-          stub_application_setting(require_admin_approval_after_user_signup: false)
-        end
-
         it 'signs up the user in `active` state' do
           subject
           created_user = User.find_by(email: 'new@user.com')
@@ -84,6 +89,12 @@ RSpec.describe RegistrationsController do
           subject
 
           expect(flash[:notice]).to be_nil
+        end
+
+        it 'does not email the approvers' do
+          expect(NotificationService).not_to receive(:new)
+
+          subject
         end
 
         context 'email confirmation' do
@@ -400,45 +411,6 @@ RSpec.describe RegistrationsController do
           end
         end
       end
-    end
-  end
-
-  describe '#welcome' do
-    subject { get :welcome }
-
-    it 'renders the welcome layout' do
-      sign_in(create(:user))
-
-      expect(subject).to render_template(:welcome)
-    end
-
-    context '2FA is required from group' do
-      before do
-        user = create(:user, require_two_factor_authentication_from_group: true)
-        sign_in(user)
-      end
-
-      it 'does not perform a redirect' do
-        expect(subject).not_to redirect_to(profile_two_factor_auth_path)
-      end
-    end
-  end
-
-  describe '#update_registration' do
-    subject(:update_registration) do
-      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
-    end
-
-    context 'without a signed in user' do
-      it { is_expected.to redirect_to new_user_registration_path }
-    end
-
-    context 'with a signed in user' do
-      before do
-        sign_in(create(:user))
-      end
-
-      it { is_expected.to redirect_to(dashboard_projects_path)}
     end
   end
 end

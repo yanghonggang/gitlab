@@ -1,22 +1,22 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Growth
+group: Activation
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Experiment Guide
 
-Experiments can be conducted by any GitLab team, most often the teams from the [Growth Sub-department](https://about.gitlab.com/handbook/engineering/development/growth/). Experiments are not tied to releases because they will primarily target GitLab.com.
+Experiments can be conducted by any GitLab team, most often the teams from the [Growth Sub-department](https://about.gitlab.com/handbook/engineering/development/growth/). Experiments are not tied to releases because they primarily target GitLab.com.
 
-Experiments will be run as an A/B test and will be behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team will decide if the experiment had a positive impact and will be the new default or rolled back.
+Experiments are run as an A/B test and are behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team decides if the experiment had a positive impact and should be made the new default or rolled back.
 
 ## Experiment tracking issue
 
 Each experiment should have an [Experiment tracking](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=growth%20experiment&search=%22Experiment+tracking%22) issue to track the experiment from roll-out through to cleanup/removal. Immediately after an experiment is deployed, the due date of the issue should be set (this depends on the experiment but can be up to a few weeks in the future).
 After the deadline, the issue needs to be resolved and either:
 
-- It was successful and the experiment will be the new default.
-- It was not successful and all code related to the experiment will be removed.
+- It was successful and the experiment becomes the new default.
+- It was not successful and all code related to the experiment is removed.
 
 In either case, an outcome of the experiment should be posted to the issue with the reasoning for the decision.
 
@@ -49,7 +49,6 @@ addressed.
      },
      # Add your experiment here:
      signup_flow: {
-       environment: ::Gitlab.dev_env_or_com?, # Target environment, defaults to enabled for development and GitLab.com
        tracking_category: 'Growth::Activation::Experiment::SignUpFlow' # Used for providing the category when setting up tracking data
      }
    }.freeze
@@ -80,7 +79,7 @@ addressed.
       end
       ```
 
-      The above will check whether the experiment is enabled and push the result to the frontend.
+      The above checks whether the experiment is enabled and push the result to the frontend.
 
       You can check the state of the feature flag in JavaScript:
 
@@ -232,6 +231,39 @@ describe('event tracking', () => {
   });
 });
 ```
+
+### Record experiment user
+
+In addition to the anonymous tracking of events, we can also record which users have participated in which experiments and whether they were given the control experience or the experimental experience.
+
+The `record_experiment_user` helper method is available to all controllers, and it enables you to record these experiment participants (the current user) and which experience they were given:
+
+```ruby
+before_action do
+  record_experiment_user(:signup_flow)
+end
+```
+
+Subsequent calls to this method for the same experiment and the same user have no effect unless the user has gets enrolled into a different experience. This happens when we roll out the experimental experience to a greater percentage of users.
+
+Note that this data is completely separate from the [events tracking data](#implement-the-tracking-events). They are not linked together in any way.
+
+### Record experiment conversion event
+
+Along with the tracking of backend and frontend events and the [recording of experiment participants](#record-experiment-user), we can also record when a user performs the desired conversion event action. For example:
+
+- **Experimental experience:** Show an in-product nudge to see if it causes more people to sign up for trials.
+- **Conversion event:** The user starts a trial.
+
+The `record_experiment_conversion_event` helper method is available to all controllers, and enables us to easily record the conversion event for the current user, regardless of whether they are in the control or experimental group:
+
+```ruby
+before_action do
+  record_experiment_conversion_event(:signup_flow)
+end
+```
+
+Note that the use of this method requires that we have first [recorded the user as being part of the experiment](#record-experiment-user).
 
 ### Enable the experiment
 

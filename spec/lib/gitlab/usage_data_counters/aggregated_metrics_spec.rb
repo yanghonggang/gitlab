@@ -8,18 +8,16 @@ RSpec.describe 'aggregated metrics' do
       Gitlab::UsageDataCounters::HLLRedisCounter.known_event?(event)
     end
 
-    failure_message do
+    failure_message do |event|
       "Event with name: `#{event}` can not be found within `#{Gitlab::UsageDataCounters::HLLRedisCounter::KNOWN_EVENTS_PATH}`"
     end
   end
 
   let_it_be(:known_events) do
-    YAML.load_file(
-      Rails.root.join(Gitlab::UsageDataCounters::HLLRedisCounter::KNOWN_EVENTS_PATH)
-    ).map(&:with_indifferent_access)
+    Gitlab::UsageDataCounters::HLLRedisCounter.known_events
   end
 
-  YAML.load_file(Rails.root.join(Gitlab::UsageDataCounters::HLLRedisCounter::AGGREGATED_METRICS_PATH))&.map(&:with_indifferent_access).tap do |aggregated_metrics|
+  Gitlab::UsageDataCounters::HLLRedisCounter.aggregated_metrics.tap do |aggregated_metrics|
     it 'all events has unique name' do
       event_names = aggregated_metrics&.map { |event| event[:name] }
 
@@ -35,7 +33,7 @@ RSpec.describe 'aggregated metrics' do
         end
 
         it "has expected structure" do
-          expect(aggregate.keys).to match_array(%w[name operator events])
+          expect(aggregate.keys).to include(*%w[name operator events])
         end
 
         it "uses allowed aggregation operators" do

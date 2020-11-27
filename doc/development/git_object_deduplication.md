@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # How Git object deduplication works in GitLab
@@ -162,7 +162,7 @@ repository and a pool.
 
 ### Pool existence
 
-If GitLab thinks a pool repository exists (i.e. it exists according to
+If GitLab thinks a pool repository exists (i.e. it exists according to
 SQL), but it does not on the Gitaly server, then it will be created on
 the fly by Gitaly.
 

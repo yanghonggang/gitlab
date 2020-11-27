@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -458,7 +458,7 @@ user.skip_reconfirmation!
 User.active.count
 
 # Users taking a seat on the instance
-License.current.current_active_users_count
+User.billable.count
 
 # The historical max on the instance as of the past year
 ::HistoricalData.max_historical_user_count
@@ -858,7 +858,7 @@ Find this content in the [Container Registry troubleshooting docs](../packages/c
 
 ## Sidekiq
 
-This content has been moved to the [Troubleshooting Sidekiq docs](./sidekiq.md).
+This content has been moved to the [Troubleshooting Sidekiq docs](sidekiq.md).
 
 ## Redis
 

@@ -1149,7 +1149,11 @@ describe('DiffsStoreActions', () => {
       file_hash: 'testhash',
       alternate_viewer: { name: updatedViewerName },
     };
-    const updatedViewer = { name: updatedViewerName, automaticallyCollapsed: false };
+    const updatedViewer = {
+      name: updatedViewerName,
+      automaticallyCollapsed: false,
+      manuallyCollapsed: false,
+    };
     const testData = [{ rich_text: 'test' }, { rich_text: 'file2' }];
     let renamedFile;
     let mock;
@@ -1232,10 +1236,6 @@ describe('DiffsStoreActions', () => {
         { diffViewType: 'inline' },
         [
           {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines: ['test'] },
-          },
-          {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: ['test'] },
           },
@@ -1254,10 +1254,6 @@ describe('DiffsStoreActions', () => {
         { file: { file_path: 'path' }, data: [] },
         { diffViewType: 'inline' },
         [
-          {
-            type: 'SET_HIDDEN_VIEW_DIFF_FILE_LINES',
-            payload: { filePath: 'path', lines },
-          },
           {
             type: 'SET_CURRENT_VIEW_DIFF_FILE_LINES',
             payload: { filePath: 'path', lines: lines.slice(0, 200) },

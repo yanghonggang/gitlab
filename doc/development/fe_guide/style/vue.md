@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Vue.js style guide
@@ -56,6 +56,66 @@ Please check this [rules](https://github.com/vuejs/eslint-plugin-vue#bulb-rules)
    ```
 
 1. Use `.vue` for Vue templates. Do not use `%template` in HAML.
+
+1. Explicitly define data being passed into the Vue app
+
+    ```javascript
+    // bad
+    return new Vue({
+      el: '#element',
+      components: {
+        componentName
+      },
+      provide: {
+        ...someDataset
+      },
+      props: {
+        ...anotherDataset
+      },
+      render: createElement => createElement('component-name'),
+    }));
+
+    // good
+    const { foobar, barfoo } = someDataset;
+    const { foo, bar } = anotherDataset;
+
+    return new Vue({
+      el: '#element',
+      components: {
+        componentName
+      },
+      provide: {
+        foobar,
+        barfoo
+      },
+      props: {
+        foo,
+        bar
+      },
+      render: createElement => createElement('component-name'),
+    }));
+    ```
+
+    We discourage the use of the spread operator in this specific case in
+    order to keep our codebase explicit, discoverable, and searchable.
+    This applies in any place where we'll benefit from the above, such as
+    when [initializing Vuex state](../vuex.md#why-not-just-spread-the-initial-state).
+    The pattern above also enables us to easily parse non scalar values during
+    instantiation.
+
+    ```javascript
+    return new Vue({
+      el: '#element',
+      components: {
+        componentName
+      },
+      props: {
+        foo,
+        bar: parseBoolean(bar)
+      },
+      render: createElement => createElement('component-name'),
+    }));
+    ```
 
 ## Naming
 
