@@ -6268,7 +6268,7 @@ input DestroyContainerRepositoryTagsInput {
   id: ContainerRepositoryID!
 
   """
-  Container repository tag names
+  Container repository tag names to delete. Can't be bigger than 20
   """
   tagNames: [String!]!
 }

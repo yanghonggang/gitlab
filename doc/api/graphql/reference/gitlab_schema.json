@@ -17268,7 +17268,7 @@
             },
             {
               "name": "tagNames",
-              "description": "Container repository tag names",
+              "description": "Container repository tag names to delete. Can't be bigger than 20",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
