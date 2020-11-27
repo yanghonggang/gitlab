@@ -13,9 +13,9 @@ module HasWikiPageMetaAttributes
     validates :title, presence: true
     validate :no_two_metarecords_in_same_container_can_have_same_canonical_slug
 
-    scope :with_canonical_slug, ->(slug) do
-      joins(:slugs).where(wiki_page_slugs: { canonical: true, slug: slug })
-    end
+    # scope :with_canonical_slug, ->(slug) do
+    #   joins(:slugs).where(wiki_page_slugs: { canonical: true, slug: slug })
+    # end
   end
 
   class_methods do
@@ -127,17 +127,24 @@ module HasWikiPageMetaAttributes
     creation = Time.current.utc
 
     slug_attrs = strings.map do |slug|
-      {
-        wiki_page_meta_id: id,
-        slug: slug,
-        canonical: (is_new && slug == canonical_slug),
-        created_at: creation,
-        updated_at: creation
-      }
+      slug_attributes(slug, canonical_slug, is_new, creation).merge(slug_extra_attributes)
     end
     slugs.insert_all(slug_attrs) unless !is_new && slug_attrs.size == 1
 
     @canonical_slug = canonical_slug if is_new || strings.size == 1 # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  end
+
+  def slug_attributes(slug, canonical_slug, is_new, creation)
+    {
+      slug: slug,
+      canonical: (is_new && slug == canonical_slug),
+      created_at: creation,
+      updated_at: creation
+    }
+  end
+
+  def slug_extra_attributes
+    {}
   end
 
   def no_two_metarecords_in_same_container_can_have_same_canonical_slug
