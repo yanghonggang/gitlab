@@ -2,7 +2,7 @@
 
 class WikiPage
   class Slug < ApplicationRecord
-    def self.foreign_key
+    def self.meta_foreign_key
       :wiki_page_meta_id
     end
 

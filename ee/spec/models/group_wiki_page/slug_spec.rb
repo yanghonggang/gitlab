@@ -48,8 +48,9 @@ RSpec.describe GroupWikiPage::Slug do
       build(:group_wiki_page_slug, canonical: canonical, group_wiki_page_meta: meta)
     end
 
-    it { is_expected.to validate_presence_of(:slug) }
     it { is_expected.to validate_uniqueness_of(:slug).scoped_to(:group_wiki_page_meta_id) }
+    it { is_expected.to validate_length_of(:slug).is_at_most(2048) }
+    it { is_expected.not_to allow_value(nil).for(:slug) }
 
     describe 'only_one_slug_can_be_canonical_per_meta_record' do
       context 'there are no other slugs' do

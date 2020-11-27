@@ -25,13 +25,8 @@ RSpec.describe GroupWikiPage::Meta do
     end
 
     it { is_expected.to validate_presence_of(:group_id) }
-    it { is_expected.to validate_presence_of(:title) }
-
-    it 'is forbidden to add extremely long titles' do
-      expect do
-        create(:group_wiki_page_meta, group: group, title: FFaker::Lorem.characters(300))
-      end.to raise_error(ActiveRecord::ValueTooLong)
-    end
+    it { is_expected.to validate_length_of(:title).is_at_most(255) }
+    it { is_expected.not_to allow_value(nil).for(:title) }
 
     it 'is forbidden to have two records for the same group with the same canonical_slug' do
       the_slug = generate(:sluggified_title)
@@ -219,7 +214,7 @@ RSpec.describe GroupWikiPage::Meta do
         let(:last_known_slug) { FFaker::Lorem.characters(2050) }
 
         it 'raises an error' do
-          expect { find_record }.to raise_error ActiveRecord::ValueTooLong
+          expect { find_record }.to raise_error ActiveRecord::StatementInvalid
         end
       end
 

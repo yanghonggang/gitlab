@@ -4,9 +4,10 @@ module HasWikiPageSlugAttributes
   extend ActiveSupport::Concern
 
   included do
-    validates :slug, presence: true, uniqueness: { scope: foreign_key }
+    validates :slug, uniqueness: { scope: meta_foreign_key }
+    validates :slug, length: { maximum: 2048 }, allow_nil: false
     validates :canonical, uniqueness: {
-          scope: foreign_key,
+          scope: meta_foreign_key,
           if: :canonical?,
           message: 'Only one slug can be canonical per wiki metadata record'
     }

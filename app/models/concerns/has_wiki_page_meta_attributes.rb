@@ -10,7 +10,7 @@ module HasWikiPageMetaAttributes
   included do
     has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
-    validates :title, presence: true
+    validates :title, length: { maximum: 255 }, allow_nil: false
     validate :no_two_metarecords_in_same_container_can_have_same_canonical_slug
 
     scope :with_canonical_slug, ->(slug) do
