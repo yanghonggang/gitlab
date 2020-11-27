@@ -5,7 +5,7 @@ class AddGroupWikiMeta < ActiveRecord::Migration[6.0]
 
   def change
     create_table :group_wiki_page_meta, id: :serial do |t|
-      t.references :group, index: false, foreign_key: { to_table: :namespaces, on_delete: :cascade }, null: false
+      t.references :group, index: true, foreign_key: { to_table: :namespaces, on_delete: :cascade }, null: false
       t.timestamps_with_timezone null: false
       t.string :title, null: false, limit: 255
     end
