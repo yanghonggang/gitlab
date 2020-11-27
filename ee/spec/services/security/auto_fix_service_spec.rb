@@ -24,16 +24,16 @@ RSpec.describe Security::AutoFixService do
       )
     end
 
-    context 'with enabled auto-fix' do
-      context 'when remediations exist' do
-        before do
-          create(:vulnerabilities_finding_with_remediation, :yarn_remediation,
-                 project: project,
-                 pipelines: [pipeline],
-                 report_type: :dependency_scanning,
-                 summary: 'Test remediation')
-        end
+    context 'when remediations' do
+      before do
+        create(:vulnerabilities_finding_with_remediation, :yarn_remediation,
+               project: project,
+               pipelines: [pipeline],
+               report_type: :dependency_scanning,
+               summary: 'Test remediation')
+      end
 
+      context 'with auto-fix is enabled' do
         it 'creates MR' do
           expect(MergeRequest.count).to eq(0)
           expect(Vulnerabilities::Feedback.count).to eq(0)
@@ -60,17 +60,37 @@ RSpec.describe Security::AutoFixService do
         end
       end
 
-      context 'without remediations' do
+      context 'with disabled auto-fix' do
         before do
-          create(:vulnerabilities_finding, report_type: :dependency_scanning, pipelines: [pipeline], project: project)
+          create(:project_security_setting, project: project, auto_fix_dependency_scanning: false)
         end
 
-        it 'does not create merge request' do
-          execute_service
-
-          expect(Vulnerabilities::Feedback.count).to eq(0)
-          expect(MergeRequest.count).to eq(0)
+        it 'does not create entities' do
+          expect { execute_service }.not_to change { MergeRequest.count }
+          expect { execute_service }.not_to change { Vulnerabilities::Feedback.count }
         end
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(security_auto_fix: false)
+        end
+
+        it 'does not create entities' do
+          expect { execute_service }.not_to change { MergeRequest.count }
+          expect { execute_service }.not_to change { Vulnerabilities::Feedback.count }
+        end
+      end
+    end
+
+    context 'without remediations' do
+      before do
+        create(:vulnerabilities_finding, report_type: :dependency_scanning, pipelines: [pipeline], project: project)
+      end
+
+      it 'does not create merge request' do
+        expect { execute_service }.not_to change { MergeRequest.count }
+        expect { execute_service }.not_to change { Vulnerabilities::Feedback.count }
       end
     end
   end
