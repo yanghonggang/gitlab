@@ -5,6 +5,8 @@ module Mutations
     class DestroyTags < ::Mutations::ContainerRepositories::DestroyBase
       LIMIT = 20.freeze
 
+      TOO_MANY_TAGS_ERROR_MESSAGE = "Tag names size is bigger than #{LIMIT}"
+
       graphql_name 'DestroyContainerRepositoryTags'
 
       authorize :destroy_container_image
@@ -17,7 +19,12 @@ module Mutations
       argument :tag_names,
                [String],
                required: true,
-               description: 'Container repository tag names'
+               description: "Container repository tag names to delete. Can't be bigger than #{LIMIT}",
+               prepare: ->(tag_names, ctx) do
+                 raise Gitlab::Graphql::Errors::ArgumentError, TOO_MANY_TAGS_ERROR_MESSAGE if tag_names.size > LIMIT
+
+                 tag_names
+               end
 
       field :deleted_tag_names,
             [String],
@@ -25,8 +32,6 @@ module Mutations
             null: false
 
       def resolve(id:, tag_names:)
-        return too_many_tags_error_response if tag_names.size > LIMIT
-
         container_repository = authorized_find!(id: id)
 
         result = ::Projects::ContainerRepository::DeleteTagsService
@@ -38,15 +43,6 @@ module Mutations
         {
           errors: [result[:message]].compact,
           deleted_tag_names: result[:deleted]
-        }
-      end
-
-      private
-
-      def too_many_tags_error_response
-        {
-          errors: ["Tag names size is bigger than #{LIMIT}"],
-          deleted_tag_names: []
         }
       end
     end

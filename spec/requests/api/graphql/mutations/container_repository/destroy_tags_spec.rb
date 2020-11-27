@@ -90,8 +90,9 @@ RSpec.describe 'Destroying a container repository tags' do
 
       it 'returns too many tags error' do
         expect { subject }.not_to change { ::Packages::Event.count }
-        expect(tag_names_response).to eq([])
-        expect(errors_response).to eq(["Tag names size is bigger than #{Mutations::ContainerRepositories::DestroyTags::LIMIT}"])
+        error = json_response['errors'].first
+        problem = error.dig('extensions', 'problems').first
+        expect(problem['explanation']).to eq(Mutations::ContainerRepositories::DestroyTags::TOO_MANY_TAGS_ERROR_MESSAGE)
       end
     end
   end

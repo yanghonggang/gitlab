@@ -72,17 +72,5 @@ RSpec.describe Mutations::ContainerRepositories::DestroyTags do
 
       it_behaves_like 'denying access to container respository'
     end
-
-    context 'with too many tag names' do
-      let(:tags) { Array.new(Mutations::ContainerRepositories::DestroyTags::LIMIT + 1, 'x') }
-
-      before do
-        project.add_maintainer(user)
-      end
-
-      it 'returns a too many tag names error' do
-        expect(subject).to eq(deleted_tag_names: [], errors: ["Tag names size is bigger than #{Mutations::ContainerRepositories::DestroyTags::LIMIT}"])
-      end
-    end
   end
 end
