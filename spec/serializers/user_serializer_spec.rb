@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
+
 RSpec.describe UserSerializer do
   let(:user1) { create(:user) }
   let(:user2) { create(:user) }
