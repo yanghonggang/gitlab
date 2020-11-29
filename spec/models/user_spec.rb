@@ -99,6 +99,8 @@ RSpec.describe User do
     it { is_expected.to have_many(:releases).dependent(:nullify) }
     it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:user) }
     it { is_expected.to have_many(:reviews).inverse_of(:author) }
+    it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
+    it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -2960,6 +2962,49 @@ RSpec.describe User do
       end
 
       it { expect(subject.can_be_removed?).to be_falsey }
+    end
+  end
+
+  describe '#solo_owned_groups' do
+    let_it_be_with_refind(:user) { create(:user) }
+
+    subject(:solo_owned_groups) { user.solo_owned_groups }
+
+    context 'no owned groups' do
+      it { is_expected.to be_empty }
+    end
+
+    context 'has owned groups' do
+      let_it_be(:group) { create(:group) }
+
+      before do
+        group.add_owner(user)
+      end
+
+      context 'not solo owner' do
+        let_it_be(:user2) { create(:user) }
+
+        before do
+          group.add_owner(user2)
+        end
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'solo owner' do
+        it { is_expected.to include(group) }
+
+        it 'avoids N+1 queries' do
+          fresh_user = User.find(user.id)
+          control_count = ActiveRecord::QueryRecorder.new do
+            fresh_user.solo_owned_groups
+          end.count
+
+          create(:group).add_owner(user)
+
+          expect { solo_owned_groups }.not_to exceed_query_limit(control_count)
+        end
+      end
     end
   end
 

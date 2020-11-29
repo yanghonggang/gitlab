@@ -9,6 +9,7 @@ import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
+import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
 import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
@@ -16,7 +17,6 @@ import createStore from './store';
 import { mrStates } from '~/mr_popover/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
-import SecuritySummary from './components/security_summary.vue';
 import {
   MODULE_CONTAINER_SCANNING,
   MODULE_COVERAGE_FUZZING,
@@ -126,11 +126,6 @@ export default {
       required: false,
       default: '',
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     createVulnerabilityFeedbackIssuePath: {
       type: String,
       required: false,
@@ -189,6 +184,36 @@ export default {
     projectFullPath: {
       type: String,
       required: true,
+    },
+    containerScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    coverageFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dependencyScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    sastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    secretScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   componentNames,
@@ -295,7 +320,6 @@ export default {
 
     this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
-    this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
     this.setCreateVulnerabilityFeedbackMergeRequestPath(
       this.createVulnerabilityFeedbackMergeRequestPath,
@@ -305,44 +329,33 @@ export default {
     this.setPipelineId(this.pipelineId);
     this.setPipelineJobsId(this.pipelineId);
 
-    const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
-
-    if (sastDiffEndpoint && this.hasSastReports) {
-      this.setSastDiffEndpoint(sastDiffEndpoint);
+    if (this.sastComparisonPath && this.hasSastReports) {
+      this.setSastDiffEndpoint(this.sastComparisonPath);
       this.fetchSastDiff();
     }
 
-    const containerScanningDiffEndpoint = gl?.mrWidgetData?.container_scanning_comparison_path;
-
-    if (containerScanningDiffEndpoint && this.hasContainerScanningReports) {
-      this.setContainerScanningDiffEndpoint(containerScanningDiffEndpoint);
+    if (this.containerScanningComparisonPath && this.hasContainerScanningReports) {
+      this.setContainerScanningDiffEndpoint(this.containerScanningComparisonPath);
       this.fetchContainerScanningDiff();
     }
 
-    const dastDiffEndpoint = gl?.mrWidgetData?.dast_comparison_path;
-
-    if (dastDiffEndpoint && this.hasDastReports) {
-      this.setDastDiffEndpoint(dastDiffEndpoint);
+    if (this.dastComparisonPath && this.hasDastReports) {
+      this.setDastDiffEndpoint(this.dastComparisonPath);
       this.fetchDastDiff();
     }
 
-    const dependencyScanningDiffEndpoint = gl?.mrWidgetData?.dependency_scanning_comparison_path;
-
-    if (dependencyScanningDiffEndpoint && this.hasDependencyScanningReports) {
-      this.setDependencyScanningDiffEndpoint(dependencyScanningDiffEndpoint);
+    if (this.dependencyScanningComparisonPath && this.hasDependencyScanningReports) {
+      this.setDependencyScanningDiffEndpoint(this.dependencyScanningComparisonPath);
       this.fetchDependencyScanningDiff();
     }
 
-    const secretDetectionDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretDetectionDiffEndpoint && this.hasSecretDetectionReports) {
-      this.setSecretDetectionDiffEndpoint(secretDetectionDiffEndpoint);
+    if (this.secretScanningComparisonPath && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(this.secretScanningComparisonPath);
       this.fetchSecretDetectionDiff();
     }
 
-    const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
-
-    if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
-      this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
+    if (this.coverageFuzzingComparisonPath && this.hasCoverageFuzzingReports) {
+      this.setCoverageFuzzingDiffEndpoint(this.coverageFuzzingComparisonPath);
       this.fetchCoverageFuzzingDiff();
       this.fetchPipelineJobs();
     }
@@ -355,7 +368,6 @@ export default {
       'setSourceBranch',
       'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
-      'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
@@ -606,7 +618,6 @@ export default {
 
         <issue-modal
           :modal="modal"
-          :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
           :can-create-issue="canCreateIssue"
           :can-create-merge-request="canCreateMergeRequest"
           :can-dismiss-vulnerability="canDismissVulnerability"

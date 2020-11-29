@@ -49,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="issuable-note-warning">
+  <div class="issuable-note-warning gl-border-t-1 gl-border-t-solid gl-border-t-gray-100">
     {{ title }}
     <button
       v-if="moreParticipantsAvailable"

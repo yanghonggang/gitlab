@@ -324,50 +324,52 @@ export default {
     ></div>
     <div class="flash-container timeline-content"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
-      <noteable-warning
-        v-if="hasWarning(getNoteableData)"
-        :is-locked="isLocked(getNoteableData)"
-        :is-confidential="isConfidential(getNoteableData)"
-        :locked-noteable-docs-path="lockedIssueDocsPath"
-        :confidential-noteable-docs-path="confidentialIssueDocsPath"
-      />
+      <div class="comment-warning-wrapper gl-border-solid gl-border-1 gl-rounded-small gl-border-gray-100">
+        <noteable-warning
+          v-if="hasWarning(getNoteableData)"
+          :is-locked="isLocked(getNoteableData)"
+          :is-confidential="isConfidential(getNoteableData)"
+          :locked-noteable-docs-path="lockedIssueDocsPath"
+          :confidential-noteable-docs-path="confidentialIssueDocsPath"
+        />
 
-      <markdown-field
-        :markdown-preview-path="markdownPreviewPath"
-        :markdown-docs-path="markdownDocsPath"
-        :quick-actions-docs-path="quickActionsDocsPath"
-        :line="line"
-        :note="discussionNote"
-        :can-suggest="canSuggest"
-        :add-spacing-classes="false"
-        :help-page-path="helpPagePath"
-        :show-suggest-popover="showSuggestPopover"
-        :textarea-value="updatedNoteBody"
-        @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
-      >
-        <textarea
-          id="note_note"
-          ref="textarea"
-          slot="textarea"
-          v-model="updatedNoteBody"
-          :data-supports-quick-actions="!isEditing"
-          name="note[note]"
-          class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
-          data-qa-selector="reply_field"
-          dir="auto"
-          :aria-label="__('Description')"
-          :placeholder="__('Write a comment or drag your files here…')"
-          @keydown.meta.enter="handleKeySubmit()"
-          @keydown.ctrl.enter="handleKeySubmit()"
-          @keydown.exact.up="editMyLastNote()"
-          @keydown.exact.esc="cancelHandler(true)"
-          @input="onInput"
-        ></textarea>
-      </markdown-field>
-      <email-participants-warning
-        v-if="hasEmailParticipants()"
-        :emails="getNoteableData.issue_email_participants"
-      />
+        <markdown-field
+          :markdown-preview-path="markdownPreviewPath"
+          :markdown-docs-path="markdownDocsPath"
+          :quick-actions-docs-path="quickActionsDocsPath"
+          :line="line"
+          :note="discussionNote"
+          :can-suggest="canSuggest"
+          :add-spacing-classes="false"
+          :help-page-path="helpPagePath"
+          :show-suggest-popover="showSuggestPopover"
+          :textarea-value="updatedNoteBody"
+          @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
+        >
+          <textarea
+            id="note_note"
+            ref="textarea"
+            slot="textarea"
+            v-model="updatedNoteBody"
+            :data-supports-quick-actions="!isEditing"
+            name="note[note]"
+            class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
+            data-qa-selector="reply_field"
+            dir="auto"
+            :aria-label="__('Description')"
+            :placeholder="__('Write a comment or drag your files here…')"
+            @keydown.meta.enter="handleKeySubmit()"
+            @keydown.ctrl.enter="handleKeySubmit()"
+            @keydown.exact.up="editMyLastNote()"
+            @keydown.exact.esc="cancelHandler(true)"
+            @input="onInput"
+          ></textarea>
+        </markdown-field>
+        <email-participants-warning
+          v-if="hasEmailParticipants()"
+          :emails="getNoteableData.issue_email_participants"
+        />
+      </div>
       <div class="note-form-actions clearfix">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">

@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issue Boards
@@ -446,6 +446,7 @@ the list by filtering by the following:
 - Assignee
 - Author
 - Epic
+- Iteration ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6)
 - Label
 - Milestone
 - My Reaction
@@ -473,6 +474,7 @@ You can filter by the following:
 - Assignee
 - Author
 - Epic
+- Iteration ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in GitLab 13.6)
 - Label
 - Milestone
 - My Reaction

@@ -3,23 +3,23 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { isEmpty } from 'lodash';
 import Autosize from 'autosize';
-import { GlAlert, GlIntersperse, GlLink, GlSprintf, GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import { deprecatedCreateFlash as Flash } from '../../flash';
-import Autosave from '../../autosave';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import Autosave from '~/autosave';
 import {
   capitalizeFirstCharacter,
   convertToCamelCase,
   splitCamelCase,
   slugifyWithUnderscore,
-} from '../../lib/utils/text_utility';
+} from '~/lib/utils/text_utility';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
-import NoteableWarning from '../../vue_shared/components/notes/noteable_warning.vue';
-import markdownField from '../../vue_shared/components/markdown/field.vue';
-import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
+import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
+import markdownField from '~/vue_shared/components/markdown/field.vue';
+import userAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
@@ -35,10 +35,6 @@ export default {
     userAvatarLink,
     GlButton,
     TimelineEntryItem,
-    GlAlert,
-    GlIntersperse,
-    GlLink,
-    GlSprintf,
     GlIcon,
     EmailParticipantsWarning,
   },
@@ -65,9 +61,8 @@ export default {
       'getNoteableDataByProp',
       'getNotesData',
       'openState',
-      'getBlockedByIssues',
     ]),
-    ...mapState(['isToggleStateButtonLoading', 'isToggleBlockedIssueWarning']),
+    ...mapState(['isToggleStateButtonLoading']),
     noteableDisplayName() {
       return splitCamelCase(this.noteableType).toLowerCase();
     },
@@ -145,8 +140,8 @@ export default {
         ? __('merge request')
         : __('issue');
     },
-    isIssueType() {
-      return this.noteableDisplayName === constants.ISSUE_NOTEABLE_TYPE;
+    isMergeRequest() {
+      return this.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE;
     },
     trackingLabel() {
       return slugifyWithUnderscore(`${this.commentButtonTitle} button`);
@@ -174,11 +169,9 @@ export default {
       'stopPolling',
       'restartPolling',
       'removePlaceholderNotes',
-      'closeIssue',
-      'reopenIssue',
+      'closeMergeRequest',
+      'reopenMergeRequest',
       'toggleIssueLocalState',
-      'toggleStateButtonLoading',
-      'toggleBlockedIssueWarning',
     ]),
     setIsSubmitButtonDisabled(note, isSubmitting) {
       if (!isEmpty(note) && !isSubmitting) {
@@ -188,8 +181,6 @@ export default {
       }
     },
     handleSave(withIssueAction) {
-      this.isSubmitting = true;
-
       if (this.note.length) {
         const noteData = {
           endpoint: this.endpoint,
@@ -212,9 +203,10 @@ export default {
         this.resizeTextarea();
         this.stopPolling();
 
+        this.isSubmitting = true;
+
         this.saveNote(noteData)
           .then(() => {
-            this.enableButton();
             this.restartPolling();
             this.discard();
 
@@ -223,7 +215,6 @@ export default {
             }
           })
           .catch(() => {
-            this.enableButton();
             this.discard(false);
             const msg = __(
               'Your comment could not be submitted! Please check your network connection and try again.',
@@ -231,64 +222,31 @@ export default {
             Flash(msg, 'alert', this.$el);
             this.note = noteData.data.note.note; // Restore textarea content.
             this.removePlaceholderNotes();
+          })
+          .finally(() => {
+            this.isSubmitting = false;
           });
       } else {
         this.toggleIssueState();
       }
     },
-    enableButton() {
-      this.isSubmitting = false;
-    },
     toggleIssueState() {
-      if (
-        this.noteableType.toLowerCase() === constants.ISSUE_NOTEABLE_TYPE &&
-        this.isOpen &&
-        this.getBlockedByIssues &&
-        this.getBlockedByIssues.length > 0
-      ) {
-        this.toggleBlockedIssueWarning(true);
+      if (!this.isMergeRequest) {
+        eventHub.$emit('toggle.issuable.state');
         return;
       }
-      if (this.isOpen) {
-        this.forceCloseIssue();
-      } else {
-        this.reopenIssue()
-          .then(() => {
-            this.enableButton();
-            refreshUserMergeRequestCounts();
-          })
-          .catch(({ data }) => {
-            this.enableButton();
-            this.toggleStateButtonLoading(false);
-            let errorMessage = sprintf(
-              __('Something went wrong while reopening the %{issuable}. Please try again later'),
-              { issuable: this.noteableDisplayName },
-            );
 
-            if (data) {
-              errorMessage = Object.values(data).join('\n');
-            }
+      const toggleMergeRequestState = this.isOpen
+        ? this.closeMergeRequest
+        : this.reopenMergeRequest;
 
-            Flash(errorMessage);
-          });
-      }
-    },
-    forceCloseIssue() {
-      this.closeIssue()
-        .then(() => {
-          this.enableButton();
-          refreshUserMergeRequestCounts();
-        })
-        .catch(() => {
-          this.enableButton();
-          this.toggleStateButtonLoading(false);
-          Flash(
-            sprintf(
-              __('Something went wrong while closing the %{issuable}. Please try again later'),
-              { issuable: this.noteableDisplayName },
-            ),
-          );
-        });
+      const errorMessage = this.isOpen
+        ? __('Something went wrong while closing the merge request. Please try again later')
+        : __('Something went wrong while reopening the merge request. Please try again later');
+
+      toggleMergeRequestState()
+        .then(refreshUserMergeRequestCounts)
+        .catch(() => Flash(errorMessage));
     },
     discard(shouldClear = true) {
       // `blur` is needed to clear slash commands autocomplete cache if event fired.
@@ -362,78 +320,51 @@ export default {
         </div>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
-            <div class="error-alert"></div>
+            <div class="comment-warning-wrapper gl-border-solid gl-border-1 gl-rounded-small gl-border-gray-100">
+              <div class="error-alert"></div>
 
-            <noteable-warning
-              v-if="hasWarning(getNoteableData)"
-              :is-locked="isLocked(getNoteableData)"
-              :is-confidential="isConfidential(getNoteableData)"
-              :noteable-type="noteableType"
-              :locked-noteable-docs-path="lockedIssueDocsPath"
-              :confidential-noteable-docs-path="confidentialIssueDocsPath"
-            />
+              <noteable-warning
+                v-if="hasWarning(getNoteableData)"
+                :is-locked="isLocked(getNoteableData)"
+                :is-confidential="isConfidential(getNoteableData)"
+                :noteable-type="noteableType"
+                :locked-noteable-docs-path="lockedIssueDocsPath"
+                :confidential-noteable-docs-path="confidentialIssueDocsPath"
+              />
 
-            <markdown-field
-              ref="markdownField"
-              :is-submitting="isSubmitting"
-              :markdown-preview-path="markdownPreviewPath"
-              :markdown-docs-path="markdownDocsPath"
-              :quick-actions-docs-path="quickActionsDocsPath"
-              :add-spacing-classes="false"
-              :textarea-value="note"
-            >
-              <textarea
-                id="note-body"
-                ref="textarea"
-                slot="textarea"
-                v-model="note"
-                dir="auto"
-                :disabled="isSubmitting"
-                name="note[note]"
-                class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
-                data-qa-selector="comment_field"
-                data-supports-quick-actions="true"
-                :aria-label="__('Description')"
-                :placeholder="__('Write a comment or drag your files here…')"
-                @keydown.up="editCurrentUserLastNote()"
-                @keydown.meta.enter="handleSave()"
-                @keydown.ctrl.enter="handleSave()"
-              ></textarea>
-            </markdown-field>
-            <email-participants-warning
-              v-if="hasEmailParticipants()"
-              :emails="getNoteableData.issue_email_participants"
-            />
-            <gl-alert
-              v-if="isToggleBlockedIssueWarning"
-              class="gl-mt-5"
-              :title="__('Are you sure you want to close this blocked issue?')"
-              :primary-button-text="__('Yes, close issue')"
-              :secondary-button-text="__('Cancel')"
-              variant="warning"
-              :dismissible="false"
-              @primaryAction="toggleBlockedIssueWarning(false) && forceCloseIssue()"
-              @secondaryAction="toggleBlockedIssueWarning(false) && enableButton()"
-            >
-              <p>
-                <gl-sprintf
-                  :message="
-                    __('This issue is currently blocked by the following issues: %{issues}.')
-                  "
-                >
-                  <template #issues>
-                    <gl-intersperse>
-                      <gl-link
-                        v-for="blockingIssue in getBlockedByIssues"
-                        :key="blockingIssue.web_url"
-                        :href="blockingIssue.web_url"
-                        >#{{ blockingIssue.iid }}</gl-link
-                      >
-                    </gl-intersperse>
-                  </template>
-                </gl-sprintf>
-              </p>
-            </gl-alert>
+              <markdown-field
+                ref="markdownField"
+                :is-submitting="isSubmitting"
+                :markdown-preview-path="markdownPreviewPath"
+                :markdown-docs-path="markdownDocsPath"
+                :quick-actions-docs-path="quickActionsDocsPath"
+                :add-spacing-classes="false"
+                :textarea-value="note"
+              >
+                <textarea
+                  id="note-body"
+                  ref="textarea"
+                  slot="textarea"
+                  v-model="note"
+                  dir="auto"
+                  :disabled="isSubmitting"
+                  name="note[note]"
+                  class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
+                  data-qa-selector="comment_field"
+                  data-testid="comment-field"
+                  data-supports-quick-actions="true"
+                  :aria-label="__('Description')"
+                  :placeholder="__('Write a comment or drag your files here…')"
+                  @keydown.up="editCurrentUserLastNote()"
+                  @keydown.meta.enter="handleSave()"
+                  @keydown.ctrl.enter="handleSave()"
+                ></textarea>
+              </markdown-field>
+              <email-participants-warning
+                v-if="hasEmailParticipants()"
+                :emails="getNoteableData.issue_email_participants"
+              />
+            </div>
             <div class="note-form-actions">
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
@@ -442,6 +373,7 @@ export default {
                   :disabled="isSubmitButtonDisabled"
                   class="js-comment-button js-comment-submit-button"
                   data-qa-selector="comment_button"
+                  data-testid="comment-button"
                   type="submit"
                   category="primary"
                   variant="success"
@@ -500,15 +432,13 @@ export default {
               </div>
 
               <gl-button
-                v-if="canToggleIssueState && !isToggleBlockedIssueWarning"
+                v-if="canToggleIssueState"
                 :loading="isToggleStateButtonLoading"
                 category="secondary"
                 :variant="buttonVariant"
-                :class="[
-                  actionButtonClassNames,
-                  'btn-comment btn-comment-and-close js-action-button',
-                ]"
-                :disabled="isToggleStateButtonLoading || isSubmitting"
+                :class="[actionButtonClassNames, 'btn-comment btn-comment-and-close']"
+                :disabled="isSubmitting"
+                data-testid="close-reopen-button"
                 @click="handleSave(true)"
                 >{{ issueActionButtonTitle }}</gl-button
               >

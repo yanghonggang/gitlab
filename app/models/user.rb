@@ -30,6 +30,8 @@ class User < ApplicationRecord
 
   INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
   add_authentication_token_field :static_object_token
@@ -166,6 +168,7 @@ class User < ApplicationRecord
 
   has_many :issue_assignees, inverse_of: :assignee
   has_many :merge_request_assignees, inverse_of: :assignee
+  has_many :merge_request_reviewers, inverse_of: :reviewer
   has_many :assigned_issues, class_name: "Issue", through: :issue_assignees, source: :issue
   has_many :assigned_merge_requests, class_name: "MergeRequest", through: :merge_request_assignees, source: :merge_request
 
@@ -1244,7 +1247,7 @@ class User < ApplicationRecord
   end
 
   def solo_owned_groups
-    @solo_owned_groups ||= owned_groups.select do |group|
+    @solo_owned_groups ||= owned_groups.includes(:owners).select do |group|
       group.owners == [self]
     end
   end
