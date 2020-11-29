@@ -21,6 +21,8 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
+      start_auto_fix
+
       success
     end
 
@@ -189,6 +191,16 @@ module Security
 
     def put_warning_for(finding)
       Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
+    end
+
+    def start_auto_fix
+      return unless auto_fix_enabled?
+
+      ::Security::AutoFixWorker.perform_async(pipeline.id)
+    end
+
+    def auto_fix_enabled?
+      ProjectSecuritySetting.safe_find_or_create_for(project).auto_fix_enabled_types.include?(report.type)
     end
   end
 end
