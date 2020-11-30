@@ -90,9 +90,30 @@ RSpec.describe 'Destroying a container repository tags' do
 
       it 'returns too many tags error' do
         expect { subject }.not_to change { ::Packages::Event.count }
-        error = json_response['errors'].first
-        problem = error.dig('extensions', 'problems').first
-        expect(problem['explanation']).to eq(Mutations::ContainerRepositories::DestroyTags::TOO_MANY_TAGS_ERROR_MESSAGE)
+
+        explanation = graphql_errors.dig(0, 'extensions', 'problems', 0, 'explanation')
+        expect(explanation).to eq(Mutations::ContainerRepositories::DestroyTags::TOO_MANY_TAGS_ERROR_MESSAGE)
+      end
+    end
+
+    context 'with service error' do
+      before do
+        project.add_maintainer(user)
+        allow_next_instance_of(Projects::ContainerRepository::DeleteTagsService) do |service|
+          allow(service).to receive(:execute).and_return(message: 'could not delete tags', status: :error)
+        end
+      end
+
+      it 'returns an error' do
+        subject
+
+        expect(tag_names_response).to eq([])
+        expect(errors_response).to eq(['could not delete tags'])
+      end
+
+      it 'does not create a package event' do
+        expect(::Packages::CreateEventService).not_to receive(:new)
+        expect { subject }.not_to change { ::Packages::Event.count }
       end
     end
   end

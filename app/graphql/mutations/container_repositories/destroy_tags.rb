@@ -17,17 +17,17 @@ module Mutations
                description: 'ID of the container repository.'
 
       argument :tag_names,
-               [String],
+               [GraphQL::STRING_TYPE],
                required: true,
                description: "Container repository tag names to delete. Can't be bigger than #{LIMIT}",
-               prepare: ->(tag_names, ctx) do
+               prepare: ->(tag_names, _) do
                  raise Gitlab::Graphql::Errors::ArgumentError, TOO_MANY_TAGS_ERROR_MESSAGE if tag_names.size > LIMIT
 
                  tag_names
                end
 
       field :deleted_tag_names,
-            [String],
+            [GraphQL::STRING_TYPE],
             description: 'Deleted container repository tag names',
             null: false
 
@@ -38,11 +38,11 @@ module Mutations
           .new(container_repository.project, current_user, tags: tag_names)
           .execute(container_repository)
 
-        track_event(:delete_tag_bulk, :tag)
+        track_event(:delete_tag_bulk, :tag) if result[:status] == :success
 
         {
           errors: [result[:message]].compact,
-          deleted_tag_names: result[:deleted]
+          deleted_tag_names: result[:deleted] || []
         }
       end
     end

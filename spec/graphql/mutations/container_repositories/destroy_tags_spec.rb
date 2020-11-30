@@ -27,7 +27,7 @@ RSpec.describe Mutations::ContainerRepositories::DestroyTags do
         end
       end
 
-      it 'destroys the container repsitory tags' do
+      it 'destroys the container repository tags' do
         expect(Projects::ContainerRepository::DeleteTagsService)
           .to receive(:new).and_call_original
 
@@ -71,6 +71,22 @@ RSpec.describe Mutations::ContainerRepositories::DestroyTags do
       let(:id) { 'gid://gitlab/ContainerRepository/5555' }
 
       it_behaves_like 'denying access to container respository'
+    end
+
+    context 'with service error' do
+      before do
+        project.add_maintainer(user)
+        allow_next_instance_of(Projects::ContainerRepository::DeleteTagsService) do |service|
+          allow(service).to receive(:execute).and_return(message: 'could not delete tags', status: :error)
+        end
+      end
+
+      it { is_expected.to eq(errors: ['could not delete tags'], deleted_tag_names: []) }
+
+      it 'does not create a package event' do
+        expect(::Packages::CreateEventService).not_to receive(:new)
+        expect { subject }.not_to change { ::Packages::Event.count }
+      end
     end
   end
 end
