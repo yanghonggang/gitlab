@@ -6,7 +6,7 @@ const unwrapPipelineData = (mainPipelineId, data) => {
   const {
     id,
     upstream,
-    downstream,
+    downstream: { nodes: downstream },
     stages: { nodes: stages },
   } = data.project.pipeline;
 

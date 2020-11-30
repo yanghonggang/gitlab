@@ -1,7 +1,17 @@
+#import "../fragments/linked_pipelines.fragment.graphql"
+
 query getPipelineDetails($projectPath: ID!, $iid: ID!) {
   project(fullPath: $projectPath) {
     pipeline(iid: $iid) {
       id: iid
+      downstream {
+        nodes {
+          ...LinkedPiplineData
+        }
+      }
+      upstream {
+        ...LinkedPiplineData
+      }
       stages {
         nodes {
           name
