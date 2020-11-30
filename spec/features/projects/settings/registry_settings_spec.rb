@@ -33,8 +33,8 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
       subject
 
       within '#js-registry-policies' do
-        select('7 days until tags are automatically removed', from: 'Remove tags older than:')
-        select('Every day', from: 'Run cleanup every:')
+        select('7 days', from: 'Remove tags older than:')
+        select('Every day', from: 'Run cleanup')
         select('50 tags per image name', from: 'Keep the most recent:')
         fill_in('Keep tags matching:', with: 'stable')
         fill_in('Remove tags matching:', with: '.*-production')
@@ -84,7 +84,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
         within '#js-registry-policies' do
           case result
           when :available_section
-            expect(find('[data-testid="enable-toggle"]')).to have_content('ags matching the rules defined below will be automatically scheduled for deletion.')
+            expect(find('[data-testid="enable-toggle"]')).to have_content('Tags that match the rules on this page are automatically scheduled for deletion.')
           when :disabled_message
             expect(find('.gl-alert-title')).to have_content('Cleanup policy for tags is disabled')
           end
