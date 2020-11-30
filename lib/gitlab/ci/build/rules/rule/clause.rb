@@ -15,7 +15,7 @@ module Gitlab
         def self.fabricate(type, value)
           # We use const_get and rescue NameError because `safe_constantize` resolves `Variables`
           # to a different class/module, even when using `"::#{self}::#{type.to_s.camelize}".safe_constantize`
-          const_get(type.to_s.camelize).new(value)
+          const_get(type.to_s.camelize, false).new(value)
         rescue NameError
         end
 
