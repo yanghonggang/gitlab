@@ -83,4 +83,38 @@ RSpec.describe ServicesHelper do
       end
     end
   end
+
+  describe '#reset_integrations?' do
+    subject { helper.reset_integrations? }
+
+    context 'when `reset_integrations` is not enabled' do
+      it 'returns false' do
+        stub_feature_flags(reset_integrations: false)
+
+        is_expected.to eq(false)
+      end
+    end
+
+    context 'when `reset_integrations` is enabled' do
+      it 'returns true' do
+        stub_feature_flags(reset_integrations: true)
+
+        is_expected.to eq(true)
+      end
+    end
+
+    context 'when `reset_integrations` is enabled for a group' do
+      let(:group) { build_stubbed(:group) }
+
+      before do
+        assign(:group, group)
+      end
+
+      it 'returns true' do
+        stub_feature_flags(reset_integrations: group)
+
+        is_expected.to eq(true)
+      end
+    end
+  end
 end
