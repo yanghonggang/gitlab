@@ -1,0 +1,59 @@
+<script>
+import { CI_CONFIG_STATUS_VALID } from '../../constants';
+import CiLintResults from './ci_lint_results.vue';
+
+export default {
+  components: {
+    CiLintResults,
+  },
+  inject: {
+    lintHelpPagePath: {
+      default: '',
+    },
+  },
+  props: {
+    ciConfig: {
+      type: Object,
+      required: true,
+    },
+  },
+  computed: {
+    isValid() {
+      return this.ciConfig.status === CI_CONFIG_STATUS_VALID;
+    },
+    stages() {
+      return this.ciConfig?.stages?.nodes || [];
+    },
+    jobs() {
+      return this.stages.reduce((acc, stage) => {
+        const jobGroups = stage.groups.nodes;
+        return acc.concat(
+          jobGroups.map(group => ({
+            stage: stage.name,
+            name: group.name,
+
+            // TODO Refactor this messsss
+            needs: group.jobs.nodes.reduce((needsAcc, job) => {
+              const names = job.needs.nodes.map(({ name }) => name);
+              return needsAcc.concat(names);
+            }, []),
+          })),
+        );
+      }, []);
+    },
+  },
+};
+</script>
+
+<template>
+  <div>
+    <pre>{{ stages }}</pre>
+    <pre>{{ jobs }}</pre>
+    <ci-lint-results
+      :valid="isValid"
+      :jobs="jobs"
+      :errors="ciConfig.errors"
+      :lint-help-page-path="lintHelpPagePath"
+    />
+  </div>
+</template>
