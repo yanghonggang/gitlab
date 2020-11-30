@@ -129,3 +129,8 @@
   content: '';
   display: flex;
 }
+
+// Remove once https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/1880 is merged
+.gl-opacity-0 {
+  opacity: 0;
+}

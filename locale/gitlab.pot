@@ -596,6 +596,9 @@ msgstr ""
 msgid "%{level_name} is not allowed since the fork source project has lower visibility."
 msgstr ""
 
+msgid "%{lineStart}Choose any color.%{lineEnd}%{lineStart}Or you can choose one of the suggested colors below%{lineEnd}"
+msgstr ""
+
 msgid "%{link_start}Learn more%{link_end} about what information is shared with GitLab Inc."
 msgstr ""
 
@@ -20332,6 +20335,9 @@ msgid "Please enter a non-negative number"
 msgstr ""
 
 msgid "Please enter a number greater than %{number} (from the project settings)"
+msgstr ""
+
+msgid "Please enter a valid HEX color value"
 msgstr ""
 
 msgid "Please enter a valid URL format, ex: http://www.example.com/home"
