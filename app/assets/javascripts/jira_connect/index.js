@@ -2,6 +2,15 @@ import Vue from 'vue';
 import $ from 'jquery';
 import App from './components/app.vue';
 
+const store = {
+  state: {
+    error: '',
+  },
+  setErrorMessage(errorMessage) {
+    store.state.error = errorMessage;
+  },
+};
+
 /**
  * Initialize necessary form handlers for the Jira Connect app
  */
@@ -11,8 +20,13 @@ const initJiraFormHandlers = () => {
   };
 
   const reqFailed = res => {
+    const { error } = res?.responseJSON || {};
+    if (!error) return;
+
+    store.setErrorMessage(error);
+
     // eslint-disable-next-line no-alert
-    alert(res.responseJSON.error);
+    alert(error);
   };
 
   AP.getLocation(location => {
@@ -65,6 +79,9 @@ function initJiraConnect() {
 
   return new Vue({
     el,
+    data: {
+      state: store.state,
+    },
     render(createElement) {
       return createElement(App, {});
     },
