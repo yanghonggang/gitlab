@@ -24,9 +24,6 @@ const initJiraFormHandlers = () => {
     if (!error) return;
 
     store.setErrorMessage(error);
-
-    // eslint-disable-next-line no-alert
-    alert(error);
   };
 
   AP.getLocation(location => {
