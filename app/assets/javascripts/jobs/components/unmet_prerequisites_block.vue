@@ -19,7 +19,7 @@ export default {
 <template>
   <gl-alert variant="danger" class="gl-mt-3" :dismissible="false">
     {{ s__(`Job|This job failed because the necessary resources were not successfully created.`) }}
-    <gl-link :href="helpPath" class="js-help-path">
+    <gl-link :href="helpPath">
       {{ __('More information') }}
     </gl-link>
   </gl-alert>
