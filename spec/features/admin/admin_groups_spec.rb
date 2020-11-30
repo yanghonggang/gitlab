@@ -28,7 +28,7 @@ RSpec.describe 'Admin Groups' do
 
   describe 'create a group' do
     describe 'with expected fields' do
-      it 'renders from as expected', :aggregate_failures do
+      it 'renders form as expected', :aggregate_failures do
         visit new_admin_group_path
 
         expect(page).to have_field('name')
