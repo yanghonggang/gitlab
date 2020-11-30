@@ -121,18 +121,30 @@ RSpec.describe Projects::TransferService do
 
     context 'with a project integration' do
       let_it_be(:project) { create(:project, namespace: user.namespace) }
-      let_it_be(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com') }
+      let_it_be(:instance_integration) { create(:slack_service, :instance, webhook: 'http://project.slack.com') }
 
-      it 'updates integrations' do
-        execute_transfer
+      context 'with an inherited integration' do
+        let_it_be(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com', inherit_from_id: instance_integration.id) }
 
-        expect(project.slack_service.webhook).to eq(group_integration.webhook)
+        it 'updates the integration' do
+          execute_transfer
+
+          expect(project.slack_service.webhook).to eq(group_integration.webhook)
+        end
+
+        it 'keeps the same number of integrations' do
+          execute_transfer
+
+          expect(Service.count).to eq(3)
+        end
       end
 
-      it 'keeps the same number of integrations' do
-        execute_transfer
+      context 'with a custom integration' do
+        let_it_be(:project_integration) { create(:slack_service, project: project, webhook: 'http://project.slack.com') }
 
-        expect(Service.count).to eq(2)
+        it 'does not updates the integrations' do
+          expect { execute_transfer }.not_to change { project.slack_service.webhook }
+        end
       end
     end
   end

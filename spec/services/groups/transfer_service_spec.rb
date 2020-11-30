@@ -271,19 +271,35 @@ RSpec.describe Groups::TransferService do
         end
 
         context 'with a group integration' do
-          let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com') }
+          let_it_be(:instance_integration) { create(:slack_service, :instance, webhook: 'http://project.slack.com') }
           let(:new_created_integration) { Service.find_by(group: group) }
 
-          it 'updates integrations' do
-            expect(new_created_integration.webhook).to eq(new_parent_group_integration.webhook)
+          context 'with an inherited integration' do
+            let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com', inherit_from_id: instance_integration.id) }
+
+            it 'updates the integrations' do
+              expect(new_created_integration.webhook).to eq(new_parent_group_integration.webhook)
+            end
+
+            it 'calls to PropagateIntegrationWorker' do
+              expect(PropagateIntegrationWorker).to have_received(:perform_async).with(new_created_integration.id)
+            end
+
+            it 'keeps the same number of integrations' do
+              expect(Service.count).to eq(3)
+            end
           end
 
-          it 'keeps the same number of integrations' do
-            expect(Service.count).to eq(2)
-          end
+          context 'with a custom integration' do
+            let_it_be(:group_integration) { create(:slack_service, group: group, project: nil, webhook: 'http://group.slack.com') }
 
-          it 'calls to PropagateIntegrationWorker' do
-            expect(PropagateIntegrationWorker).to have_received(:perform_async).with(new_created_integration.id)
+            it 'does not updates the integrations' do
+              expect { transfer_service.execute(new_parent_group) }.not_to change { group_integration.webhook }
+            end
+
+            it 'does not call to PropagateIntegrationWorker' do
+              expect(PropagateIntegrationWorker).not_to receive(:perform_async)
+            end
           end
         end
 

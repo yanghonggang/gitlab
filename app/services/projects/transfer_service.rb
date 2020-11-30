@@ -218,7 +218,7 @@ module Projects
     end
 
     def update_integrations
-      Service.for_project(project).delete_all
+      Service.for_project(project).inherit.delete_all
       Service.create_from_active_default_integrations(project, :project_id)
     end
   end

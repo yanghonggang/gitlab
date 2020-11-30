@@ -200,7 +200,7 @@ module Groups
     end
 
     def update_integrations
-      Service.for_group(@group).delete_all
+      Service.for_group(@group).inherit.delete_all
       Service.create_from_active_default_integrations(@group, :group_id)
     end
 
