@@ -54,6 +54,7 @@ module Security
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
+      create_or_update_remediations_for(vulnerability_finding, finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -131,6 +132,17 @@ module Security
         vulnerability_finding.finding_links.safe_find_or_create_by!(link.to_hash)
       end
     rescue ActiveRecord::RecordNotUnique
+    end
+
+    def create_or_update_remediations_for(vulnerability_finding, finding)
+      checksums = finding.remediations.map(&:checksum)
+      existing_remediations = Vulnerabilities::Remediation.where(checksum: checksums)
+      existing_remediation_checksums = existing_remediations.map(&:checksum)
+
+      missing_remediations = finding.remediations.select { |remediation| !remediation.checksum.in?(existing_remediation_checksums) }
+      new_remediations = missing_remediations.map { |remediation| Vulnerabilities::Remediation.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum) }
+
+      vulnerability_finding.remediations = existing_remediations + new_remediations
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
