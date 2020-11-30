@@ -8,6 +8,7 @@ class GroupsController < Groups::ApplicationController
   include RecordUserLastActivity
   include SendFileUpload
   include FiltersEvents
+  include GroupInviteTeammates
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -69,6 +70,7 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      invite_teammates(@group)
       track_experiment_event(:onboarding_issues, 'created_namespace')
 
       notice = if @group.chat_team.present?
