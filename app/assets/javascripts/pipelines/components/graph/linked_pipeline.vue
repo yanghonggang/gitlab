@@ -31,7 +31,8 @@ export default {
     },
     projectId: {
       type: Number,
-      required: true,
+      required: false,
+      default: -1,
     },
     type: {
       type: String,
@@ -81,7 +82,7 @@ export default {
       return this.type === UPSTREAM;
     },
     isSameProject() {
-      return this.projectId === this.pipeline.project.id;
+      return this.projectId === this.pipeline.project.id || this.pipeline.multiproject;
     },
     sourceJobName() {
       return accessValue(this.dataMethod, 'sourceJob', this.pipeline);
@@ -110,7 +111,7 @@ export default {
       this.$root.$emit('bv::hide::tooltip');
     },
     onDownstreamHovered() {
-      this.$emit('downstreamHovered', this.pipeline.source_job.name);
+      this.$emit('downstreamHovered', this.sourceJobName);
     },
     onDownstreamHoverLeave() {
       this.$emit('downstreamHovered', '');

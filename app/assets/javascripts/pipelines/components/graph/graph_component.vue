@@ -1,12 +1,14 @@
 <script>
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
+import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
-import { MAIN } from './constants';
+import { DOWNSTREAM, MAIN, UPSTREAM  } from './constants';
 
 export default {
   name: 'PipelineGraph',
   components: {
     LinkedGraphWrapper,
+    LinkedPipelinesColumn,
     StageColumnComponent,
   },
   props: {
@@ -25,10 +27,49 @@ export default {
       default: MAIN,
     },
   },
+  pipelineTypeConstants: {
+    DOWNSTREAM,
+    UPSTREAM,
+  },
+  data() {
+    return {
+      hoveredJobName: '',
+    }
+  },
   computed: {
+    downstreamPipelines() {
+      return this.hasDownstreamPipelines ? this.pipeline.downstream : [];
+    },
     graph() {
       return this.pipeline.stages;
     },
+    hasDownstreamPipelines() {
+      return Boolean(this.pipeline?.downstream?.length > 0);
+    },
+    hasUpstreamPipelines() {
+      return Boolean(this.pipeline?.upstream?.length > 0);
+    },
+    // The two show checks prevent upstream / downstream from showing redundant linked columns
+    showDownstreamPipelines() {
+      return this.hasDownstreamPipelines && this.type !== this.$options.pipelineTypeConstants.UPSTREAM;
+    },
+    showUpstreamPipelines() {
+      return this.hasUpstreamPipelines && this.type !== this.$options.pipelineTypeConstants.DOWNSTREAM;
+    },
+    upstreamPipelines() {
+      return this.hasUpstreamPipelines ? this.pipeline.upstream : [];
+    },
+  },
+  methods: {
+    setJob(jobName) {
+      this.hoveredJobName = jobName;
+    },
+    togglePipelineExpanded(jobName, expanded) {
+      this.pipelineExpanded = {
+        expanded,
+        jobName: expanded ? jobName : '',
+      };
+    }
   },
 };
 </script>
@@ -54,6 +95,7 @@ export default {
             :title="stage.name"
             :groups="stage.groups"
             :action="stage.status.action"
+            :job-hovered="hoveredJobName"
           />
         </template>
         <template #downstream>
@@ -63,7 +105,7 @@ export default {
             :column-title="__('Downstream')"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             @downstreamHovered="setJob"
-            @pipelineExpandToggle="setPipelineExpanded"
+            @pipelineExpandToggle="togglePipelineExpanded"
           />
         </template>
       </linked-graph-wrapper>
