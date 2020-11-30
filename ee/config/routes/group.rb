@@ -11,6 +11,10 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       patch :override, on: :member
     end
 
+    namespace :settings do
+      resources :compliance_framework_labels, only: [:new, :edit]
+    end
+
     get '/analytics', to: redirect('groups/%{group_id}/-/contribution_analytics')
     resource :contribution_analytics, only: [:show]
 
