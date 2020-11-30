@@ -18,10 +18,8 @@ class AddOtherRoleToUserDetails < ActiveRecord::Migration[6.0]
   end
 
   def down
-    if column_exists?(:user_details, :other_role)
-      with_lock_retries do
-        remove_column :user_details, :other_role
-      end
+    with_lock_retries do
+      remove_column :user_details, :other_role
     end
   end
 end

@@ -52,11 +52,6 @@ RSpec.describe 'registrations/welcome/show' do
       it { is_expected.not_to have_selector('#progress-bar') }
     end
 
-    it 'has a hidden field for other role' do
-      is_expected.not_to have_selector('input[type="text"][name="user[other_role]"]')
-      is_expected.to have_selector('input[type="hidden"][name="user[other_role]"]', visible: false)
-    end
-
     context 'feature flag other_role_details is enabled' do
       let_it_be(:user_other_role_details_enabled) { true }
 

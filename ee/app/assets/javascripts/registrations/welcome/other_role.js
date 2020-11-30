@@ -1,12 +1,10 @@
-import $ from 'jquery';
+const role = document.querySelector('.js-user-role-dropdown');
+const otherRoleGroup = document.querySelector('.js-other-role-group');
 
-const role = $('#user_role');
-const otherRoleGroup = $('#other_role_group');
+role.addEventListener('change', () => {
+  const enableOtherRole = role.value === 'other';
 
-role.on('change', () => {
-  const enableOtherRole = role.val() === 'other';
-
-  otherRoleGroup.toggleClass('hidden', !enableOtherRole).find('input');
+  otherRoleGroup.classList.toggle('hidden', !enableOtherRole);
 });
 
-role.trigger('change');
+role.dispatchEvent(new Event('change'));
