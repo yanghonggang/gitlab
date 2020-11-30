@@ -32,6 +32,7 @@ module Packages
 
       def file_params
         {
+          build: params[:build],
           file: params[:content],
           file_name: params[:content].original_filename,
           file_md5: params[:md5_digest],
