@@ -1,6 +1,43 @@
 # frozen_string_literal: true
 
 module UsersHelper
+  def admin_actions(user)
+    actions = []
+    unless user.internal?
+      actions << 'edit'
+      unless user == current_user
+        # Block
+        if user.ldap_blocked?
+          actions << 'ldap'
+        elsif user.blocked?
+          if user.blocked_pending_approval?
+            actions << 'approve'
+          else
+            actions << 'unblock'
+          end
+        else
+          actions << 'block'
+        end
+        # Deactivate
+        if user.can_be_deactivated?
+          actions << 'deactivate'
+        else
+          actions << 'activate'
+        end
+        # Unlock
+        if user.access_locked?
+          actions << 'unlock'
+        end
+        # Delete
+        if can?(current_user, :destroy_user, user) && user.can_be_removed?
+          actions << 'delete'
+          actions << 'delete_with_contributions'
+        end
+      end
+    end
+    actions
+  end
+
   def user_link(user)
     link_to(user.name, user_path(user),
             title: user.email,
