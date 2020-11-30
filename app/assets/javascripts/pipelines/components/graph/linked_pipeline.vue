@@ -29,14 +29,19 @@ export default {
       type: Object,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     projectId: {
       type: Number,
       required: false,
       default: -1,
-    },
-    type: {
-      type: String,
-      required: true,
     },
   },
   data() {
@@ -74,6 +79,9 @@ export default {
         return __('Child');
       }
       return __('Multi-project');
+    },
+    pipelineIsLoading() {
+      return Boolean(this.isLoading || this.pipeline.isLoading);
     },
     isDownstream() {
       return this.type === DOWNSTREAM;
@@ -137,8 +145,9 @@ export default {
     >
       <div class="gl-display-flex">
         <ci-status
-          v-if="!pipeline.isLoading"
+          v-if="!pipelineIsLoading"
           :status="pipelineStatus"
+          :size="24"
           css-classes="gl-top-0 gl-pr-2"
         />
         <div v-else class="gl-pr-2"><gl-loading-icon inline /></div>

@@ -27,8 +27,8 @@ export default {
   },
   data() {
     return {
-      currentPipelineId: null,
       currentPipeline: null,
+      loadingPipelineId: null,
       pipelineExpanded: false,
     }
   },
@@ -75,8 +75,10 @@ export default {
     isExpanded(id){
       return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
     },
+    isLoadingPipeline(id) {
+      return this.$apollo.queries.currentPipeline?.loading && this.loadingPipelineId === id;
+    },
     onPipelineClick(pipeline) {
-      console.log('pipeline: ', pipeline);
       /* If the clicked pipeline has been expanded already, close it, clear, exit */
       if (this.currentPipeline?.id === pipeline.id) {
         this.pipelineExpanded = false;
@@ -122,6 +124,7 @@ export default {
           <linked-pipeline
             :key="pipeline.id"
             class="gl-display-inline-block"
+            :is-loading="isLoadingPipeline(pipeline.id)"
             :pipeline="pipeline"
             :column-title="columnTitle"
             :type="type"
@@ -130,10 +133,9 @@ export default {
             @pipelineClicked="onPipelineClick(pipeline)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
-          <div v-if="(isExpanded(pipeline.id))" class="gl-display-inline-block" :style="{ width: 'max-content', background: 'mistyrose'}">
-            <gl-loading-icon v-if="$apollo.queries.currentPipeline.loading" class="m-auto" size="lg" />
+          <div v-if="(isExpanded(pipeline.id))" class="gl-display-inline-block">
             <pipeline-graph
-              v-else
+              v-if="currentPipeline"
               :type="type"
               class="d-inline-block"
               :pipeline="currentPipeline"
