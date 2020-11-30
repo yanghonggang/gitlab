@@ -42,7 +42,6 @@ export default {
   },
   methods: {
     onPipelineClick(downstreamNode, pipeline, index) {
-      console.log('^^^^^^^', downstreamNode, pipeline, index)
       this.$emit('linkedPipelineClick', pipeline, index, downstreamNode);
     },
     onDownstreamHovered(jobName) {

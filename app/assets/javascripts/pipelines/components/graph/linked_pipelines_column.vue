@@ -48,11 +48,55 @@ export default {
     },
   },
   methods: {
+    getPipelineData(pipeline) {
+      this.$apollo.addSmartQuery('currentPipeline', {
+        query: getPipelineDetails,
+        variables() {
+          return {
+            projectPath: pipeline.project.fullPath,
+            iid: pipeline.id,
+          };
+        },
+        update(data) {
+          return unwrapPipelineData(pipeline.id, data);
+        },
+        error(err){
+          console.error('graphQL error:', err);
+        },
+        watchLoading(isLoading) {
+          if (isLoading) {
+            this.loadingPipelineId = pipeline.id;
+          } else {
+            this.loadingPipelineId = null;
+          }
+        }
+      })
+    },
     isExpanded(id){
       return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
     },
-    onPipelineClick(a, pipeline, b) {
-      console.log('^^^^^^^', a, pipeline, b)
+    onPipelineClick(pipeline) {
+      console.log('pipeline: ', pipeline);
+      /* If the clicked pipeline has been expanded already, close it, clear, exit */
+      if (this.currentPipeline?.id === pipeline.id) {
+        this.pipelineExpanded = false;
+        this.currentPipeline = null;
+        return;
+      }
+
+      /* Set the loading id */
+      this.loadingPipelineId = pipeline.id;
+
+      /*
+        Expand the pipeline.
+        If this was not a toggle close action, and
+        it was already showing a different pipeline, then
+        this will be a no-op, but that doesn't matter.
+      */
+      this.pipelineExpanded = true;
+
+      this.getPipelineData(pipeline);
+
     },
     onDownstreamHovered(jobName) {
       this.$emit('downstreamHovered', jobName);
