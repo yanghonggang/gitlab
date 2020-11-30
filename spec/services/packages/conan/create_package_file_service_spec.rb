@@ -5,6 +5,7 @@ RSpec.describe Packages::Conan::CreatePackageFileService do
   include WorkhorseHelpers
 
   let_it_be(:package) { create(:conan_package) }
+  let_it_be(:user) { create(:user) }
 
   describe '#execute' do
     let(:file_name) { 'foo.tgz' }
@@ -40,6 +41,8 @@ RSpec.describe Packages::Conan::CreatePackageFileService do
         expect(package_file.conan_file_metadatum.conan_file_type).to eq('package_file')
         expect(package_file.file.read).to eq('content')
       end
+
+      it_behaves_like 'assigns build to package file'
     end
 
     shared_examples 'a valid recipe_file' do
@@ -69,6 +72,8 @@ RSpec.describe Packages::Conan::CreatePackageFileService do
         expect(package_file.conan_file_metadatum.conan_file_type).to eq('recipe_file')
         expect(package_file.file.read).to eq('content')
       end
+
+      it_behaves_like 'assigns build to package file'
     end
 
     context 'with temp file' do

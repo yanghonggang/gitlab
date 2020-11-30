@@ -19,6 +19,8 @@ module Packages
           Packages::Pypi::Metadatum.upsert(meta.attributes)
 
           ::Packages::CreatePackageFileService.new(created_package, file_params).execute
+
+          created_package
         end
       end
 
