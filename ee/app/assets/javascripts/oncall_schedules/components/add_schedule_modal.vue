@@ -12,6 +12,7 @@ import {
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import createOncallScheduleMutation from '../graphql/create_oncall_schedule.mutation.graphql';
+import { getFormattedTimezone } from '../utils';
 
 export const i18n = {
   selectTimezone: s__('OnCallSchedules|Select timezone'),
@@ -147,7 +148,7 @@ export default {
       this.form.timezone = tz;
     },
     getFormattedTimezone(tz) {
-      return __(`(UTC${tz.formatted_offset}) ${tz.abbr} ${tz.name}`);
+      return getFormattedTimezone(tz);
     },
     isTimezoneSelected(tz) {
       return isEqual(tz, this.form.timezone);
