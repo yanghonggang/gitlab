@@ -415,7 +415,8 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    Example usage for an existing event already defined in [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/):
 
-   Usage Data API is behind  `usage_data_api` feature flag which is `default_enabled: true`.
+   Usage Data API is behind  `usage_data_api` feature flag which, as of GitLab 13.7, is
+   now set to `default_enabled: true`.
 
    Each event tracked using Usage Data API is behind a feature flag `usage_data_#{event_name}` which should be `default_enabled: true`
 
