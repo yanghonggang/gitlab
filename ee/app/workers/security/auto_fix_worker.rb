@@ -5,6 +5,8 @@ module Security
     include ApplicationWorker
 
     def perform(pipeline_id)
+      return if Feature.disabled?(:security_auto_fix)
+
       ::Ci::Pipeline.find_by(id: pipeline_id).try do |pipeline|
         project = pipeline.project
 
