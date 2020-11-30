@@ -10,6 +10,7 @@ import resolvable from '../mixins/resolvable';
 import { __, sprintf } from '~/locale';
 import { getDraft, updateDraft } from '~/lib/utils/autosave';
 import EmailParticipantsWarning from './email_participants_warning.vue';
+import CommentFormWrapper from './comment_form_wrapper.vue';
 
 export default {
   name: 'NoteForm',
@@ -17,6 +18,7 @@ export default {
     NoteableWarning,
     markdownField,
     EmailParticipantsWarning,
+    CommentFormWrapper,
   },
   mixins: [issuableStateMixin, resolvable],
   props: {
@@ -324,7 +326,7 @@ export default {
     ></div>
     <div class="flash-container timeline-content"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
-      <div class="comment-warning-wrapper gl-border-solid gl-border-1 gl-rounded-small gl-border-gray-100">
+      <comment-form-wrapper>
         <noteable-warning
           v-if="hasWarning(getNoteableData)"
           :is-locked="isLocked(getNoteableData)"
@@ -369,7 +371,7 @@ export default {
           v-if="hasEmailParticipants()"
           :emails="getNoteableData.issue_email_participants"
         />
-      </div>
+      </comment-form-wrapper>
       <div class="note-form-actions clearfix">
         <template v-if="showBatchCommentsActions">
           <p v-if="showResolveDiscussionToggle">

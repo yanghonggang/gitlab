@@ -24,6 +24,7 @@ import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
 import EmailParticipantsWarning from './email_participants_warning.vue';
+import CommentFormWrapper from './comment_form_wrapper.vue';
 
 export default {
   name: 'CommentForm',
@@ -37,6 +38,7 @@ export default {
     TimelineEntryItem,
     GlIcon,
     EmailParticipantsWarning,
+    CommentFormWrapper,
   },
   mixins: [issuableStateMixin],
   props: {
@@ -320,7 +322,7 @@ export default {
         </div>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
-            <div class="comment-warning-wrapper gl-border-solid gl-border-1 gl-rounded-small gl-border-gray-100">
+            <comment-form-wrapper>
               <div class="error-alert"></div>
 
               <noteable-warning
@@ -364,7 +366,7 @@ export default {
                 v-if="hasEmailParticipants()"
                 :emails="getNoteableData.issue_email_participants"
               />
-            </div>
+            </comment-form-wrapper>
             <div class="note-form-actions">
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
