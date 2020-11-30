@@ -1,0 +1,10 @@
+query getComplianceFramework($fullPath: ID!, $id: ID!) {
+  namespace(fullPath: $fullPath) {
+    complianceFramework(id: $id) {
+      id
+      name
+      color
+      description
+    }
+  }
+}

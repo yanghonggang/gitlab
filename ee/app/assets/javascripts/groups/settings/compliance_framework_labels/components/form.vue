@@ -1,4 +1,6 @@
 <script>
+import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
+
 export default {
   components: {
   },
@@ -13,11 +15,22 @@ export default {
       default: null,
     },
   },
-  computed: {
+  data() {
+    return {
+      complianceFramework: [],
+    };
   },
-  mounted() {
-  },
-  methods: {
+  apollo: {
+    complianceFramework: {
+      query: getComplianceFrameworkQuery,
+      update(data) {
+        console.log(data);
+        return data;
+      },
+      error(error) {
+        console.error(error);
+      }
+    }
   },
 };
 </script>

@@ -1,7 +1,13 @@
 import Vue from 'vue';
-
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import Form from './components/form.vue';
-import store from './stores';
+
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   const el = document.querySelector('#js-compliance-framework-labels-form');
@@ -10,8 +16,7 @@ export default () => {
 
   return new Vue({
     el,
-    store,
-    components: {},
+    apolloProvider,
     render(createElement) {
       return createElement(Form, {
         props: {
