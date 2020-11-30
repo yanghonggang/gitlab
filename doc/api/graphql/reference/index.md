@@ -1406,7 +1406,7 @@ Represents an external issue.
 | `externalTracker` | String! | Type of external tracker |
 | `relativeReference` | String! | Relative reference of the issue in external tracker |
 | `status` | String! | Status of the issue in external tracker |
-| `title` | ID! | Title of the issue in external tracker |
+| `title` | String! | Title of the issue in external tracker |
 | `updatedAt` | Time! | Timestamp of when the issue was updated |
 | `webUrl` | String! | URL to the issue in external tracker |
 

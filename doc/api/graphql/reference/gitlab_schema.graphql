@@ -8464,7 +8464,7 @@ type ExternalIssue {
   """
   Title of the issue in external tracker
   """
-  title: ID!
+  title: String!
 
   """
   Timestamp of when the issue was updated

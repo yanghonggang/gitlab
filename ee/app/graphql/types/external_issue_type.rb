@@ -6,7 +6,7 @@ module Types
     graphql_name 'ExternalIssue'
     description 'Represents an external issue'
 
-    field :title, GraphQL::ID_TYPE, null: false,
+    field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the issue in external tracker'
 
     field :relative_reference, GraphQL::STRING_TYPE, null: false,
