@@ -30,7 +30,7 @@
 
   .results.gl-display-md-flex.gl-mt-3
     - if %w(issues merge_requests).include?(@scope)
-      #js-search-sidebar.gl-display-flex.gl-flex-direction-column.col-md-3.gl-mr-4{ }
+      #js-search-sidebar.gl-display-flex.gl-flex-direction-column.col-md-3.col-xl-2.gl-mr-4{ }
     .gl-w-full
       - if @scope == 'commits'
         %ul.content-list.commit-list
