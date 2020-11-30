@@ -60,23 +60,19 @@ export default {
         update(data) {
           return unwrapPipelineData(pipeline.id, data);
         },
+        result() {
+          this.loadingPipelineId = null;
+        },
         error(err){
           console.error('graphQL error:', err);
         },
-        watchLoading(isLoading) {
-          if (isLoading) {
-            this.loadingPipelineId = pipeline.id;
-          } else {
-            this.loadingPipelineId = null;
-          }
-        }
       })
     },
     isExpanded(id){
       return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
     },
     isLoadingPipeline(id) {
-      return this.$apollo.queries.currentPipeline?.loading && this.loadingPipelineId === id;
+      return this.loadingPipelineId === id;
     },
     onPipelineClick(pipeline) {
       /* If the clicked pipeline has been expanded already, close it, clear, exit */
