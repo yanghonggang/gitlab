@@ -1,4 +1,6 @@
 import { produce } from 'immer';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+
 /**
  * Appends paginated results to existing ones
  * - to be used with $apollo.queries.x.fetchMore
@@ -54,3 +56,30 @@ export const dastProfilesDeleteResponse = ({ mutationName, payloadTypeName }) =>
     errors: [],
   },
 });
+
+export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, status, store }) => {
+  const queryBody = {
+    query: dastSiteProfilesQuery,
+    variables: {
+      fullPath,
+    },
+  };
+  const sourceData = store.readQuery(queryBody);
+  const data = produce(sourceData, draftState => {
+    // eslint-disable-next-line no-param-reassign
+    draftState.project.siteProfiles.edges = draftState.project.siteProfiles.edges.map(edge => {
+      // TODO: make sure we match against normalized URLs here
+      if (edge.node.targetUrl === normalizedTargetUrl) {
+        return {
+          ...edge,
+          node: {
+            ...edge.node,
+            validationStatus: status,
+          },
+        };
+      }
+      return edge;
+    });
+  });
+  store.writeQuery({ ...queryBody, data });
+};
