@@ -17,7 +17,7 @@ module Emails
         send_from_user_email: false,
         sender_name: @project.service_desk_setting&.outgoing_name
       )
-      options = service_desk_options(email_sender, 'thank_you')
+      options = service_desk_options(email_sender, 'thank_you', @issue.external_author)
                   .merge(subject: "Re: #{subject_base}")
 
       mail_new_thread(@issue, options)
@@ -28,10 +28,13 @@ module Emails
       setup_service_desk_mail(issue_id)
 
       email_sender = sender(@note.author_id)
-      options = service_desk_options(email_sender, 'new_note')
-                  .merge(subject: subject_base)
 
-      mail_answer_thread(@issue, options)
+      @issue.issue_email_participants.each do |email_participant|
+        options = service_desk_options(email_sender, 'new_note', email_participant)
+                    .merge(subject: subject_base)
+
+        mail_answer_thread(@issue, options)
+      end
     end
 
     private
@@ -44,10 +47,10 @@ module Emails
       @sent_notification = SentNotification.record(@issue, @support_bot.id, reply_key)
     end
 
-    def service_desk_options(email_sender, email_type)
+    def service_desk_options(email_sender, email_type, email_recipient)
       {
         from: email_sender,
-        to: @issue.external_author
+        to: email_recipient
       }.tap do |options|
         next unless template_body = template_content(email_type)
 

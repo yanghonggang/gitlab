@@ -1,0 +1,5 @@
+---
+title: Notify issue_email_participants instead of external_author
+merge_request: 48363
+author: Lee Tickett
+type: other
