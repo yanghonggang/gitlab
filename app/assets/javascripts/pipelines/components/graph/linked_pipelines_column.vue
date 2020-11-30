@@ -51,8 +51,8 @@ export default {
     isExpanded(id){
       return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
     },
-    onPipelineClick(downstreamNode, pipeline, index) {
-      this.$emit('linkedPipelineClick', pipeline, index, downstreamNode);
+    onPipelineClick(a, pipeline, b) {
+      console.log('^^^^^^^', a, pipeline, b)
     },
     onDownstreamHovered(jobName) {
       this.$emit('downstreamHovered', jobName);
@@ -83,7 +83,7 @@ export default {
             :type="type"
             :expanded="(isExpanded(pipeline.id))"
             @downstreamHovered="onDownstreamHovered"
-            @pipelineClicked="onPipelineClick(pipeline, index)"
+            @pipelineClicked="onPipelineClick(pipeline)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
           <div v-if="(isExpanded(pipeline.id))" class="gl-display-inline-block" :style="{ width: 'max-content', background: 'mistyrose'}">

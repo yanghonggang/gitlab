@@ -102,10 +102,10 @@ export default {
   },
   methods: {
     onClickLinkedPipeline() {
-      this.$root.$emit('bv::hide::tooltip', this.buttonId);
+      this.hideTooltips();
       this.expanded = !this.expanded;
       this.$emit('pipelineClicked', this.$refs.linkedPipeline);
-      this.$emit('pipelineExpandToggle', this.pipeline.source_job.name, this.expanded);
+      this.$emit('pipelineExpandToggle', this.sourceJobName, this.expanded);
     },
     hideTooltips() {
       this.$root.$emit('bv::hide::tooltip');
