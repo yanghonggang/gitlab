@@ -88,12 +88,12 @@ export default {
         if (!this.glFeatures.securityOnDemandScansSiteValidation) {
           return;
         }
-        profiles.forEach(({ validationStatus, targetUrl }) => {
+        profiles.forEach(({ validationStatus, normalizedTargetUrl }) => {
           if (
             [PENDING, INPROGRESS].includes(validationStatus) &&
-            !this.urlsPendingValidation.includes(targetUrl)
+            !this.urlsPendingValidation.includes(normalizedTargetUrl)
           ) {
-            this.urlsPendingValidation.push(targetUrl); // TODO: Use normalizedUrl here
+            this.urlsPendingValidation.push(normalizedTargetUrl);
           }
         });
       },
@@ -118,11 +118,10 @@ export default {
         this.showValidationModal();
       });
     },
-    // TODO: Use normalizedUrl here
-    startValidatingProfile({ targetUrl }) {
+    startValidatingProfile({ normalizedTargetUrl }) {
       updateSiteProfilesStatuses({
         fullPath: this.fullPath,
-        normalizedTargetUrl: targetUrl,
+        normalizedTargetUrl,
         status: PENDING,
         store: this.$apolloProvider.defaultClient,
       });

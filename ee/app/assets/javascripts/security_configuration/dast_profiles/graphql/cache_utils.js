@@ -68,9 +68,8 @@ export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, stat
 
   const sourceData = store.readQuery(queryBody);
 
-  // TODO: make sure we match against normalized URLs here
   const profilesWithNormalizedTargetUrl = sourceData.project.siteProfiles.edges.flatMap(
-    ({ node }) => (node.targetUrl === normalizedTargetUrl ? node : []),
+    ({ node }) => (node.normalizedTargetUrl === normalizedTargetUrl ? node : []),
   );
 
   profilesWithNormalizedTargetUrl.forEach(({ id }) => {
