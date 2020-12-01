@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 module Security
-  class AutoFixWorker # rubocop:disable Scalability/IdempotentWorker
+  class AutoFixWorker
     include ApplicationWorker
+
+    feature_category :solutions_for_vulnerabilities
+
+    idempotent!
 
     def perform(pipeline_id)
       return if Feature.disabled?(:security_auto_fix)
