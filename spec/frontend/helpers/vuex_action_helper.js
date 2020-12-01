@@ -72,7 +72,7 @@ export default (
       expectedMutations = [],
       expectedActions = [],
       done = noop,
-    } = actionArg)
+    } = actionArg);
   }
 
   const mutations = [];
