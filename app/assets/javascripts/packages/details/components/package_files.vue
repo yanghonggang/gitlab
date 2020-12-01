@@ -79,7 +79,7 @@ export default {
       <template #cell(name)="{ item }">
         <gl-link
           :href="item.download_path"
-          class="gl-relative"
+          class="gl-relative gl-text-gray-500"
           data-testid="download-link"
           @click="$emit('download-file')"
         >
@@ -93,9 +93,12 @@ export default {
       </template>
 
       <template #cell(commit)="{item}">
-        <gl-link :href="item.pipeline.project.commit_url" data-testid="commit-link">{{
-          item.pipeline.git_commit_message
-        }}</gl-link>
+        <gl-link
+          :href="item.pipeline.project.commit_url"
+          class="gl-text-gray-500"
+          data-testid="commit-link"
+          >{{ item.pipeline.git_commit_message }}</gl-link
+        >
       </template>
 
       <template #cell(created)="{ item }">
