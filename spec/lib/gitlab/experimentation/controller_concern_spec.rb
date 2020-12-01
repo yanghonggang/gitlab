@@ -327,6 +327,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
 
   describe '#record_experiment_user' do
     let(:user) { build(:user) }
+    let(:context) { { a: 42 } }
 
     context 'when the experiment is enabled' do
       before do
@@ -340,9 +341,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         end
 
         it 'calls add_user on the Experiment model' do
-          expect(::Experiment).to receive(:add_user).with(:test_experiment, :experimental, user)
+          expect(::Experiment).to receive(:add_user).with(:test_experiment, :experimental, user, context)
 
-          controller.record_experiment_user(:test_experiment)
+          controller.record_experiment_user(:test_experiment, context)
         end
       end
 
@@ -354,9 +355,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         end
 
         it 'calls add_user on the Experiment model' do
-          expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user)
+          expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user, context)
 
-          controller.record_experiment_user(:test_experiment)
+          controller.record_experiment_user(:test_experiment, context)
         end
       end
     end
@@ -370,7 +371,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       it 'does not call add_user on the Experiment model' do
         expect(::Experiment).not_to receive(:add_user)
 
-        controller.record_experiment_user(:test_experiment)
+        controller.record_experiment_user(:test_experiment, context)
       end
     end
 
@@ -382,7 +383,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       it 'does not call add_user on the Experiment model' do
         expect(::Experiment).not_to receive(:add_user)
 
-        controller.record_experiment_user(:test_experiment)
+        controller.record_experiment_user(:test_experiment, context)
       end
     end
 
@@ -398,9 +399,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         end
 
         it 'calls add_user on the Experiment model' do
-          expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user)
+          expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user, context)
 
-          controller.record_experiment_user(:test_experiment)
+          controller.record_experiment_user(:test_experiment, context)
         end
       end
 
@@ -412,7 +413,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         it 'does not call add_user on the Experiment model' do
           expect(::Experiment).not_to receive(:add_user)
 
-          controller.record_experiment_user(:test_experiment)
+          controller.record_experiment_user(:test_experiment, context)
         end
       end
     end
