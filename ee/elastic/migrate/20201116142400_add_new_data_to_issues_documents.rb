@@ -23,7 +23,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
           },
           filter: {
             bool: {
-              must_not: field_exists('issues_access_level'),
+              must_not: field_exists('visibility_level'),
               filter: issue_type_filter
             }
           }
@@ -60,7 +60,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
         issues: {
           filter: {
             bool: {
-              must_not: field_exists('issues_access_level'),
+              must_not: field_exists('visibility_level'),
               filter: issue_type_filter
             }
           }

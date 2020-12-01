@@ -44,7 +44,7 @@ RSpec.describe AddNewDataToIssuesDocuments, :elastic, :sidekiq_inline do
       before do
         allow(migration).to receive(:completed?).and_return(false)
 
-        remove_issues_access_level_from_index
+        remove_visibility_level_from_index
       end
 
       it 'updates all issue documents and logs a message', :aggregate_failures do
@@ -71,7 +71,7 @@ RSpec.describe AddNewDataToIssuesDocuments, :elastic, :sidekiq_inline do
 
     with_them do
       it 'returns whether documents missing data are found' do
-        remove_issues_access_level_from_index unless expected
+        remove_visibility_level_from_index unless expected
 
         expect(subject).to eq(expected)
       end
@@ -80,12 +80,12 @@ RSpec.describe AddNewDataToIssuesDocuments, :elastic, :sidekiq_inline do
 
   private
 
-  def remove_issues_access_level_from_index
-    # the issue_instance_proxy has been updated to send `issues_access_level` so it
+  def remove_visibility_level_from_index
+    # the issue_instance_proxy has been updated to send `visibility_level` so it
     # needs to be overridden to test this migration
     issues.each do |issue|
       proxy = ::Elastic::Latest::IssueInstanceProxy.new(issue)
-      issue_json_modified = issue.__elasticsearch__.as_indexed_json.except('issues_access_level')
+      issue_json_modified = issue.__elasticsearch__.as_indexed_json.except('visibility_level')
       allow(proxy).to receive(:as_indexed_json).and_return(issue_json_modified)
       allow(::Elastic::Latest::IssueInstanceProxy).to receive(:new).and_return(proxy)
     end
