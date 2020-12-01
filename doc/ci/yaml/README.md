@@ -991,8 +991,7 @@ The job attributes you can use with `rules` are:
 - [`when`](#when): If not defined, defaults to `when: on_success`.
   - If used as `when: delayed`, `start_in` is also required.
 - [`allow_failure`](#allow_failure): If not defined, defaults to `allow_failure: false`.
-- [`variables`](#variables): If not defined, defaults to existing variables.
-  - More info: [`rules:variables`](#rules:variables)
+- [`variables`](#rules:variables): If not defined, uses the [variables defined elsewhere](#variables).
 
 If a rule evaluates to true, and `when` has any value except `never`, the job is included in the pipeline.
 
@@ -1423,14 +1422,14 @@ In this example, if the first rule matches, then the job has `when: manual` and 
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-rules-variables-core-only). **(CORE ONLY)**
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
 You can use [`variables`](#variables) in `rules:` to define variables for specific conditions.
 
-For example;
+For example:
 
 ```yaml
 job:
