@@ -49,16 +49,18 @@ export default {
   },
   methods: {
     getPipelineData(pipeline) {
+      const projectPath = pipeline.project.fullPath;
+
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
         variables() {
           return {
-            projectPath: pipeline.project.fullPath,
-            iid: pipeline.id,
+            projectPath,
+            iid: pipeline.iid,
           };
         },
         update(data) {
-          return unwrapPipelineData(pipeline.id, data);
+          return unwrapPipelineData(projectPath, data);
         },
         result() {
           this.loadingPipelineId = null;
@@ -69,7 +71,7 @@ export default {
       })
     },
     isExpanded(id){
-      return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
+      return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);;
     },
     isLoadingPipeline(id) {
       return this.loadingPipelineId === id;
