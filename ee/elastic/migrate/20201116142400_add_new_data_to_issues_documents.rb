@@ -18,12 +18,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
       size: BATCH_SIZE,
       query: {
         bool: {
-          filter: {
-            bool: {
-              must_not: field_exists('visibility_level'),
-              filter: issue_type_filter
-            }
-          }
+          filter: issues_missing_visibility_level_filter
         }
       }
     }
@@ -52,12 +47,7 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
       size: 0,
       aggs: {
         issues: {
-          filter: {
-            bool: {
-              must_not: field_exists('visibility_level'),
-              filter: issue_type_filter
-            }
-          }
+          filter: issues_missing_visibility_level_filter
         }
       }
     }
@@ -68,6 +58,15 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
   end
 
   private
+
+  def issues_missing_visibility_level_filter
+    {
+      bool: {
+        must_not: field_exists('visibility_level'),
+        filter: issue_type_filter
+      }
+    }
+  end
 
   def issue_type_filter
     {
