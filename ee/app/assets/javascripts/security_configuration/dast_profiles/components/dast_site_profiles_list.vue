@@ -85,6 +85,9 @@ export default {
       immediate: true,
       deep: true,
       handler(profiles = []) {
+        if (!this.glFeatures.securityOnDemandScansSiteValidation) {
+          return;
+        }
         profiles.forEach(({ validationStatus, targetUrl }) => {
           if (
             [PENDING, INPROGRESS].includes(validationStatus) &&
