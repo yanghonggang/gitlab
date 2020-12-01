@@ -1,14 +1,18 @@
-const unwrapPipelineData = (mainPipelineId, data) => {
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+
+
+const unwrapPipelineData = (mainPipelineProjectPath, data) => {
   if (!data?.project?.pipeline) {
     return null;
   }
 
+  const { pipeline } = data.project;
+
   const {
-    id,
     upstream,
     downstream: { nodes: downstream },
     stages: { nodes: stages },
-  } = data.project.pipeline;
+  } = pipeline;
 
   const unwrappedNestedGroups = stages.map(stage => {
     const {
@@ -30,15 +34,20 @@ const unwrapPipelineData = (mainPipelineId, data) => {
     return { name, status, groups: groupsWithJobs };
   });
 
-  const addMulti = pipeline => {
-    return { ...pipeline, multiproject: mainPipelineId !== pipeline.id };
+  const addMulti = linkedPipeline => {
+    return { ...linkedPipeline, multiproject: mainPipelineProjectPath !== linkedPipeline.project.fullPath };
+  };
+
+  const transformId = linkedPipeline => {
+    return { ...linkedPipeline, id: getIdFromGraphQLId(linkedPipeline.id)}
   };
 
   return {
-    id,
+    ...pipeline,
+    id: getIdFromGraphQLId(pipeline.id),
     stages: nodes,
-    upstream: upstream ? [upstream].map(addMulti) : [],
-    downstream: downstream ? downstream.map(addMulti) : [],
+    upstream: upstream ? [upstream].map(addMulti).map(transformId) : [],
+    downstream: downstream ? downstream.map(addMulti).map(transformId) : [],
   };
 };
 

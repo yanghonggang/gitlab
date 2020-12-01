@@ -42,7 +42,7 @@ export default {
         };
       },
       update(data) {
-        return unwrapPipelineData(this.pipelineIid, data);
+        return unwrapPipelineData(this.pipelineProjectPath, data);
       },
       error() {
         this.reportFailure(LOAD_FAILURE);

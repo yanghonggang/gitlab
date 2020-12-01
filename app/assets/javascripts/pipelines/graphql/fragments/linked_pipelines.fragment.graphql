@@ -1,5 +1,6 @@
 fragment LinkedPiplineData on Pipeline {
-  id: iid
+  id
+  iid
   path
   status: detailedStatus {
     group

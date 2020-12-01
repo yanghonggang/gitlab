@@ -3,7 +3,7 @@
 query getPipelineDetails($projectPath: ID!, $iid: ID!) {
   project(fullPath: $projectPath) {
     pipeline(iid: $iid) {
-      id: iid
+      iid
       downstream {
         nodes {
           ...LinkedPiplineData
