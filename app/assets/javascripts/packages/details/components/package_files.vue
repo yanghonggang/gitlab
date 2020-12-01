@@ -1,5 +1,6 @@
 <script>
 import { GlLink, GlTable } from '@gitlab/ui';
+import { last } from 'lodash';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
@@ -27,7 +28,36 @@ export default {
       return this.packageFiles.map(pf => ({
         ...pf,
         size: this.formatSize(pf.size),
+        pipeline: last(pf.pipelines),
       }));
+    },
+    showCommitColumn() {
+      return this.filesTableRows.reduce((acc, curr) => {
+        return Boolean(acc || curr.pipeline?.id);
+      }, false);
+    },
+    filesTableHeaderFields() {
+      return [
+        {
+          key: 'name',
+          label: __('Name'),
+          tdClass: 'gl-display-flex gl-align-items-center',
+        },
+        {
+          key: 'size',
+          label: __('Size'),
+        },
+        {
+          key: 'commit',
+          label: __('Commit'),
+          hide: !this.showCommitColumn,
+        },
+        {
+          key: 'created',
+          label: __('Created'),
+          class: 'gl-text-right',
+        },
+      ].filter(c => !c.hide);
     },
   },
   methods: {
@@ -35,22 +65,6 @@ export default {
       return numberToHumanSize(size);
     },
   },
-  filesTableHeaderFields: [
-    {
-      key: 'name',
-      label: __('Name'),
-      tdClass: 'gl-display-flex gl-align-items-center',
-    },
-    {
-      key: 'size',
-      label: __('Size'),
-    },
-    {
-      key: 'created',
-      label: __('Created'),
-      class: 'gl-text-right',
-    },
-  ],
 };
 </script>
 
@@ -58,7 +72,7 @@ export default {
   <div>
     <h3 class="gl-font-lg gl-mt-5">{{ __('Files') }}</h3>
     <gl-table
-      :fields="$options.filesTableHeaderFields"
+      :fields="filesTableHeaderFields"
       :items="filesTableRows"
       :tbody-tr-attr="{ 'data-testid': 'file-row' }"
     >
@@ -76,6 +90,12 @@ export default {
           />
           <span class="gl-relative">{{ item.file_name }}</span>
         </gl-link>
+      </template>
+
+      <template #cell(commit)="{item}">
+        <gl-link :href="item.pipeline.project.commit_url" data-testid="commit-link">{{
+          item.pipeline.git_commit_message
+        }}</gl-link>
       </template>
 
       <template #cell(created)="{ item }">
