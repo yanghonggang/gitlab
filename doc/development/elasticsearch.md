@@ -201,7 +201,7 @@ class MigrationName < Elastic::Migration
   # Important: Any update to the Elastic index mappings should be replicated in Elastic::Latest::Config
   
   # Uncomment the line below to set the migration to run in batch mode
-  # migration_options batched: true, throttle_delay: 5.minutes
+  #migration_options batched: true, throttle_delay: 5.minutes
 
   def migrate
   end
