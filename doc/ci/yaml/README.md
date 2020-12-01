@@ -1432,7 +1432,6 @@ You can use [`variables`](#variables) in `rules:` to define variables for specif
 For example:
 
 ```yaml
-```yaml
 job:
   variables:
     DEPLOY_VARIABLE: "default-deploy"
