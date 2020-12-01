@@ -4,7 +4,7 @@ const noop = () => {};
  * Helper for testing action with expected mutations inspired in
  * https://vuex.vuejs.org/en/testing.html
  *
- * @param {Function|Object} action to be tested, or object of named parameters
+ * @param {(Function|Object)} action to be tested, or object of named parameters
  * @param {Object} payload will be provided to the action
  * @param {Object} state will be provided to the action
  * @param {Array} [expectedMutations=[]] mutations expected to be committed
