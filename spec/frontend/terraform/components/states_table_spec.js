@@ -1,6 +1,7 @@
 import { GlIcon, GlTooltip } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { useFakeDate } from 'helpers/fake_date';
+import StateActions from '~/terraform/components/states_table_actions.vue';
 import StatesTable from '~/terraform/components/states_table.vue';
 
 describe('StatesTable', () => {
@@ -78,6 +79,7 @@ describe('StatesTable', () => {
 
       expect(state.text()).toContain(name);
       expect(state.find(GlIcon).exists()).toBe(locked);
+      expect(state.find(StateActions).exists()).toBe(false);
       expect(toolTip.exists()).toBe(locked);
 
       if (locked) {
@@ -98,5 +100,24 @@ describe('StatesTable', () => {
     const state = states.at(lineNumber);
 
     expect(state.text()).toMatchInterpolatedText(updateTime);
+  });
+
+  describe('when user is a terraform administrator', () => {
+    beforeEach(() => {
+      wrapper = mount(StatesTable, {
+        propsData: {
+          terraformAdmin: true,
+          ...propsData,
+        },
+      });
+
+      return wrapper.vm.$nextTick();
+    });
+
+    it('displays the actions dropdown', () => {
+      const stateActions = wrapper.findAll(StateActions);
+
+      expect(stateActions.length).toEqual(propsData.states.length);
+    });
   });
 });
