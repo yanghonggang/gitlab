@@ -6,7 +6,7 @@ class MergeRequestCurrentUserEntity < CurrentUserEntity
   include TreeHelper
 
   expose :can_fork do |user|
-    can?(user, :fork_project, request.project) if project
+    project && can?(user, :fork_project, request.project)
   end
 
   expose :can_create_merge_request do |user|
@@ -19,8 +19,6 @@ class MergeRequestCurrentUserEntity < CurrentUserEntity
   end
 
   def project
-    return false unless request.respond_to?(:project) && request.project
-
-    request.project
+    request.respond_to?(:project) && request.project
   end
 end

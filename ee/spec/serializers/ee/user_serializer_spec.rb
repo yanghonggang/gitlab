@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe UserSerializer do
   let_it_be(:user1) { create(:user) }
   let_it_be(:user2) { create(:user) }
-  let(:merge_request) { create(:merge_request) }
-  let(:project) { merge_request.project }
+  let_it_be(:merge_request) { create(:merge_request) }
+  let_it_be(:project) { merge_request.project }
 
   let(:serializer) { described_class.new(options) }
 

@@ -14,7 +14,7 @@ RSpec.describe UserSerializer do
     before do
       allow(project).to(
         receive_message_chain(:merge_requests, :find_by_iid!)
-        .with(merge_request.iid).and_return(merge_request)
+          .with(merge_request.iid).and_return(merge_request)
       )
 
       project.add_maintainer(user1)
