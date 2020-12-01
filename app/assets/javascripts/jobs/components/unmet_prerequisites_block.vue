@@ -6,7 +6,9 @@ import { s__ } from '~/locale';
  */
 export default {
   i18n: {
-    failMessage: s__('Job|This job failed because the necessary resources were not successfully created.'),
+    failMessage: s__(
+      'Job|This job failed because the necessary resources were not successfully created.',
+    ),
     moreInformation: s__('More information'),
   },
   components: {
