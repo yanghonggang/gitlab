@@ -77,6 +77,9 @@ module Gitlab
       default_to_issues_board: {
         tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
         use_backwards_compatible_subject_index: true
+      },
+      remove_known_trial_form_fields: {
+        tracking_category: 'Growth::Conversion::Experiment::RemoveKnownTrialFormFields'
       }
     }.freeze
 
