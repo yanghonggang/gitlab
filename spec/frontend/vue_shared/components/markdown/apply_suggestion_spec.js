@@ -27,7 +27,6 @@ describe('Apply Suggestion component', () => {
 
       expect(dropdown.exists()).toBe(true);
       expect(dropdown.props('text')).toBe('Apply suggestion');
-      expect(dropdown.props('headerText')).toBe('Apply suggestion commit message');
       expect(dropdown.props('disabled')).toBe(false);
     });
 

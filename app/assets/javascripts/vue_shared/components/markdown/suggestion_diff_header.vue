@@ -142,8 +142,16 @@ export default {
       </gl-button>
     </div>
     <div v-else class="d-flex align-items-center">
+      <apply-suggestion
+        v-if="canAddCustomCommitMessage && suggestionsCount > 1 && canBeBatched && !isDisableButton"
+        :disabled="isDisableButton"
+        :file-path="filePath"
+        :is-batch="true"
+        class="gl-ml-3"
+        @apply="addSuggestionToBatch"
+      />
       <gl-button
-        v-if="suggestionsCount > 1 && canBeBatched && !isDisableButton"
+        v-else-if="suggestionsCount > 1 && canBeBatched && !isDisableButton"
         class="btn-inverted js-add-to-batch-btn btn-grouped"
         :disabled="isDisableButton"
         @click="addSuggestionToBatch"

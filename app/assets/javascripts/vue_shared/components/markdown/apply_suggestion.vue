@@ -10,6 +10,11 @@ export default {
       required: false,
       default: false,
     },
+    isBatch: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     filePath: {
       type: String,
       required: true,
@@ -18,8 +23,7 @@ export default {
   data() {
     return {
       message: null,
-      buttonText: __('Apply suggestion'),
-      headerText: __('Apply suggestion commit message'),
+      buttonText: this.isBatch ? __('Add suggestion to batch') : __('Apply suggestion'),
     };
   },
   computed: {
@@ -38,21 +42,21 @@ export default {
 <template>
   <gl-dropdown
     :text="buttonText"
-    :header-text="headerText"
     :disabled="disabled"
     boundary="window"
     :right="true"
-    menu-class="gl-w-full! gl-pb-0!"
+    menu-class="gl-w-full!"
   >
-    <gl-dropdown-form class="gl-m-3!">
-      <gl-form-textarea v-model="message" :placeholder="placeholderText" />
+    <gl-dropdown-form class="gl-px-4! gl-m-0!">
+      <label for="commit-message">{{ __('Commit message') }}</label>
+      <gl-form-textarea id="commit-message" v-model="message" :placeholder="placeholderText" />
       <gl-button
-        class="gl-w-quarter! gl-mt-3 gl-text-center! float-right"
-        category="secondary"
+        class="gl-w-auto! gl-mt-3 gl-text-center! float-right"
+        category="primary"
         variant="success"
         @click="onApply"
       >
-        {{ __('Apply') }}
+        {{ isBatch ? __('Add') : __('Apply') }}
       </gl-button>
     </gl-dropdown-form>
   </gl-dropdown>

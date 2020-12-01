@@ -139,6 +139,7 @@ RSpec.describe 'User comments on a diff', :js do
           expect(page).not_to have_content('Applied')
 
           click_button('Add suggestion to batch')
+          click_button('Add')
           wait_for_requests
 
           expect(page).to have_content('Remove from batch')
@@ -152,6 +153,7 @@ RSpec.describe 'User comments on a diff', :js do
 
         expect(page).to have_content('Apply suggestion')
         expect(page).to have_content('Add suggestion to batch')
+        expect(page).to have_content('Add')
       end
 
       page.within("[id='#{files[1][:hash]}']") do
@@ -177,6 +179,7 @@ RSpec.describe 'User comments on a diff', :js do
 
         page.within("[id='#{file[:hash]}']") do
           click_button('Add suggestion to batch')
+          click_button('Add')
           wait_for_requests
         end
       end
