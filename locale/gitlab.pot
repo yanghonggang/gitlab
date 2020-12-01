@@ -27485,6 +27485,9 @@ msgstr ""
 msgid "There was an error fetching the Geo Settings"
 msgstr ""
 
+msgid "There was an error fetching the Maintenance Mode Settings"
+msgstr ""
+
 msgid "There was an error fetching the Node's Groups"
 msgstr ""
 
@@ -27555,6 +27558,9 @@ msgid "There was an error trying to validate your query"
 msgstr ""
 
 msgid "There was an error updating the Geo Settings"
+msgstr ""
+
+msgid "There was an error updating the Maintenance Mode Settings"
 msgstr ""
 
 msgid "There was an error updating the dashboard, branch name is invalid."

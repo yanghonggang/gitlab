@@ -1,5 +1,7 @@
 <script>
-import { GlToggle, GlFormGroup, GlFormTextarea, GlButton } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { GlToggle, GlFormGroup, GlFormTextarea, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { mapComputed } from '~/vuex_shared/bindings';
 
 export default {
   name: 'MaintenanceModeSettingsApp',
@@ -8,37 +10,50 @@ export default {
     GlFormGroup,
     GlFormTextarea,
     GlButton,
+    GlLoadingIcon,
   },
-  data() {
-    return {
-      inMaintenanceMode: false,
-      bannerMessage: '',
-    };
+  computed: {
+    ...mapState(['isLoading']),
+    ...mapComputed([
+      { key: 'maintenanceEnabled', updateFn: 'setMaintenanceEnabled' },
+      { key: 'bannerMessage', updateFn: 'setBannerMessage' },
+    ]),
+  },
+  created() {
+    this.fetchMaintenanceModeSettings();
+  },
+  methods: {
+    ...mapActions(['fetchMaintenanceModeSettings', 'updateMaintenanceModeSettings']),
   },
 };
 </script>
 <template>
-  <article>
-    <div class="d-flex align-items-center mb-3">
-      <gl-toggle v-model="inMaintenanceMode" class="mb-0" />
-      <div class="ml-2">
-        <p class="mb-0">{{ __('Enable maintenance mode') }}</p>
-        <p class="mb-0 text-secondary-500">
-          {{
-            __('Non-admin users can sign in with read-only access and make read-only API requests.')
-          }}
-        </p>
+  <section>
+    <gl-loading-icon v-if="isLoading" size="xl" />
+    <form v-else @submit.prevent="updateMaintenanceModeSettings">
+      <div class="gl-display-flex gl-align-items-center gl-mb-4">
+        <gl-toggle v-model="maintenanceEnabled" />
+        <div class="gl-ml-3">
+          <p class="gl-mb-0">{{ __('Enable maintenance mode') }}</p>
+          <p class="gl-mb-0 gl-text-gray-500">
+            {{
+              __(
+                'Non-admin users can sign in with read-only access and make read-only API requests.',
+              )
+            }}
+          </p>
+        </div>
       </div>
-    </div>
-    <gl-form-group label="Banner Message" label-for="maintenanceBannerMessage">
-      <gl-form-textarea
-        id="maintenanceBannerMessage"
-        v-model="bannerMessage"
-        :placeholder="__(`GitLab is undergoing maintenance and is operating in a read-only mode.`)"
-      />
-    </gl-form-group>
-    <div class="mt-4">
-      <gl-button variant="success" category="primary">{{ __('Save changes') }}</gl-button>
-    </div>
-  </article>
+      <gl-form-group label="Banner Message" label-for="maintenanceBannerMessage">
+        <gl-form-textarea
+          id="maintenanceBannerMessage"
+          v-model="bannerMessage"
+          :placeholder="
+            __(`GitLab is undergoing maintenance and is operating in a read-only mode.`)
+          "
+        />
+      </gl-form-group>
+      <gl-button variant="success" type="submit">{{ __('Save changes') }}</gl-button>
+    </form>
+  </section>
 </template>
