@@ -39,7 +39,7 @@ export default {
       result(response) {
         const {
           data: {
-            validations: { nodes },
+            validations: { nodes = [] },
           },
         } = response;
         const store = this.$apolloProvider.defaultClient;
