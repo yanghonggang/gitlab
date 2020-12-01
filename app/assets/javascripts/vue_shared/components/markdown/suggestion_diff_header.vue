@@ -42,6 +42,10 @@ export default {
       type: String,
       required: true,
     },
+    defaultCommitMessage: {
+      type: String,
+      required: true,
+    },
     inapplicableReason: {
       type: String,
       required: false,
@@ -154,6 +158,7 @@ export default {
         v-if="canAddCustomCommitMessage"
         :disabled="isDisableButton"
         :file-path="filePath"
+        :default-commit-message="defaultCommitMessage"
         class="gl-ml-3"
         @apply="applySuggestion"
       />

@@ -54,6 +54,7 @@ export default {
     ...mapState({
       batchSuggestionsInfo: state => state.notes.batchSuggestionsInfo,
     }),
+    ...mapState('diffs', ['defaultSuggestionCommitMessage']),
     noteBody() {
       return this.note.note;
     },
@@ -65,6 +66,7 @@ export default {
     },
   },
   mounted() {
+    console.log('jerasmus > test > ', this.defaultSuggestionCommitMessage);
     this.renderGFM();
 
     if (this.isEditing) {
@@ -131,6 +133,7 @@ export default {
       :line-type="lineType"
       :help-page-path="helpPagePath"
       :file-path="note.position.new_path"
+      :default-commit-message="defaultSuggestionCommitMessage"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"

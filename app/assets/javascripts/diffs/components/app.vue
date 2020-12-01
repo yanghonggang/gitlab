@@ -119,6 +119,11 @@ export default {
       required: false,
       default: false,
     },
+    defaultSuggestionCommitMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     const treeWidth =
@@ -255,6 +260,7 @@ export default {
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
       viewDiffsFileByFile: this.viewDiffsFileByFile,
+      defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
     });
 
     if (this.shouldShow) {

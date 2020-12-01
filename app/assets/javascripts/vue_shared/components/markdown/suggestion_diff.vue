@@ -31,6 +31,10 @@ export default {
       type: String,
       required: true,
     },
+    defaultCommitMessage: {
+      type: String,
+      required: true,
+    },
     suggestionsCount: {
       type: Number,
       required: false,
@@ -79,6 +83,7 @@ export default {
       :batch-suggestions-count="batchSuggestionsCount"
       :help-page-path="helpPagePath"
       :file-path="filePath"
+      :default-commit-message="defaultCommitMessage"
       :inapplicable-reason="suggestion.inapplicable_reason"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"

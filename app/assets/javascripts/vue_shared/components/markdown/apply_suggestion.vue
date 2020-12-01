@@ -1,6 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownForm, GlFormTextarea, GlButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 
 export default {
   components: { GlDropdown, GlDropdownForm, GlFormTextarea, GlButton },
@@ -14,6 +14,10 @@ export default {
       type: String,
       required: true,
     },
+    defaultCommitMessage: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -22,14 +26,9 @@ export default {
       headerText: __('Apply suggestion commit message'),
     };
   },
-  computed: {
-    placeholderText() {
-      return sprintf(__('Apply suggestion on %{filePath}'), { filePath: this.filePath });
-    },
-  },
   methods: {
     onApply() {
-      this.$emit('apply', this.message || this.placeholderText);
+      this.$emit('apply', this.message);
     },
   },
 };
@@ -45,7 +44,7 @@ export default {
     menu-class="gl-w-full! gl-pb-0!"
   >
     <gl-dropdown-form class="gl-m-3!">
-      <gl-form-textarea v-model="message" :placeholder="placeholderText" />
+      <gl-form-textarea v-model="message" :placeholder="defaultCommitMessage" />
       <gl-button
         class="gl-w-quarter! gl-mt-3 gl-text-center! float-right"
         category="secondary"

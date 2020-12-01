@@ -57,6 +57,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
@@ -66,6 +67,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
   });
 };
 
