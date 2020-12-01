@@ -1432,42 +1432,20 @@ You can use [`variables`](#variables) in `rules:` to define variables for specif
 For example:
 
 ```yaml
+```yaml
 job:
-  script: "echo job1"
   variables:
-    VAR1: my var 1
-    VAR2: my var 2
+    DEPLOY_VARIABLE: "default-deploy"
   rules:
     - if: $CI_COMMIT_REF_NAME =~ /master/
-      variables:
-        VAR1: overridden var 1
+      variables:                              # Override DEPLOY_VARIABLE defined
+        DEPLOY_VARIABLE: "deploy-production"  # at the job level.
     - if: $CI_COMMIT_REF_NAME =~ /feature/
       variables:
-        VAR2: overridden var 2
-        VAR3: new var 3
-    - when: on_success
-```
-
-If the first condition is satisfied, then the total variables will be:
-
-```
-- VAR1: overridden var 1
-- VAR2: my var 2
-```
-
-If the second condition is satisfied, then the total variables will be:
-
-```
-- VAR1: my var 1
-- VAR2: overridden var 2
-- VAR3: new var 3
-```
-
-If no condition is satisfied, then the total variables will be:
-
-```
-- VAR1: my var 1
-- VAR2: my var 2
+        IS_A_FEATURE: "true"                  # Define a new variable.
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
 ```
 
 ##### Enable or disable rules:variables **(CORE ONLY)**
