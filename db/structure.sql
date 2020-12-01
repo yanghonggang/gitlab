@@ -8990,6 +8990,28 @@ CREATE SEQUENCE analytics_devops_adoption_segments_id_seq
 
 ALTER SEQUENCE analytics_devops_adoption_segments_id_seq OWNED BY analytics_devops_adoption_segments.id;
 
+CREATE TABLE analytics_devops_adoption_snapshots (
+    id bigint NOT NULL,
+    segment_id bigint NOT NULL,
+    recorded_at timestamp with time zone NOT NULL,
+    issue_opened boolean NOT NULL,
+    merge_request_opened boolean NOT NULL,
+    merge_request_approved boolean NOT NULL,
+    runner_configured boolean NOT NULL,
+    pipeline_succeeded boolean NOT NULL,
+    deploy_succeeded boolean NOT NULL,
+    security_scan_succeeded boolean NOT NULL
+);
+
+CREATE SEQUENCE analytics_devops_adoption_snapshots_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE analytics_devops_adoption_snapshots_id_seq OWNED BY analytics_devops_adoption_snapshots.id;
+
 CREATE TABLE analytics_instance_statistics_measurements (
     id bigint NOT NULL,
     count bigint NOT NULL,
@@ -9320,8 +9342,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9332,24 +9352,26 @@ CREATE TABLE application_settings (
     encrypted_ci_jwt_signing_key text,
     encrypted_ci_jwt_signing_key_iv text,
     container_registry_expiration_policies_worker_capacity integer DEFAULT 0 NOT NULL,
-    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
-    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_enabled boolean DEFAULT false NOT NULL,
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    elasticsearch_analyzers_smartcn_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_smartcn_search boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_enabled boolean DEFAULT false NOT NULL,
+    elasticsearch_analyzers_kuromoji_search boolean DEFAULT false NOT NULL,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -14875,6 +14897,7 @@ CREATE VIEW postgres_indexes AS
     pg_index.indexrelid,
     pg_namespace.nspname AS schema,
     pg_class.relname AS name,
+    pg_indexes.tablename,
     pg_index.indisunique AS "unique",
     pg_index.indisvalid AS valid_index,
     pg_class.relispartition AS partitioned,
@@ -17291,7 +17314,8 @@ CREATE TABLE vulnerability_feedback (
     merge_request_id integer,
     comment_author_id integer,
     comment text,
-    comment_timestamp timestamp with time zone
+    comment_timestamp timestamp with time zone,
+    finding_uuid uuid
 );
 
 CREATE SEQUENCE vulnerability_feedback_id_seq
@@ -17601,8 +17625,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
-    feature_flag_events boolean DEFAULT false NOT NULL
+    feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE web_hooks_id_seq
@@ -17772,6 +17796,8 @@ ALTER TABLE ONLY analytics_cycle_analytics_project_stages ALTER COLUMN id SET DE
 ALTER TABLE ONLY analytics_devops_adoption_segment_selections ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_segment_selections_id_seq'::regclass);
 
 ALTER TABLE ONLY analytics_devops_adoption_segments ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_segments_id_seq'::regclass);
+
+ALTER TABLE ONLY analytics_devops_adoption_snapshots ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_snapshots_id_seq'::regclass);
 
 ALTER TABLE ONLY analytics_instance_statistics_measurements ALTER COLUMN id SET DEFAULT nextval('analytics_instance_statistics_measurements_id_seq'::regclass);
 
@@ -18753,6 +18779,9 @@ ALTER TABLE ONLY analytics_devops_adoption_segment_selections
 
 ALTER TABLE ONLY analytics_devops_adoption_segments
     ADD CONSTRAINT analytics_devops_adoption_segments_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY analytics_devops_adoption_snapshots
+    ADD CONSTRAINT analytics_devops_adoption_snapshots_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY analytics_instance_statistics_measurements
     ADD CONSTRAINT analytics_instance_statistics_measurements_pkey PRIMARY KEY (id);
@@ -21632,6 +21661,8 @@ CREATE UNIQUE INDEX index_on_segment_selections_project_id_segment_id ON analyti
 
 CREATE INDEX index_on_segment_selections_segment_id ON analytics_devops_adoption_segment_selections USING btree (segment_id);
 
+CREATE INDEX index_on_snapshots_segment_id_recorded_at ON analytics_devops_adoption_snapshots USING btree (segment_id, recorded_at);
+
 CREATE INDEX index_on_users_lower_email ON users USING btree (lower((email)::text));
 
 CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username)::text));
@@ -23741,6 +23772,9 @@ ALTER TABLE ONLY saml_group_links
 
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY analytics_devops_adoption_snapshots
+    ADD CONSTRAINT fk_rails_25da9a92c0 FOREIGN KEY (segment_id) REFERENCES analytics_devops_adoption_segments(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY cluster_agents
     ADD CONSTRAINT fk_rails_25e9fc2d5d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
