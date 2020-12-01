@@ -9,7 +9,7 @@ const resolvers = {
   Query: {
     dastSiteValidations: (_, { normalizedTargetUrls }) => {
       return {
-        edges: normalizedTargetUrls.map(url => {
+        nodes: normalizedTargetUrls.map(url => {
           const randNumber = random(100);
           let validationStatus = 'INPROGRESS_VALIDATION';
           if (randNumber < 20) {
@@ -18,12 +18,9 @@ const resolvers = {
             validationStatus = 'FAILED_VALIDATION';
           }
           return {
-            node: {
-              normalizedTargetUrl: url,
-              status: validationStatus,
-              __typename: 'DastSiteValidation',
-            },
-            __typename: 'DastSiteValidationEdge',
+            normalizedTargetUrl: url,
+            status: validationStatus,
+            __typename: 'DastSiteValidation',
           };
         }),
         __typename: 'DastSiteValidations',

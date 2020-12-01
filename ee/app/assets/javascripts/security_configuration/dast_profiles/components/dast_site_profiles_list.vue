@@ -39,11 +39,11 @@ export default {
       result(response) {
         const {
           data: {
-            validations: { edges },
+            validations: { nodes },
           },
         } = response;
         const store = this.$apolloProvider.defaultClient;
-        edges.forEach(({ node: { normalizedTargetUrl, status } }) => {
+        nodes.forEach(({ normalizedTargetUrl, status }) => {
           updateSiteProfilesStatuses({
             fullPath: this.fullPath,
             normalizedTargetUrl,
