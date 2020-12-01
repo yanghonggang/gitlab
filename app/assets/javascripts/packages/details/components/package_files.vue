@@ -44,13 +44,13 @@ export default {
           tdClass: 'gl-display-flex gl-align-items-center',
         },
         {
-          key: 'size',
-          label: __('Size'),
-        },
-        {
           key: 'commit',
           label: __('Commit'),
           hide: !this.showCommitColumn,
+        },
+        {
+          key: 'size',
+          label: __('Size'),
         },
         {
           key: 'created',
