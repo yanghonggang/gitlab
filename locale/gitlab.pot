@@ -5658,6 +5658,9 @@ msgstr ""
 msgid "Close epic"
 msgstr ""
 
+msgid "Close merge request"
+msgstr ""
+
 msgid "Close milestone"
 msgstr ""
 
@@ -22786,6 +22789,9 @@ msgstr ""
 msgid "Reopen epic"
 msgstr ""
 
+msgid "Reopen merge request"
+msgstr ""
+
 msgid "Reopen milestone"
 msgstr ""
 
@@ -22843,13 +22849,13 @@ msgstr ""
 msgid "Repo by URL"
 msgstr ""
 
-msgid "Report %{display_issuable_type} that are abusive, inappropriate or spam."
-msgstr ""
-
 msgid "Report abuse"
 msgstr ""
 
 msgid "Report abuse to admin"
+msgstr ""
+
+msgid "Report merge requests that are abusive, inappropriate or spam."
 msgstr ""
 
 msgid "Reported %{timeAgo} by %{reportedBy}"
@@ -25487,9 +25493,6 @@ msgid "Something went wrong, unable to get projects"
 msgstr ""
 
 msgid "Something went wrong, unable to search projects"
-msgstr ""
-
-msgid "Something went wrong."
 msgstr ""
 
 msgid "Something went wrong. Please try again."
