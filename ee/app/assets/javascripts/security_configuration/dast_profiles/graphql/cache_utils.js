@@ -1,4 +1,5 @@
 import { produce } from 'immer';
+import gql from 'graphql-tag';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 
 /**
@@ -64,22 +65,25 @@ export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, stat
       fullPath,
     },
   };
+
   const sourceData = store.readQuery(queryBody);
-  const data = produce(sourceData, draftState => {
-    // eslint-disable-next-line no-param-reassign
-    draftState.project.siteProfiles.edges = draftState.project.siteProfiles.edges.map(edge => {
-      // TODO: make sure we match against normalized URLs here
-      if (edge.node.targetUrl === normalizedTargetUrl) {
-        return {
-          ...edge,
-          node: {
-            ...edge.node,
-            validationStatus: status,
-          },
-        };
-      }
-      return edge;
+
+  // TODO: make sure we match against normalized URLs here
+  const profilesWithNormalizedTargetUrl = sourceData.project.siteProfiles.edges.flatMap(
+    ({ node }) => (node.targetUrl === normalizedTargetUrl ? node : []),
+  );
+
+  profilesWithNormalizedTargetUrl.forEach(({ id }) => {
+    store.writeFragment({
+      id: `DastSiteProfile:${id}`,
+      fragment: gql`
+        fragment profile on DastSiteProfile {
+          validationStatus
+        }
+      `,
+      data: {
+        validationStatus: status,
+      },
     });
   });
-  store.writeQuery({ ...queryBody, data });
 };
