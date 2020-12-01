@@ -32,10 +32,10 @@ FactoryBot.define do
             {
               summary: evaluator.summary,
               diff: Base64.encode64(
-                      File.read(
-                        File.join(
-                          Rails.root.join('ee/spec/fixtures/security_reports/remediations'), "remediation.patch")
-                    ))
+                File.read(
+                  File.join(
+                    Rails.root.join('ee/spec/fixtures/security_reports/remediations'), "remediation.patch")
+                ))
             }
           ]
           finding.raw_metadata = raw_metadata.to_json
