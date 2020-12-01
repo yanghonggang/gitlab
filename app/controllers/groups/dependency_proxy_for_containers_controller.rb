@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 class Groups::DependencyProxyForContainersController < Groups::ApplicationController
-  include Groups::DependencyProxy::Access
   include DependencyProxy::Auth
+  include DependencyProxy::GroupAccess
   include SendFileUpload
 
-  prepend_before_action :sign_in_user_from_token!
   before_action :ensure_token_granted!
   before_action :ensure_feature_enabled!
 
@@ -35,16 +34,6 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
   end
 
   private
-
-  def sign_in_user_from_token!
-    return unless Feature.enabled?(:dependency_proxy_for_private_groups, default_enabled: false)
-    return respond_unauthorized! unless request.headers['HTTP_AUTHORIZATION']
-
-    user = user_from_token
-    return respond_unauthorized! unless user
-
-    sign_in(user)
-  end
 
   def image
     params[:image]
