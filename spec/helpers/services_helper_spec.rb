@@ -62,8 +62,9 @@ RSpec.describe ServicesHelper do
 
   describe '#scoped_reset_integration_path' do
     let(:integration) { build_stubbed(:jira_service) }
+    let(:group) { nil }
 
-    subject { helper.scoped_reset_integration_path(integration) }
+    subject { helper.scoped_reset_integration_path(integration, group: group) }
 
     context 'when no group is present' do
       it 'returns instance-level path' do
@@ -74,10 +75,6 @@ RSpec.describe ServicesHelper do
     context 'when group is present' do
       let(:group) { build_stubbed(:group) }
 
-      before do
-        assign(:group, group)
-      end
-
       it 'returns group-level path' do
         is_expected.to eq(reset_group_settings_integration_path(group, integration))
       end
@@ -85,7 +82,9 @@ RSpec.describe ServicesHelper do
   end
 
   describe '#reset_integrations?' do
-    subject { helper.reset_integrations? }
+    let(:group) { nil }
+
+    subject { helper.reset_integrations?(group: group) }
 
     context 'when `reset_integrations` is not enabled' do
       it 'returns false' do
@@ -105,10 +104,6 @@ RSpec.describe ServicesHelper do
 
     context 'when `reset_integrations` is enabled for a group' do
       let(:group) { build_stubbed(:group) }
-
-      before do
-        assign(:group, group)
-      end
 
       it 'returns true' do
         stub_feature_flags(reset_integrations: group)

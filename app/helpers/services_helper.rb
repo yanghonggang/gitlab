@@ -75,15 +75,15 @@ module ServicesHelper
     end
   end
 
-  def scoped_reset_integration_path(integration)
-    if @group.present?
-      reset_group_settings_integration_path(@group, integration)
+  def scoped_reset_integration_path(integration, group: nil)
+    if group.present?
+      reset_group_settings_integration_path(group, integration)
     else
       reset_admin_application_settings_integration_path(integration)
     end
   end
 
-  def integration_form_data(integration)
+  def integration_form_data(integration, group: nil)
     {
       id: integration.id,
       show_active: integration.show_active_box?.to_s,
@@ -102,7 +102,7 @@ module ServicesHelper
       cancel_path: scoped_integrations_path,
       can_test: integration.can_test?.to_s,
       test_path: scoped_test_integration_path(integration),
-      reset_path: reset_integrations? ? scoped_reset_integration_path(integration) : ''
+      reset_path: reset_integrations?(group: group) ? scoped_reset_integration_path(integration, group: group) : ''
     }
   end
 
@@ -130,8 +130,8 @@ module ServicesHelper
     !Gitlab.com?
   end
 
-  def reset_integrations?
-    Feature.enabled?(:reset_integrations, @group, type: :development)
+  def reset_integrations?(group: nil)
+    Feature.enabled?(:reset_integrations, group, type: :development)
   end
 
   extend self
