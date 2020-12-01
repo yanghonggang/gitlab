@@ -1,0 +1,5 @@
+---
+title: Add index for notes WHERE NOT system
+merge_request: 48864
+author:
+type: performance
