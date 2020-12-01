@@ -1532,8 +1532,34 @@ field :created_at, Types::TimeType, null: true, description: 'Timestamp of when 
 
 ## Testing
 
-_full stack_ tests for a graphql query or mutation live in
+### Writing unit tests
+
+Prefer to test as much of the logic in your GraphQL queries and mutations using unit
+tests as they run much faster. Unit tests live in `spec/graphql`.
+
+Use unit tests to verify that:
+
+- Types have the expected fields.
+- Resolvers and mutations apply authorizations and return expected data.
+
+### Writing request tests
+
+Request tests will test the full stack for a GraphQL query or mutation and live in
 `spec/requests/api/graphql`.
+
+As request tests run much slower than unit tests, do not use request tests to test
+logic that can be tested in unit tests, or to duplicate tests that are covered by
+unit tests. Instead, use request tests to verify things that require the full stack,
+such as that:
+
+- A mutation is queryable (was mounted in `MutationType`).
+- Data returned by resolvers and mutations correctly matches the
+  [return types](https://graphql-ruby.org/fields/introduction.html#field-return-type) of fields.
+- Logic within an argument or scalar's [`prepare`](#validating-arguments) applies correctly.
+- Logic within a resolver or mutation's [`#ready?` method](#correct-use-of-resolverready) applies correctly.
+- Logic to do with an [argument's `default_value`](https://graphql-ruby.org/fields/arguments.html) applies correctly.
+
+In many cases this will mean that the request test will be very small compared to the corresponding unit test.
 
 When adding a query, the `a working graphql query` shared example can
 be used to test if the query renders valid results.
