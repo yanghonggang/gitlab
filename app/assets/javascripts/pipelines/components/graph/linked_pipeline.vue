@@ -25,6 +25,10 @@ export default {
       type: String,
       required: true,
     },
+    expanded: {
+      type: Boolean,
+      required: true,
+    },
     pipeline: {
       type: Object,
       required: true,
@@ -43,11 +47,6 @@ export default {
       required: false,
       default: -1,
     },
-  },
-  data() {
-    return {
-      expanded: false,
-    };
   },
   computed: {
     tooltipText() {
@@ -90,7 +89,7 @@ export default {
       return this.type === UPSTREAM;
     },
     isSameProject() {
-      return this.projectId === this.pipeline.project.id || !this.pipeline.multiproject;
+      return this.projectId > -1 ? this.projectId === this.pipeline.project.id : !this.pipeline.multiproject;
     },
     sourceJobName() {
       return accessValue(this.dataMethod, 'sourceJob', this.pipeline);
@@ -111,7 +110,6 @@ export default {
   methods: {
     onClickLinkedPipeline() {
       this.hideTooltips();
-      this.expanded = !this.expanded;
       this.$emit('pipelineClicked', this.$refs.linkedPipeline);
       this.$emit('pipelineExpandToggle', this.sourceJobName, this.expanded);
     },

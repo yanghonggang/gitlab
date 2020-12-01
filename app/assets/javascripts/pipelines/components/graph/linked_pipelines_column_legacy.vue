@@ -75,6 +75,7 @@ export default {
         :column-title="columnTitle"
         :project-id="projectId"
         :type="type"
+        :expanded="pipeline.isExpanded"
         @pipelineClicked="onPipelineClick($event, pipeline, index)"
         @downstreamHovered="onDownstreamHovered"
         @pipelineExpandToggle="onPipelineExpandToggle"
