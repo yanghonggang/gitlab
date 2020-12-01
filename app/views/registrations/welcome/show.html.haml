@@ -18,7 +18,7 @@
         - if Feature.enabled?(:user_other_role_details)
           .row
             .form-group.col-sm-12.js-other-role-group{ class: ("hidden") }
-              = f.label :other_role, _('What is your job title? (optional)'), class: 'form-check-label'
+              = f.label :other_role, _('What is your job title? (optional)'), class: 'form-check-label gl-mb-3'
               = f.text_field :other_role, class: 'form-control'
         - else
         .row
