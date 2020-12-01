@@ -18,9 +18,6 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
       size: BATCH_SIZE,
       query: {
         bool: {
-          must: {
-            match_all: {}
-          },
           filter: {
             bool: {
               must_not: field_exists('visibility_level'),
@@ -52,9 +49,6 @@ class AddNewDataToIssuesDocuments < Elastic::Migration
 
   def completed?
     query = {
-      query: {
-        match_all: {}
-      },
       size: 0,
       aggs: {
         issues: {
