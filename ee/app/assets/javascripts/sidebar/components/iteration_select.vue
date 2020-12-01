@@ -137,8 +137,6 @@ export default {
         .then(({ data }) => {
           if (data.issueSetIteration?.errors?.length) {
             createFlash(data.issueSetIteration.errors[0]);
-          } else {
-            this.currentIteration = data.issueSetIteration?.issue?.iteration;
           }
         })
         .catch(() => {
