@@ -90,7 +90,7 @@ export default {
       return this.type === UPSTREAM;
     },
     isSameProject() {
-      return this.projectId === this.pipeline.project.id || this.pipeline.multiproject;
+      return this.projectId === this.pipeline.project.id || !this.pipeline.multiproject;
     },
     sourceJobName() {
       return accessValue(this.dataMethod, 'sourceJob', this.pipeline);
