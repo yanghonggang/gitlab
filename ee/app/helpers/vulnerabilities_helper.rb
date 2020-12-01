@@ -36,9 +36,10 @@ module VulnerabilitiesHelper
   def create_jira_issue_url_for(vulnerability)
     return unless vulnerability.project.jira_vulnerabilities_integration_enabled?
 
-    summary = _('Investigate vulnerability: %{title}') % { title: vulnerability.title }
+    decorated_vulnerability = vulnerability.present
+    summary = _('Investigate vulnerability: %{title}') % { title: decorated_vulnerability.title }
     description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb',
-                                               locals: { vulnerability: vulnerability.present })
+                                               locals: { vulnerability: decorated_vulnerability })
 
     vulnerability.project.jira_service.new_issue_url_with_predefined_fields(summary, description)
   end
@@ -59,28 +60,8 @@ module VulnerabilitiesHelper
   end
 
   def vulnerability_finding_data(vulnerability)
-    finding = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding)
-
-    data = finding.slice(
-      :description,
-      :identifiers,
-      :links,
-      :location,
-      :name,
-      :issue_feedback,
-      :merge_request_feedback,
-      :project,
-      :project_fingerprint,
-      :remediations,
-      :evidence,
-      :scanner,
-      :solution,
-      :request,
-      :response,
-      :evidence_source,
-      :supporting_messages,
-      :assets
-    )
+    desired_fields = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner]
+    data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: desired_fields)
 
     if data[:location]['file']
       branch = vulnerability.finding.pipelines&.last&.sha || vulnerability.project.default_branch
