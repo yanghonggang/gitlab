@@ -49,6 +49,7 @@ function UsersSelect(currentUser, els, options = {}) {
     options.todoStateFilter = $dropdown.data('todoStateFilter');
     options.iid = $dropdown.data('iid');
     options.issuableType = $dropdown.data('issuableType');
+    options.targetBranch = $dropdown.data('targetBranch');
     const showNullUser = $dropdown.data('nullUser');
     const defaultNullUser = $dropdown.data('nullUserDefault');
     const showMenuAbove = $dropdown.data('showMenuAbove');
@@ -756,8 +757,13 @@ UsersSelect.prototype.users = function(query, options, callback) {
     ...getAjaxUsersSelectParams(options, AJAX_USERS_SELECT_PARAMS_MAP),
   };
 
-  if (options.issuableType === 'merge_request' || (!options.issuableType && options.iid)) {
+  if (
+    options.issuableType === 'merge_request' ||
+    (!options.issuableType && (options.iid || options.targetBranch))
+  ) {
     params.merge_request_iid = options.iid || null;
+    params.target_branch = options.targetBranch || null;
+    params.approval_rules = true;
   }
 
   return axios.get(url, { params }).then(({ data }) => {

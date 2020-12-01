@@ -55,7 +55,7 @@ module FormHelper
     dropdown_data
   end
 
-  def reviewers_dropdown_options(issuable_type, iid = nil)
+  def reviewers_dropdown_options(issuable_type, iid = nil, target_branch = nil)
     dropdown_data = {
       toggle_class: 'js-reviewer-search js-multiselect js-save-user-data',
       title: 'Request review from',
@@ -80,6 +80,10 @@ module FormHelper
 
     if iid
       dropdown_data[:data][:iid] = iid
+    end
+
+    if target_branch
+      dropdown_data[:data][:target_branch] = target_branch
     end
 
     if merge_request_supports_multiple_reviewers?
