@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe Groups::DependencyProxyAuthController do
   include DependencyProxyHelpers
 
-  describe 'GET #authorize' do
-    subject { get :authorize }
+  describe 'GET #authenticate' do
+    subject { get :authenticate }
 
     context 'feature flag disabled' do
       before do

@@ -7,7 +7,7 @@ class Groups::DependencyProxyAuthController < ApplicationController
 
   skip_before_action :authenticate_user!
 
-  def authorize
+  def authenticate
     if Feature.enabled?(:dependency_proxy_for_private_groups, default_enabled: false)
       if request.headers['HTTP_AUTHORIZATION']
         user = user_from_token
