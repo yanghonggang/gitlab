@@ -297,7 +297,7 @@ RSpec.describe NotificationService, :mailer do
   describe 'Notes' do
     context 'issue note' do
       let_it_be(:project) { create(:project, :private) }
-      let_it_be(:issue) { create(:issue, project: project, assignees: [assignee]) }
+      let_it_be_with_reload(:issue) { create(:issue, project: project, assignees: [assignee]) }
       let_it_be(:mentioned_issue) { create(:issue, assignees: issue.assignees) }
       let_it_be_with_reload(:author) { create(:user) }
       let(:note) { create(:note_on_issue, author: author, noteable: issue, project_id: issue.project_id, note: '@mention referenced, @unsubscribed_mentioned and @outsider also') }
@@ -354,7 +354,12 @@ RSpec.describe NotificationService, :mailer do
         context 'a service-desk issue' do
           before do
             issue.update!(external_author: 'service.desk@example.com')
+            issue.issue_email_participants.create!(email: 'service.desk@example.com')
             project.update!(service_desk_enabled: true)
+          end
+
+          after do
+            issue.issue_email_participants.first.destroy!
           end
 
           it_should_email!

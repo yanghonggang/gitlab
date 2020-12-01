@@ -15,6 +15,10 @@ RSpec.describe Emails::ServiceDesk do
   let_it_be(:issue) { create(:issue, project: project) }
   let(:template) { double(content: template_content) }
 
+  before_all do
+    issue.issue_email_participants.create!(email: "someone@gitlab.com")
+  end
+
   before do
     stub_const('ServiceEmailClass', Class.new(ApplicationMailer))
 
@@ -72,10 +76,16 @@ RSpec.describe Emails::ServiceDesk do
     let(:template_content) { 'custom text' }
     let(:issue) { create(:issue, project: project)}
 
+    before do
+      issue.issue_email_participants.create!(email: "someone@gitlab.com")
+    end
+
     context 'when a template is in the repository' do
       let(:project) { create(:project, :custom_repo, files: { ".gitlab/service_desk_templates/#{template_key}.md" => template_content }) }
 
       it 'uses the text template from the template' do
+        puts issue.external_author
+
         is_expected.to have_body_text(template_content)
       end
     end
