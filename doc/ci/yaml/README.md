@@ -1422,7 +1422,7 @@ In this example, if the first rule matches, then the job has `when: manual` and 
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-rules-variables-core-only). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-rules-variables). **(CORE ONLY)**
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
