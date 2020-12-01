@@ -181,7 +181,6 @@ module Gitlab
         private
 
         # TODO:
-        # Temporary...
         # Move enable_query_cache! to ConnectionPool (https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/database.rb#L223)
         # when the feature flag is removed in https://gitlab.com/gitlab-org/gitlab/-/issues/276203.
         def ensure_caching!
