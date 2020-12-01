@@ -182,12 +182,6 @@ RSpec.describe TrialsController do
       response
     end
 
-    it 'calls record a conversion event for the trimmed_skip_trial_copy experiment' do
-      expect(controller).not_to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
-
-      subject
-    end
-
     it_behaves_like 'an authenticated endpoint'
     it_behaves_like 'a dot-com only feature'
 
@@ -195,6 +189,11 @@ RSpec.describe TrialsController do
       let(:apply_trial_result) { true }
 
       it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
+      it 'calls the record conversion method for the trimmed_skip_trial_copy experiment' do
+        expect(controller).to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
+
+        subject
+      end
 
       context 'with a new Group' do
         let(:post_params) { { new_group_name: 'GitLab' } }
@@ -209,6 +208,11 @@ RSpec.describe TrialsController do
       let(:apply_trial_result) { false }
 
       it { is_expected.to render_template(:select) }
+      it 'does not call the record conversion method for the trimmed_skip_trial_copy experiment' do
+        expect(controller).not_to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
+
+        subject
+      end
 
       context 'with a new Group' do
         let(:post_params) { { new_group_name: 'admin' } }
