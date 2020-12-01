@@ -1,6 +1,29 @@
 # frozen_string_literal: true
 
 module UsersHelper
+  def admin_users_data_attributes(users)
+    {
+      users: AdminUserSerializer.new.represent(users).to_json,
+      current_page: users.current_page,
+      total_pages: users.total_pages,
+      paths: admin_users_paths
+    }
+  end
+
+  def admin_users_paths
+    {
+      edit: edit_admin_user_path(:id),
+      approve: approve_admin_user_path(:id),
+      unblock: unblock_admin_user_path(:id),
+      block: block_admin_user_path(:id),
+      deactivate: deactivate_admin_user_path(:id),
+      activate: activate_admin_user_path(:id),
+      unlock: unlock_admin_user_path(:id),
+      delete: admin_user_path(:id),
+      delete_with_contributions: admin_user_path(:id),
+    }
+  end
+
   def user_link(user)
     link_to(user.name, user_path(user),
             title: user.email,
