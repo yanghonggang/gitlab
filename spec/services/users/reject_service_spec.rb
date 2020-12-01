@@ -34,7 +34,7 @@ RSpec.describe Users::RejectService do
 
     context 'success' do
       context 'when the executor user is an admin in admin mode', :enable_admin_mode do
-        it 'deletes the user' do
+        it 'deletes the user', :sidekiq_inline do
           subject
 
           expect(subject[:status]).to eq(:success)
