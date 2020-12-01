@@ -2,6 +2,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
 import LinkedPipeline from './linked_pipeline.vue';
+import { LOAD_FAILURE } from '../../constants';
 import { UPSTREAM, DOWNSTREAM } from './constants';
 import { unwrapPipelineData } from './utils';
 
@@ -65,8 +66,8 @@ export default {
         result() {
           this.loadingPipelineId = null;
         },
-        error(err){
-          console.error('graphQL error:', err);
+        error(){
+          this.$emit('error', LOAD_FAILURE);
         },
       })
     },
