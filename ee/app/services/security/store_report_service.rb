@@ -21,7 +21,7 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
-      start_auto_fix
+      start_auto_fix if vulnerability_ids
 
       success
     end
@@ -200,7 +200,7 @@ module Security
     end
 
     def auto_fix_enabled?
-      ProjectSecuritySetting.safe_find_or_create_for(project).auto_fix_enabled_types.include?(report.type)
+      ProjectSecuritySetting.safe_find_or_create_for(project).auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
 end

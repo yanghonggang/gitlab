@@ -25,6 +25,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   before do
     stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
+    allow(Security::AutoFixWorker).to receive(:perform_async)
   end
 
   subject { described_class.new(pipeline, report).execute }
@@ -73,6 +74,40 @@ RSpec.describe Security::StoreReportService, '#execute' do
         subject
         uuids = Vulnerabilities::Finding.pluck(:uuid)
         expect(uuids).to all(be_uuid_v5)
+      end
+    end
+
+    context 'with auto fix supported report type' do
+      let(:trait) { :dependency_scanning }
+
+      context 'when auto fix enabled' do
+        it 'start auto fix worker' do
+          expect(Security::AutoFixWorker).to receive(:perform_async).with(pipeline.id)
+
+          subject
+        end
+      end
+
+      context 'when auto fix disabled' do
+        before do
+          create(:project_security_setting, :disabled_auto_fix, project: project)
+        end
+
+        it 'does not start auto fix worker' do
+          expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+          subject
+        end
+      end
+    end
+
+    context 'with auto fix not supported report type' do
+      let(:trait) { :sast }
+
+      it 'does not start auto fix worker' do
+        expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+        subject
       end
     end
 
