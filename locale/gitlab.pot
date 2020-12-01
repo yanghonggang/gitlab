@@ -15080,7 +15080,7 @@ msgstr ""
 msgid "Invited"
 msgstr ""
 
-msgid "Invited users will be added with developer level permissions. You can always change this later."
+msgid "Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later."
 msgstr ""
 
 msgid "Invocations"
