@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-02 10:48+0000\n"
+"PO-Revision-Date: 2020-12-02 10:48+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19006,6 +19008,9 @@ msgstr ""
 msgid "On-call schedules"
 msgstr ""
 
+msgid "OnCallSchedules|Add a rotation"
+msgstr ""
+
 msgid "OnCallSchedules|Add a schedule"
 msgstr ""
 
@@ -19034,6 +19039,9 @@ msgid "OnCallSchedules|On-call schedule"
 msgstr ""
 
 msgid "OnCallSchedules|On-call schedule for the %{tzShort}"
+msgstr ""
+
+msgid "OnCallSchedules|Rotations"
 msgstr ""
 
 msgid "OnCallSchedules|Route alerts directly to specific members of your team"
