@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require Rails.root.join('db', 'post_migrate', '20201130103926_schedule_populate_dismissed_state_for_vulnerabilities.rb')
 
-RSpec.describe ::Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabilities, schema: 2020_11_30_103926 do
+RSpec.describe SchedulePopulateDismissedStateForVulnerabilities do
   let(:users) { table(:users) }
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
@@ -30,9 +31,11 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabi
 
   let!(:identifier_1) { identifiers.create!(project_id: project.id, fingerprint: 'foo1', external_type: 'bar', external_id: 'zoo', name: 'identifier') }
   let!(:identifier_2) { identifiers.create!(project_id: project.id, fingerprint: 'foo2', external_type: 'bar', external_id: 'zoo', name: 'identifier') }
+  let!(:identifier_3) { identifiers.create!(project_id: project.id, fingerprint: 'foo3', external_type: 'bar', external_id: 'zoo', name: 'identifier') }
 
   let!(:feedback_1) { feedback.create!(feedback_type: 0, category: 'sast', project_fingerprint: '418291a26024a1445b23fe64de9380cdcdfd1fa8', project_id: project.id, author_id: user.id) }
   let!(:feedback_2) { feedback.create!(feedback_type: 0, category: 'dast', project_fingerprint: 'a98c8aed53514eddba2976b942162bf3418291a2', project_id: project.id, author_id: user.id) }
+  let!(:feedback_3) { feedback.create!(feedback_type: 0, category: 'dast', project_fingerprint: 'a98c8aed53514eddba2976b942162bf3418291a3', project_id: project.id, author_id: user.id) }
 
   let!(:vulnerability_1) { vulnerabilities.create!(vulnerability_params.merge(state: 1)) }
   let!(:vulnerability_2) { vulnerabilities.create!(vulnerability_params.merge(state: 3)) }
@@ -65,31 +68,42 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateDismissedStateForVulnerabi
       raw_metadata: '',
       uuid: SecureRandom.uuid,
       project_id: project.id,
-      vulnerability_id: vulnerability_3.id,
+      vulnerability_id: vulnerability_2.id,
       scanner_id: scanner.id,
       primary_identifier_id: identifier_2.id)
   end
 
-  describe '.vulnerability_ids_with_invalid_state' do
-    it 'returns only ids of vulnerabilities that have dismissal feedback and have state different than dismissed' do
-      expect(described_class.vulnerability_ids_with_invalid_state.rows.flatten).to eq([vulnerability_1.id])
-    end
+  let!(:finding_3) do
+    findings.create!(name: 'Finding',
+      report_type: 'dast',
+      project_fingerprint: Gitlab::Database::ShaAttribute.new.serialize('a98c8aed53514eddba2976b942162bf3418291a3'),
+      location_fingerprint: 'bar',
+      severity: 1,
+      confidence: 1,
+      metadata_version: 1,
+      raw_metadata: '',
+      uuid: SecureRandom.uuid,
+      project_id: project.id,
+      vulnerability_id: vulnerability_3.id,
+      scanner_id: scanner.id,
+      primary_identifier_id: identifier_3.id)
   end
 
-  describe '#perform' do
-    it 'changes state of vulnerability to dismissed' do
-      subject.perform(vulnerability_1.id, vulnerability_2.id)
+  it 'correctly schedules background migrations invalid vulnerabilities only', :aggregate_failures do
+    stub_const("#{described_class.name}::BATCH_SIZE", 1)
 
-      expect(vulnerability_1.reload.state).to eq(2)
-      expect(vulnerability_2.reload.state).to eq(2)
-    end
+    Sidekiq::Testing.fake! do
+      freeze_time do
+        migrate!
 
-    it 'populates missing dismissal information' do
-      expect_next_instance_of(::Gitlab::BackgroundMigration::PopulateMissingVulnerabilityDismissalInformation) do |migration|
-        expect(migration).to receive(:perform).with(vulnerability_1.id, vulnerability_2.id)
+        expect(described_class::MIGRATION_CLASS)
+          .to be_scheduled_delayed_migration(3.minutes, 1)
+
+        expect(described_class::MIGRATION_CLASS)
+          .to be_scheduled_delayed_migration(6.minutes, 2)
+
+        expect(BackgroundMigrationWorker.jobs.size).to eq(2)
       end
-
-      subject.perform(vulnerability_1.id, vulnerability_2.id)
     end
   end
 end
