@@ -39,8 +39,8 @@ describe('Settings Form', () => {
 
   const findForm = () => wrapper.find({ ref: 'form-element' });
 
-  const findCancelButton = () => wrapper.find({ ref: 'cancel-button' });
-  const findSaveButton = () => wrapper.find({ ref: 'save-button' });
+  const findCancelButton = () => wrapper.find('[data-testid="cancel-button"');
+  const findSaveButton = () => wrapper.find('[data-testid="save-button"');
   const findEnableToggle = () => wrapper.find('[data-testid="enable-toggle"]');
   const findCadenceDropdown = () => wrapper.find('[data-testid="cadence-dropdown"]');
   const findKeepNDropdown = () => wrapper.find('[data-testid="keep-n-dropdown"]');
@@ -190,6 +190,18 @@ describe('Settings Form', () => {
         await wrapper.vm.$nextTick();
 
         expect(finder().props('error')).toEqual('');
+      });
+
+      it('validation event updates buttons disabled state', async () => {
+        mountComponent();
+
+        expect(findSaveButton().props('disabled')).toBe(false);
+
+        finder().vm.$emit('validation', false);
+
+        await wrapper.vm.$nextTick();
+
+        expect(findSaveButton().props('disabled')).toBe(true);
       });
     }
 

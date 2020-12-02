@@ -99,7 +99,6 @@ export default {
     },
     fieldsAreValid() {
       return Object.values(this.localErrors).every(error => error);
-      );
     },
     isSubmitButtonDisabled() {
       return !this.fieldsAreValid || this.showLoadingIcon;
@@ -140,7 +139,7 @@ export default {
         return acc;
       }, {});
     },
-    setLocalErrors(model, state) {
+    setLocalErrors(state, model) {
       this.localErrors = {
         ...this.localErrors,
         [model]: state,
@@ -176,9 +175,7 @@ export default {
     },
     onModelChange(newValue, model) {
       this.$emit('input', { ...this.value, [model]: newValue });
-      if (this.apiErrors) {
-        this.apiErrors[model] = undefined;
-      }
+      this.apiErrors[model] = undefined;
     },
   },
 };
@@ -241,7 +238,7 @@ export default {
             name="keep-regex"
             data-testid="keep-regex-textarea"
             @input="onModelChange($event, 'nameRegexKeep')"
-            @validation="setLocalErrors('nameRegexKeep', $event)"
+            @validation="setLocalErrors($event, 'nameRegexKeep')"
           />
         </div>
       </template>
@@ -281,14 +278,14 @@ export default {
             name="remove-regex"
             data-testid="remove-regex-textarea"
             @input="onModelChange($event, 'nameRegex')"
-            @validation="setLocalErrors('nameRegex', $event)"
+            @validation="setLocalErrors($event, 'nameRegex')"
           />
         </div>
       </template>
     </gl-card>
     <div class="gl-mt-7 gl-display-flex gl-align-items-center">
       <gl-button
-        ref="save-button"
+        data-testid="save-button"
         type="submit"
         :disabled="isSubmitButtonDisabled"
         :loading="showLoadingIcon"
@@ -299,7 +296,7 @@ export default {
         {{ $options.i18n.SET_CLEANUP_POLICY_BUTTON }}
       </gl-button>
       <gl-button
-        ref="cancel-button"
+        data-testid="cancel-button"
         type="reset"
         :disabled="isCancelButtonDisabled"
         class="gl-mr-4"

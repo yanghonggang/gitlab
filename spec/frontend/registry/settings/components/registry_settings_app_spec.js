@@ -70,9 +70,10 @@ describe('Registry Settings App', () => {
     it.each`
       description                                  | apiResponse                       | workingCopy                                                   | result
       ${'empty response and no changes from user'} | ${emptyExpirationPolicyPayload()} | ${{}}                                                         | ${false}
-      ${'empty response and changes from user'}   | ${emptyExpirationPolicyPayload()} | ${{ enabled: true }}                                          | ${true}
+      ${'empty response and changes from user'}    | ${emptyExpirationPolicyPayload()} | ${{ enabled: true }}                                          | ${true}
       ${'response and no changes'}                 | ${expirationPolicyPayload()}      | ${containerExpirationPolicyData()}                            | ${false}
       ${'response and changes'}                    | ${expirationPolicyPayload()}      | ${{ ...containerExpirationPolicyData(), nameRegex: '12345' }} | ${true}
+      ${'response and empty'}                      | ${expirationPolicyPayload()}      | ${{}}                                                         | ${true}
     `('$description', async ({ apiResponse, workingCopy, result }) => {
       const requests = mountComponentWithApollo({
         provide: { ...defaultProvidedValues, enableHistoricEntries: true },
