@@ -1,11 +1,11 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
+import { GlKeysetPagination } from '@gitlab/ui';
 import ImageListRow from './image_list_row.vue';
 
 export default {
   name: 'ImageList',
   components: {
-    GlPagination,
+    GlKeysetPagination,
     ImageListRow,
   },
   props: {
@@ -22,27 +22,6 @@ export default {
     showPagination() {
       return this.pageInfo?.hasPreviousPage || this.pageInfo?.hasNextPage;
     },
-    previousPage() {
-      return this.pageInfo.hasPreviousPage ? 1 : null;
-    },
-    nextPage() {
-      return this.pageInfo.hasNextPage ? 2 : null;
-    },
-    currentPage: {
-      get() {
-        if (this.pageInfo.hasPreviousPage) {
-          return 2;
-        }
-        return 1;
-      },
-      set(page) {
-        if (page === 1) {
-          this.$emit('prev-page');
-        } else {
-          this.$emit('next-page');
-        }
-      },
-    },
   },
 };
 </script>
@@ -56,14 +35,15 @@ export default {
       :first="index === 0"
       @delete="$emit('delete', $event)"
     />
-
-    <gl-pagination
-      v-if="showPagination"
-      v-model="currentPage"
-      :prev-page="previousPage"
-      :next-page="nextPage"
-      align="center"
-      class="gl-mt-3"
-    />
+    <div class="gl-display-flex gl-justify-content-center">
+      <gl-keyset-pagination
+        v-if="showPagination"
+        :has-next-page="pageInfo.hasNextPage"
+        :has-previous-page="pageInfo.hasPreviousPage"
+        class="gl-mt-3"
+        @prev="$emit('prev-page')"
+        @next="$emit('next-page')"
+      />
+    </div>
   </div>
 </template>

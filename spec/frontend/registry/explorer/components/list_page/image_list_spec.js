@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlPagination } from '@gitlab/ui';
+import { GlKeysetPagination } from '@gitlab/ui';
 import Component from '~/registry/explorer/components/list_page/image_list.vue';
 import ImageListRow from '~/registry/explorer/components/list_page/image_list_row.vue';
 
@@ -9,7 +9,7 @@ describe('Image List', () => {
   let wrapper;
 
   const findRow = () => wrapper.findAll(ImageListRow);
-  const findPagination = () => wrapper.find(GlPagination);
+  const findPagination = () => wrapper.find(GlKeysetPagination);
 
   const mountComponent = (pageInfo = defaultPageInfo) => {
     wrapper = shallowMount(Component, {
@@ -60,30 +60,15 @@ describe('Image List', () => {
         mountComponent({ hasNextPage, hasPreviousPage });
 
         expect(findPagination().exists()).toBe(isVisible);
-      },
-    );
-
-    it.each`
-      hasNextPage | hasPreviousPage | nextPage | previousPage | currentPage
-      ${true}     | ${true}         | ${2}     | ${1}         | ${2}
-      ${true}     | ${false}        | ${2}     | ${null}      | ${1}
-      ${false}    | ${true}         | ${null}  | ${1}         | ${2}
-    `(
-      'when hasNextPage is $hasNextPage and hasPreviousPage is $hasPreviousPage: nextPage is $nextPage, previousPage is $previousPage and currentPage is $currentPage',
-      ({ hasNextPage, hasPreviousPage, nextPage, previousPage, currentPage }) => {
-        mountComponent({ hasNextPage, hasPreviousPage });
-
-        const pagination = findPagination();
-        expect(pagination.props('prevPage')).toBe(previousPage);
-        expect(pagination.props('nextPage')).toBe(nextPage);
-        expect(pagination.props('value')).toBe(currentPage);
+        expect(findPagination().props('hasPreviousPage')).toBe(hasPreviousPage);
+        expect(findPagination().props('hasNextPage')).toBe(hasNextPage);
       },
     );
 
     it('emits "prev-page" when the user clicks the back page button', () => {
       mountComponent({ hasPreviousPage: true });
 
-      findPagination().vm.$emit(GlPagination.model.event, 1);
+      findPagination().vm.$emit('prev');
 
       expect(wrapper.emitted('prev-page')).toEqual([[]]);
     });
@@ -91,7 +76,7 @@ describe('Image List', () => {
     it('emits "next-page" when the user clicks the forward page button', () => {
       mountComponent({ hasNextPage: true });
 
-      findPagination().vm.$emit(GlPagination.model.event, 2);
+      findPagination().vm.$emit('next');
 
       expect(wrapper.emitted('next-page')).toEqual([[]]);
     });
