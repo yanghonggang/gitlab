@@ -392,7 +392,9 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    API requests are protected by checking for a valid CSRF token.
 
-   In order to be able to increment the values the related feature `usage_data<event_name>` should be `default_enabled: true`.
+   In order to increment the values, the related feature `usage_data_<event_name>` should be
+   set to `default_enabled: true`. For more information, see
+   [Feature flags in development of GitLab](../feature_flags/index.md).
 
    ```plaintext
    POST /usage_data/increment_unique_users
