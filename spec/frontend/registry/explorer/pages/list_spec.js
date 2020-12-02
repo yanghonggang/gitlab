@@ -109,10 +109,15 @@ describe('List Page', () => {
     wrapper.destroy();
   });
 
-  it('contains registry header', () => {
+  it('contains registry header', async () => {
     mountComponent();
 
+    await waitForApolloRequestRender();
+
     expect(findRegistryHeader().exists()).toBe(true);
+    expect(findRegistryHeader().props()).toMatchObject({
+      imagesCount: 2,
+    });
   });
 
   describe('connection error', () => {

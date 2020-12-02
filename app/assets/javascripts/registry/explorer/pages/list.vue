@@ -84,8 +84,9 @@ export default {
       update(data) {
         return data[this.graphqlResource]?.containerRepositories.nodes;
       },
-      result(res) {
-        this.pageInfo = res.data[this.graphqlResource]?.containerRepositories?.pageInfo;
+      result({ data }) {
+        this.pageInfo = data[this.graphqlResource]?.containerRepositories?.pageInfo;
+        this.containerRepositoriesCount = data[this.graphqlResource]?.containerRepositoriesCount;
       },
       error() {
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
@@ -96,6 +97,7 @@ export default {
     return {
       images: [],
       pageInfo: {},
+      containerRepositoriesCount: 0,
       itemToDelete: {},
       deleteAlertType: null,
       searchValue: null,
@@ -240,9 +242,8 @@ export default {
     </gl-empty-state>
 
     <template v-else>
-      <!-- TODO: fix this when value is ready from API -->
       <registry-header
-        :images-count="0"
+        :images-count="containerRepositoriesCount"
         :expiration-policy="config.expirationPolicy"
         :help-page-path="config.helpPagePath"
         :expiration-policy-help-page-path="config.expirationPolicyHelpPagePath"
