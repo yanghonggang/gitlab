@@ -98,9 +98,7 @@ export default {
       return this.isLoading || this.mutationLoading;
     },
     fieldsAreValid() {
-      return Object.keys(this.localErrors).reduce(
-        (acc, curr) => acc && this.localErrors[curr],
-        true,
+      return Object.values(this.localErrors).every(error => error);
       );
     },
     isSubmitButtonDisabled() {
@@ -176,10 +174,10 @@ export default {
           this.mutationLoading = false;
         });
     },
-    onModelChange(newValue, modified) {
-      this.$emit('input', { ...this.value, [modified]: newValue });
+    onModelChange(newValue, model) {
+      this.$emit('input', { ...this.value, [model]: newValue });
       if (this.apiErrors) {
-        this.apiErrors[modified] = undefined;
+        this.apiErrors[model] = undefined;
       }
     },
   },

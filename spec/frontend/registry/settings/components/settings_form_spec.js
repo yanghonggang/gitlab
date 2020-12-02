@@ -180,7 +180,7 @@ describe('Settings Form', () => {
     }
 
     if (type === 'textarea') {
-      it('input event update the api error property', async () => {
+      it('input event updates the api error property', async () => {
         const apiErrors = { [model]: 'bar' };
         mountComponent({ data: { apiErrors } });
 
@@ -221,7 +221,7 @@ describe('Settings Form', () => {
 
       it('resets the errors objects', async () => {
         mountComponent({
-          data: { apiErrors: { nameRegex: 'bar' }, localErrors: { nameRegexKeep: 'zab' } },
+          data: { apiErrors: { nameRegex: 'bar' }, localErrors: { nameRegexKeep: false } },
         });
 
         findForm().trigger('reset');
@@ -293,6 +293,7 @@ describe('Settings Form', () => {
             });
           });
         });
+
         describe('global errors', () => {
           it('shows an error', async () => {
             const handlers = mountComponentWithApollo({
@@ -366,15 +367,17 @@ describe('Settings Form', () => {
 
         expect(findSaveButton().attributes('type')).toBe('submit');
       });
+
       it.each`
         isLoading | localErrors       | mutationLoading
         ${true}   | ${{}}             | ${true}
+        ${true}   | ${{}}             | ${false}
         ${false}  | ${{}}             | ${true}
         ${false}  | ${{ foo: false }} | ${true}
         ${true}   | ${{ foo: false }} | ${false}
         ${false}  | ${{ foo: false }} | ${false}
       `(
-        'when isLoading is $isLoading, localErrors is $localErrors and mutationLoading is $mutationLoading  is disabled',
+        'when isLoading is $isLoading, localErrors is $localErrors and mutationLoading is $mutationLoading is disabled',
         ({ localErrors, isLoading, mutationLoading }) => {
           mountComponent({
             props: { ...defaultProps, isLoading },
