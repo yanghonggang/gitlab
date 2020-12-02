@@ -114,6 +114,12 @@ export const mockEpic = {
   },
 };
 
+export const mockEpic2 = {
+  ...mockEpic,
+  startDate: new Date('2017-11-10'),
+  originalStartDate: new Date('2017-11-10'),
+};
+
 export const mockRawEpic = {
   id: 41,
   iid: 2,

@@ -45,7 +45,7 @@ export default {
      * Implementation of this method is identical to
      * MonthsPresetMixin#getTimelineBarStartOffsetForMonths
      */
-    getTimelineBarStartOffsetForQuarters(roadmapItem) {
+    getTimelineBarStartOffsetForQuarters(roadmapItem, returnRawNumber = false) {
       const daysInQuarter = totalDaysInQuarter(this.timeframeItem.range);
       const startDay = dayInQuarter(roadmapItem.startDate, this.timeframeItem.range);
 
@@ -53,14 +53,15 @@ export default {
         roadmapItem.startDateOutOfRange ||
         (roadmapItem.startDateUndefined && roadmapItem.endDateOutOfRange)
       ) {
-        return '';
+        return returnRawNumber ? 0 : '';
       } else if (startDay === 1) {
         /* eslint-disable-next-line @gitlab/require-i18n-strings */
-        return 'left: 0;';
+        return returnRawNumber ? 0 : 'left: 0;';
       }
 
+      const offset = (startDay / daysInQuarter) * 100;
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      return `left: ${(startDay / daysInQuarter) * 100}%;`;
+      return returnRawNumber ? offset : `left: ${offset}%;`;
     },
     /**
      * This method is externally only called when current timeframe cell has timeline

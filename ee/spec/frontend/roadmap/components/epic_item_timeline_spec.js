@@ -1,6 +1,5 @@
 import { GlPopover, GlProgressBar } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
 import EpicItemTimeline from 'ee/roadmap/components/epic_item_timeline.vue';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
@@ -13,20 +12,22 @@ const createComponent = ({
   presetType = PRESET_TYPES.MONTHS,
   timeframe = mockTimeframeMonths,
   timeframeItem = mockTimeframeMonths[0],
-  timeframeString = '',
+  timeframeText = 'Jun 26, 2017 – Mar 10, 2018',
 } = {}) => {
   return shallowMount(EpicItemTimeline, {
     propsData: {
       epic,
       presetType,
+      startDateValues: {},
+      endDateValues: {},
       timeframe,
       timeframeItem,
-      timeframeString,
+      timeframeText,
     },
   });
 };
 
-const getEpicBar = wrapper => wrapper.find('.epic-bar');
+const getEpicBar = wrapper => wrapper.find('[data-testid="epic-bar"]');
 
 describe('EpicItemTimelineComponent', () => {
   let wrapper;
@@ -81,11 +82,5 @@ describe('EpicItemTimelineComponent', () => {
 
       expect(wrapper.find(GlPopover).text()).toContain('- of - weight completed');
     });
-  });
-
-  it('shows current day indicator element', () => {
-    wrapper = createComponent();
-
-    expect(wrapper.find(CurrentDayIndicator).exists()).toBe(true);
   });
 });

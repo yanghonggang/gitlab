@@ -8,8 +8,6 @@ import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import MonthsPresetMixin from '../mixins/months_preset_mixin';
 import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
-import CurrentDayIndicator from './current_day_indicator.vue';
-
 import {
   EPIC_DETAILS_CELL_WIDTH,
   PERCENTAGE,
@@ -21,7 +19,6 @@ import {
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,
   components: {
-    CurrentDayIndicator,
     GlIcon,
     GlPopover,
     GlProgressBar,
@@ -32,12 +29,26 @@ export default {
       type: String,
       required: true,
     },
+    // startDateValues is used in getTimelineBarWidthFor* mixin methods.
+    startDateValues: {
+      type: Object,
+      required: true,
+    },
+    // endDateValues is used in getTimelineBarWidthFor* mixin methods.
+    endDateValues: {
+      type: Object,
+      required: true,
+    },
     timeframe: {
       type: Array,
       required: true,
     },
     timeframeItem: {
       type: [Date, Object],
+      required: true,
+    },
+    timeframeText: {
+      type: String,
       required: true,
     },
     epic: {
@@ -51,75 +62,52 @@ export default {
     },
   },
   computed: {
-    startDateValues() {
-      const { startDate } = this.epic;
-
-      return {
-        day: startDate.getDay(),
-        date: startDate.getDate(),
-        month: startDate.getMonth(),
-        year: startDate.getFullYear(),
-        time: startDate.getTime(),
-      };
-    },
-    endDateValues() {
-      const { endDate } = this.epic;
-
-      return {
-        day: endDate.getDay(),
-        date: endDate.getDate(),
-        month: endDate.getMonth(),
-        year: endDate.getFullYear(),
-        time: endDate.getTime(),
-      };
-    },
-    /**
-     * In case Epic start date is out of range
-     * we need to use original date instead of proxy date
-     */
-    startDate() {
-      if (this.epic.startDateOutOfRange) {
-        return this.epic.originalStartDate;
-      }
-
-      return this.epic.startDate;
-    },
-    /**
-     * In case Epic end date is out of range
-     * we need to use original date instead of proxy date
-     */
-    endDate() {
-      if (this.epic.endDateOutOfRange) {
-        return this.epic.originalEndDate;
-      }
-      return this.epic.endDate;
-    },
-    hasStartDate() {
-      if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter();
-      } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth();
-      } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek();
-      }
-      return false;
-    },
     timelineBarInnerStyle() {
       return {
+        left: `${EPIC_DETAILS_CELL_WIDTH}px`,
         maxWidth: `${this.clientWidth - EPIC_DETAILS_CELL_WIDTH}px`,
       };
     },
-    timelineBarWidth() {
-      if (this.hasStartDate) {
-        if (this.presetType === PRESET_TYPES.QUARTERS) {
-          return this.getTimelineBarWidthForQuarters(this.epic);
-        } else if (this.presetType === PRESET_TYPES.MONTHS) {
-          return this.getTimelineBarWidthForMonths();
-        } else if (this.presetType === PRESET_TYPES.WEEKS) {
-          return this.getTimelineBarWidthForWeeks();
-        }
+    barWidthAndOffset() {
+      if (this.presetType === PRESET_TYPES.QUARTERS) {
+        return [
+          this.getTimelineBarWidthForQuarters(this.epic),
+          this.getTimelineBarStartOffsetForQuarters(this.epic, true),
+        ];
+      } else if (this.presetType === PRESET_TYPES.MONTHS) {
+        return [
+          this.getTimelineBarWidthForMonths(),
+          this.getTimelineBarStartOffsetForMonths(this.epic, true),
+        ];
+      } else if (this.presetType === PRESET_TYPES.WEEKS) {
+        return [
+          this.getTimelineBarWidthForWeeks(),
+          this.getTimelineBarStartOffsetForWeeks(this.epic, true),
+        ];
       }
       return Infinity;
+    },
+    barStyle() {
+      const [width, offsetWithinFrame] = this.barWidthAndOffset;
+
+      // offsetWithinFrame is in %, convert to px.
+      const offset = TIMELINE_CELL_MIN_WIDTH * (offsetWithinFrame / PERCENTAGE);
+
+      const currentFrameIndex = this.timeframe.indexOf(this.timeframeItem);
+      const offsetForCurrentFrame = TIMELINE_CELL_MIN_WIDTH * currentFrameIndex;
+
+      /*
+        Visual reference
+                                                                  <-   width  ->
+                                                                  |  epic bar  |
+        |       frame 0       |       frame 1       |     current frame    |
+        <--         offsetForCurrentFrame        --><-- offset -->
+        <--                      left                          -->
+      */
+      return {
+        width: width !== Infinity ? `${width}px` : '',
+        left: `${offsetForCurrentFrame + offset}px`,
+      };
     },
     isTimelineBarSmall() {
       return this.timelineBarWidth < SMALL_TIMELINE_BAR;
@@ -163,42 +151,44 @@ export default {
 </script>
 
 <template>
-  <span class="epic-timeline-cell" data-qa-selector="epic_timeline_cell">
-    <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-    <div class="epic-bar-wrapper">
-      <a
-        v-if="hasStartDate"
-        :id="generateKey(epic)"
-        :href="epic.webUrl"
-        :style="timelineBarStyles(epic)"
-        :class="{ 'epic-bar-child-epic': epic.isChildEpic }"
-        class="epic-bar rounded"
-      >
-        <div class="epic-bar-inner px-2 py-1" :style="timelineBarInnerStyle">
-          <p class="epic-bar-title text-nowrap text-truncate m-0">{{ timelineBarTitle }}</p>
+  <span
+    class="gl-absolute gl-top-0 gl-bg-transparent gl-h-full"
+    :style="{ width: `${this.$options.cellWidth}px` }"
+    data-testid="epic-timeline-bar"
+    data-qa-selector="epic_timeline_cell"
+  >
+    <a
+      :id="generateKey(epic)"
+      :href="epic.webUrl"
+      :style="barStyle"
+      class="epic-bar gl-absolute gl-z-index-3 gl-rounded-base"
+      :class="{ 'epic-bar-child-epic': epic.isChildEpic }"
+      data-testid="epic-bar"
+    >
+      <div class="epic-bar-inner gl-px-3 gl-py-2" :style="timelineBarInnerStyle">
+        <p class="epic-bar-title gl-text-truncate gl-m-0">{{ timelineBarTitle }}</p>
 
-          <div v-if="!isTimelineBarSmall" class="d-flex align-items-center">
-            <gl-progress-bar
-              class="epic-bar-progress flex-grow-1 mr-1"
-              :value="epicWeightPercentage"
-              aria-hidden="true"
-            />
-            <div class="gl-font-sm d-flex align-items-center text-nowrap">
-              <gl-icon class="gl-mr-1" :size="12" name="weight" />
-              <p class="m-0" :aria-label="epicWeightPercentageText">{{ epicWeightPercentage }}%</p>
-            </div>
+        <div v-if="!isTimelineBarSmall" class="gl-display-flex gl-align-items-center">
+          <gl-progress-bar
+            class="epic-bar-progress gl-flex-grow-1 gl-mr-2"
+            :value="epicWeightPercentage"
+            aria-hidden="true"
+          />
+          <div class="gl-font-sm gl-display-flex gl-align-items-center gl-white-space-nowrap">
+            <gl-icon class="gl-mr-1" :size="12" name="weight" />
+            <p class="gl-m-0" :aria-label="epicWeightPercentageText">{{ epicWeightPercentage }}%</p>
           </div>
         </div>
-      </a>
-      <gl-popover
-        :target="generateKey(epic)"
-        :title="epic.title"
-        triggers="hover"
-        placement="lefttop"
-      >
-        <p class="text-secondary m-0">{{ timeframeString(epic) }}</p>
-        <p class="m-0">{{ popoverWeightText }}</p>
-      </gl-popover>
-    </div>
+      </div>
+    </a>
+    <gl-popover
+      :target="generateKey(epic)"
+      :title="epic.title"
+      triggers="hover"
+      placement="lefttop"
+    >
+      <p class="gl-text-gray-500 gl-m-0">{{ timeframeText }}</p>
+      <p class="gl-m-0">{{ popoverWeightText }}</p>
+    </gl-popover>
   </span>
 </template>

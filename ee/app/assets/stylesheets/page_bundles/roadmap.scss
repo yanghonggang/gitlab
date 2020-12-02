@@ -324,17 +324,11 @@ html.group-epics-roadmap-html {
   }
 }
 
-.epic-bar-wrapper {
-  position: relative;
-}
-
 .epic-bar {
-  position: absolute;
   top: 5px;
   height: 40px;
   background-color: var(--blue-600, $blue-600);
   will-change: width, left;
-  z-index: 5;
 
   &:hover {
     background-color: var(--blue-700, $blue-700);

@@ -5,6 +5,7 @@ import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import { mockTimeframeInitialDate, mockEpic } from 'ee_jest/roadmap/mock_data';
+import { dateValues } from 'ee_jest/roadmap/helpers';
 import mountComponent from 'helpers/vue_mount_component_helper';
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
@@ -19,8 +20,11 @@ const createComponent = ({
 
   return mountComponent(Component, {
     presetType,
+    startDateValues: dateValues(epic.startDate),
+    endDateValues: dateValues(epic.endDate),
     timeframe,
     timeframeItem,
+    timeframeText: '',
     epic,
   });
 };

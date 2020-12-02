@@ -7,7 +7,7 @@ import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import {
-  mockEpic,
+  mockEpic2 as mockEpic,
   mockTimeframeInitialDate,
   mockGroupId,
   mockMilestone,

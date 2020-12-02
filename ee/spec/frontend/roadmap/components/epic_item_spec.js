@@ -11,7 +11,7 @@ import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import {
   mockTimeframeInitialDate,
-  mockEpic,
+  mockEpic2 as mockEpic,
   mockGroupId,
   mockFormattedChildEpic1,
 } from 'ee_jest/roadmap/mock_data';
@@ -99,7 +99,7 @@ describe('EpicItemComponent', () => {
 
   describe('timeframeString', () => {
     it('returns timeframe string correctly when both start and end dates are defined', () => {
-      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Jul 10, 2017 – Jun 2, 2018');
+      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Nov 10, 2017 – Jun 2, 2018');
     });
 
     it('returns timeframe string correctly when no dates are defined', () => {
@@ -113,7 +113,7 @@ describe('EpicItemComponent', () => {
       const epic = { ...mockEpic, endDateUndefined: true };
       wrapper = createComponent({ epic });
 
-      expect(wrapper.vm.timeframeString(epic)).toBe('Jul 10, 2017 – No end date');
+      expect(wrapper.vm.timeframeString(epic)).toBe('Nov 10, 2017 – No end date');
     });
 
     it('returns timeframe string correctly when only end date is defined', () => {
@@ -159,8 +159,8 @@ describe('EpicItemComponent', () => {
       expect(wrapper.find('.epic-details-cell').exists()).toBe(true);
     });
 
-    it('renders Epic timeline element with class `epic-timeline-cell`', () => {
-      expect(wrapper.find('.epic-timeline-cell').exists()).toBe(true);
+    it('renders Epic timeline bar element', () => {
+      expect(wrapper.find('[data-testid="epic-timeline-bar"]').exists()).toBe(true);
     });
 
     it('does not render Epic item container element with class `epic-list-item-container` if epic is not expanded', () => {
