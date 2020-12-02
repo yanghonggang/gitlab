@@ -7,11 +7,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
 import UpdateScheduleModal, { i18n } from 'ee/oncall_schedules/components/edit_schedule_modal.vue';
 import { UPDATE_SCHEDULE_ERROR } from 'ee/oncall_schedules/utils/error_messages';
-import {
-  getOncallSchedulesQueryResponse,
-  updateScheduleResponse,
-  scheduleToUpdate,
-} from './mocks/apollo_mock';
+import { getOncallSchedulesQueryResponse, updateScheduleResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mockTimezones.json';
 
 const localVue = createLocalVue();
