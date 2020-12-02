@@ -78,7 +78,7 @@ RSpec.describe Admin::IntegrationsController do
     let(:integration) { create(:jira_service, :instance) }
 
     before do
-      put :reset, params: { id: integration.class.to_param }
+      post :reset, params: { id: integration.class.to_param }
     end
 
     it 'returns 200 OK' do
