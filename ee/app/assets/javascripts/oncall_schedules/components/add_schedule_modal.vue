@@ -68,8 +68,7 @@ export default {
         description: '',
         timezone: {},
       },
-      showErrorAlert: false,
-      error: '',
+      error: null,
     };
   },
   computed: {
@@ -137,7 +136,6 @@ export default {
         })
         .catch(error => {
           this.error = error;
-          this.showErrorAlert = true;
         })
         .finally(() => {
           this.loading = false;
@@ -153,7 +151,7 @@ export default {
       return isEqual(tz, this.form.timezone);
     },
     hideErrorAlert() {
-      this.showErrorAlert = false;
+      this.error = null;
     },
   },
 };
@@ -169,15 +167,10 @@ export default {
     :action-cancel="actionsProps.cancel"
     @primary.prevent="createSchedule"
   >
-    <gl-alert
-      v-if="showErrorAlert"
-      variant="danger"
-      class="gl-mt-n3 gl-mb-3"
-      @dismiss="hideErrorAlert"
-    >
+    <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
       {{ error || $options.i18n.errorMsg }}
     </gl-alert>
-    <gl-form @submit.prevent="createSchedule">
+    <gl-form>
       <gl-form-group
         :label="$options.i18n.fields.name.title"
         :invalid-feedback="$options.i18n.fields.name.validation.empty"
