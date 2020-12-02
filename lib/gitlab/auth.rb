@@ -285,7 +285,7 @@ module Gitlab
         return unless build.project.builds_enabled?
 
         if build.user
-          return unless build.user.can?(:access_api)
+          return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
