@@ -124,6 +124,7 @@ export const graphQLImageListMock = {
   data: {
     project: {
       __typename: 'Project',
+      containerRepositoriesCount: 2,
       containerRepositories: {
         __typename: 'ContainerRepositoryConnection',
         nodes: imagesListResponse,
@@ -137,6 +138,7 @@ export const graphQLEmptyImageListMock = {
   data: {
     project: {
       __typename: 'Project',
+      containerRepositoriesCount: 2,
       containerRepositories: {
         __typename: 'ContainerRepositoryConnection',
         nodes: [],
@@ -150,6 +152,7 @@ export const graphQLEmptyGroupImageListMock = {
   data: {
     group: {
       __typename: 'Group',
+      containerRepositoriesCount: 2,
       containerRepositories: {
         __typename: 'ContainerRepositoryConnection',
         nodes: [],

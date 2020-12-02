@@ -10,6 +10,7 @@ query getProjectContainerRepositories(
   $before: String
 ) {
   group(fullPath: $fullPath) {
+    containerRepositoriesCount
     containerRepositories(name: $name, after: $after, before: $before, first: $first, last: $last) {
       nodes {
         ...ContainerRepositoryFields
