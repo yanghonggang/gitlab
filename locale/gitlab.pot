@@ -1510,6 +1510,9 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
+msgid "Actual Response"
+msgstr ""
+
 msgid "Add"
 msgstr ""
 
@@ -23089,10 +23092,10 @@ msgstr ""
 msgid "RepositorySettingsAccessLevel|Select"
 msgstr ""
 
-msgid "Request Access"
+msgid "Request"
 msgstr ""
 
-msgid "Request Headers"
+msgid "Request Access"
 msgstr ""
 
 msgid "Request details"
@@ -23271,12 +23274,6 @@ msgid "Resolves IP addresses once and uses them to submit requests"
 msgstr ""
 
 msgid "Response"
-msgstr ""
-
-msgid "Response Headers"
-msgstr ""
-
-msgid "Response Status"
 msgstr ""
 
 msgid "Response didn't include `service_desk_address`"
@@ -29133,6 +29130,9 @@ msgstr ""
 msgid "Unmarks this %{noun} as a draft."
 msgstr ""
 
+msgid "Unmodified Response"
+msgstr ""
+
 msgid "Unreachable"
 msgstr ""
 
@@ -31835,6 +31835,9 @@ msgstr ""
 msgid "ciReport|%{improvedNum} improved"
 msgstr ""
 
+msgid "ciReport|%{linkStartTag}Learn more about API Fuzzing %{linkEndTag}"
+msgstr ""
+
 msgid "ciReport|%{linkStartTag}Learn more about Container Scanning %{linkEndTag}"
 msgstr ""
 
@@ -31872,6 +31875,9 @@ msgid "ciReport|: Loading resulted in an error"
 msgstr ""
 
 msgid "ciReport|API Fuzzing"
+msgstr ""
+
+msgid "ciReport|API fuzzing"
 msgstr ""
 
 msgid "ciReport|All projects"
