@@ -41,6 +41,9 @@ export const DEVOPS_ADOPTION_STRINGS = {
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected (20 max)'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected (20 max)'),
   },
+  table: {
+    deleteButton: s__('DevopsAdoption|Delete segment'),
+  },
 };
 
 export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {

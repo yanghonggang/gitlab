@@ -1,8 +1,8 @@
 <script>
-import { GlTable, GlButton } from '@gitlab/ui';
+import { GlTable, GlButton, GlPopover } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
-import { DEVOPS_ADOPTION_TABLE_TEST_IDS } from '../constants';
+import { DEVOPS_ADOPTION_TABLE_TEST_IDS, DEVOPS_ADOPTION_STRINGS } from '../constants';
 
 const fieldOptions = {
   thClass: 'gl-bg-white! gl-text-gray-400',
@@ -11,7 +11,8 @@ const fieldOptions = {
 
 export default {
   name: 'DevopsAdoptionTable',
-  components: { GlTable, DevopsAdoptionTableCellFlag, GlButton },
+  components: { GlTable, DevopsAdoptionTableCellFlag, GlButton, GlPopover },
+  i18n: DEVOPS_ADOPTION_STRINGS.table,
   tableHeaderFields: [
     {
       key: 'name',
@@ -65,6 +66,14 @@ export default {
     segments: {
       type: Array,
       required: true,
+    },
+  },
+  methods: {
+    popoverContainerId(name) {
+      return `popover_container_id_for_${name}`;
+    },
+    popoverId(name) {
+      return `popover_id_for_${name}`;
     },
   },
 };
@@ -138,9 +147,21 @@ export default {
       />
     </template>
 
-    <template #cell(actions)>
+    <template #cell(actions)="{ item }">
       <div :data-testid="$options.testids.ACTIONS">
-        <gl-button category="tertiary" icon="ellipsis_h" />
+        <gl-button :id="popoverId(item.name)" category="tertiary" icon="ellipsis_h" />
+        <div :id="popoverContainerId(item.name)">
+          <gl-popover
+            :target="popoverId(item.name)"
+            :container="popoverContainerId(item.name)"
+            triggers="hover focus"
+            placement="left"
+          >
+            <gl-button category="tertiary" variant="danger">{{
+              $options.i18n.deleteButton
+            }}</gl-button>
+          </gl-popover>
+        </div>
       </div>
     </template>
   </gl-table>
