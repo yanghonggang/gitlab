@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlButton } from '@gitlab/ui';
 import { inserted } from '~/feature_highlight/feature_highlight_helper';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 
@@ -12,6 +12,7 @@ export default {
   name: 'HelpPopover',
   components: {
     GlIcon,
+    GlButton,
   },
   props: {
     options: {
@@ -43,7 +44,7 @@ export default {
 };
 </script>
 <template>
-  <button type="button" class="btn btn-blank btn-transparent btn-help" tabindex="0">
+  <gl-button icon="question" tabindex="0">
     <gl-icon name="question" />
-  </button>
+  </gl-button>
 </template>
