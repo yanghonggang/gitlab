@@ -442,9 +442,11 @@ After the reindexing is completed, the original index will be scheduled to be de
 While the reindexing is running, you will be able to follow its progress under that same section.
 
 ### Mark the most recent reindex job as failed and unpause the indexing
+
 Sometimes users want to abandon the unfinished reindex job and unpause the indexing. They can achieve it via the following steps.
 
 1. Mark the most recent reindex job as failed by the following command
+
    ```shell
    # Omnibus installations
    sudo gitlab-rake gitlab:elastic:mark_reindex_failed
